@@ -4,6 +4,7 @@ const modelscopeChatModels: AIChatModelCard[] = [
   {
     abilities: {
       functionCall: true,
+      reasoning: true,
     },
     contextWindowTokens: 131_072,
     description:
@@ -27,6 +28,7 @@ const modelscopeChatModels: AIChatModelCard[] = [
   {
     abilities: {
       functionCall: true,
+      reasoning: true,
     },
     contextWindowTokens: 131_072,
     description: 'DeepSeek-R1是DeepSeek最新的推理模型，专注于复杂推理任务。',
