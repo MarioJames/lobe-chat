@@ -103,6 +103,20 @@ table ai_providers {
   }
 }
 
+table api_keys {
+  id text [pk, not null]
+  name text [not null]
+  key text [not null, unique]
+  description text
+  enabled boolean [default: true]
+  expires_at "timestamp with time zone"
+  last_used_at "timestamp with time zone"
+  user_id text [not null]
+  accessed_at "timestamp with time zone" [not null, default: `now()`]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+}
+
 table async_tasks {
   id uuid [pk, not null, default: `gen_random_uuid()`]
   type text
@@ -621,6 +635,51 @@ table rag_eval_evaluation_records {
   updated_at "timestamp with time zone" [not null, default: `now()`]
 }
 
+table rbac_permissions {
+  id text [pk, not null]
+  code text [not null, unique]
+  name text [not null]
+  description text
+  module text [not null]
+  is_active boolean [not null, default: true]
+  accessed_at "timestamp with time zone" [not null, default: `now()`]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+}
+
+table rbac_role_permissions {
+  role_id text [not null]
+  permission_id text [not null]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+
+  indexes {
+    (role_id, permission_id) [pk]
+  }
+}
+
+table rbac_roles {
+  id text [pk, not null]
+  name text [not null, unique]
+  display_name text [not null]
+  description text
+  is_system boolean [not null, default: false]
+  is_active boolean [not null, default: true]
+  accessed_at "timestamp with time zone" [not null, default: `now()`]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  updated_at "timestamp with time zone" [not null, default: `now()`]
+}
+
+table rbac_user_roles {
+  user_id text [not null]
+  role_id text [not null]
+  created_at "timestamp with time zone" [not null, default: `now()`]
+  expires_at "timestamp with time zone"
+
+  indexes {
+    (user_id, role_id) [pk]
+  }
+}
+
 table agents_to_sessions {
   agent_id text [not null]
   session_id text [not null]
@@ -808,6 +867,10 @@ ref: messages.topic_id - topics.id
 
 ref: threads.source_message_id - messages.id
 
+ref: rbac_role_permissions.role_id > rbac_roles.id
+
+ref: rbac_role_permissions.permission_id > rbac_permissions.id
+
 ref: sessions.group_id - session_groups.id
 
 ref: topic_documents.document_id > documents.id
@@ -815,3 +878,7 @@ ref: topic_documents.document_id > documents.id
 ref: topic_documents.topic_id > topics.id
 
 ref: topics.session_id - sessions.id
+
+ref: rbac_user_roles.user_id > users.id
+
+ref: rbac_user_roles.role_id > rbac_roles.id

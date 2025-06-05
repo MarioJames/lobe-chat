@@ -153,6 +153,11 @@ export class RBACModel {
    * Batch assign permissions to role
    */
   assignPermissionsToRole = async (roleId: string, permissionIds: string[]): Promise<void> => {
+    // Skip if no permissions to assign
+    if (permissionIds.length === 0) {
+      return;
+    }
+
     const values = permissionIds.map((permissionId) => ({ permissionId, roleId }));
     await this.db.insert(rolePermissions).values(values).onConflictDoNothing();
   };

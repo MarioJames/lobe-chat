@@ -5,7 +5,7 @@ import { timestamps } from './_helpers';
 import { users } from './user';
 
 // Roles table
-export const roles = pgTable('roles', {
+export const roles = pgTable('rbac_roles', {
   id: text('id').primaryKey().notNull(),
   name: text('name').notNull().unique(), // Role name, e.g.: admin, user, guest
   displayName: text('display_name').notNull(), // Display name
@@ -20,7 +20,7 @@ export type NewRole = typeof roles.$inferInsert;
 export type RoleItem = typeof roles.$inferSelect;
 
 // Permissions table
-export const permissions = pgTable('permissions', {
+export const permissions = pgTable('rbac_permissions', {
   id: text('id').primaryKey().notNull(),
   code: text('code').notNull().unique(), // Permission code, e.g.: chat:create, file:upload
   name: text('name').notNull(), // Permission name
@@ -36,7 +36,7 @@ export type PermissionItem = typeof permissions.$inferSelect;
 
 // Role-permission association table
 export const rolePermissions = pgTable(
-  'role_permissions',
+  'rbac_role_permissions',
   {
     roleId: text('role_id')
       .references(() => roles.id, { onDelete: 'cascade' })
@@ -57,7 +57,7 @@ export type RolePermissionItem = typeof rolePermissions.$inferSelect;
 
 // User-role association table
 export const userRoles = pgTable(
-  'user_roles',
+  'rbac_user_roles',
   {
     userId: text('user_id')
       .references(() => users.id, { onDelete: 'cascade' })

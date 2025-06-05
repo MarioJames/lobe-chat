@@ -909,14 +909,25 @@ export class RBACSeeder {
     if (userRole) {
       // This is just a Demo example showing how to assign basic permissions to regular users
       // In production environment, permissions should be configured by administrators through management interface
-      const userPermissionCodes = new Set<string>([]);
+      const userPermissionCodes = new Set<string>([
+        'topic:create',
+        'topic:update',
+        'message:create',
+        'file:upload',
+      ]);
 
       const userPermissions = allPermissions.filter((p) => userPermissionCodes.has(p.code));
       const permissionIds = userPermissions.map((p) => p.id);
-      await this.rbacModel.assignPermissionsToRole(userRole.id, permissionIds);
-      console.log(
-        `✅ Assigned Demo permissions to regular users (${userPermissions.length} permissions)`,
-      );
+
+      // Only assign permissions if there are any to assign
+      if (permissionIds.length > 0) {
+        await this.rbacModel.assignPermissionsToRole(userRole.id, permissionIds);
+        console.log(
+          `✅ Assigned Demo permissions to regular users (${userPermissions.length} permissions)`,
+        );
+      } else {
+        console.log('ℹ️ No matching permissions found for regular users');
+      }
     }
   }
 

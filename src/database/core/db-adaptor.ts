@@ -1,6 +1,7 @@
 import { isDesktop } from '@/const/version';
 import { getDBInstance } from '@/database/core/web-server';
 import { LobeChatDatabase } from '@/database/type';
+import { initializeRBAC } from '@/database/utils/rbacInit';
 
 import { getPgliteInstance } from './electron';
 
@@ -21,8 +22,7 @@ export const getServerDB = async (): Promise<LobeChatDatabase> => {
     // Asynchronously initialize RBAC system without blocking database return
     setImmediate(async () => {
       try {
-        const { initializeRBAC } = await import('@/database/utils/rbacInit');
-        await initializeRBAC();
+        await initializeRBAC(cachedDB || undefined);
       } catch (error) {
         console.warn('RBAC initialization failed:', error);
       }

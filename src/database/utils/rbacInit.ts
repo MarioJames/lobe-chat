@@ -1,16 +1,20 @@
 import { RBACSeeder } from '@/database/models/rbacSeed';
-import { serverDB } from '@/database/server';
+import { LobeChatDatabase } from '@/database/type';
 
 /**
  * Initialize RBAC system
  * Decide whether to execute initialization based on whether RBAC data already exists in the database
+ * @param database Database instance
  */
-export async function initializeRBAC() {
+export async function initializeRBAC(database?: LobeChatDatabase) {
   try {
+    // If no database instance provided, return
+    if (!database) return;
+
     console.log('🔐 Checking RBAC system initialization status...');
 
     const { RBACModel } = await import('@/database/models/rbac');
-    const rbacModel = new RBACModel(serverDB);
+    const rbacModel = new RBACModel(database);
 
     // Check if role data already exists
     const existingRoles = await rbacModel.getRoles(false); // Get all roles, including inactive ones
@@ -20,7 +24,7 @@ export async function initializeRBAC() {
     if (existingRoles.length === 0 || existingPermissions.length === 0) {
       console.log('🚀 Starting RBAC system data initialization...');
 
-      const seeder = new RBACSeeder(serverDB);
+      const seeder = new RBACSeeder(database);
       await seeder.seedAll();
 
       console.log('✅ RBAC system initialization completed');
@@ -30,7 +34,7 @@ export async function initializeRBAC() {
       );
 
       // Check if there are new permissions to add (incremental update)
-      const seeder = new RBACSeeder(serverDB);
+      const seeder = new RBACSeeder(database);
       await seeder.seedPermissions(); // Only add new permissions, won't duplicate existing ones
       console.log('✅ RBAC permission incremental update completed');
     }
@@ -45,11 +49,19 @@ export async function initializeRBAC() {
  * Assign default role to new user
  * @param userId User ID
  * @param defaultRole Default role name, defaults to 'user'
+ * @param db Database instance
  */
-export async function assignDefaultRoleToUser(userId: string, defaultRole: string = 'user') {
+export async function assignDefaultRoleToUser(
+  userId: string,
+  defaultRole: string = 'user',
+  database?: LobeChatDatabase,
+) {
   try {
+    // If no database instance provided, dynamically import it
+    if (!database) return;
+
     const { RBACModel } = await import('@/database/models/rbac');
-    const rbacModel = new RBACModel(serverDB);
+    const rbacModel = new RBACModel(database);
 
     // Check if user already has roles
     const userRoles = await rbacModel.getUserRoles(userId);
