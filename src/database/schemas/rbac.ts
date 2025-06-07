@@ -1,12 +1,12 @@
 /* eslint-disable sort-keys-fix/sort-keys-fix  */
-import { boolean, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
+import { boolean, index, integer, pgTable, primaryKey, text, timestamp } from 'drizzle-orm/pg-core';
 
 import { timestamps } from './_helpers';
 import { users } from './user';
 
 // Roles table
 export const roles = pgTable('rbac_roles', {
-  id: text('id').primaryKey().notNull(),
+  id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
   name: text('name').notNull().unique(), // Role name, e.g.: admin, user, guest
   displayName: text('display_name').notNull(), // Display name
   description: text('description'), // Role description
@@ -21,11 +21,11 @@ export type RoleItem = typeof roles.$inferSelect;
 
 // Permissions table
 export const permissions = pgTable('rbac_permissions', {
-  id: text('id').primaryKey().notNull(),
+  id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
   code: text('code').notNull().unique(), // Permission code, e.g.: chat:create, file:upload
   name: text('name').notNull(), // Permission name
   description: text('description'), // Permission description
-  module: text('module').notNull(), // Module it belongs to, e.g.: chat, file, user
+  category: text('category').notNull(), // Category it belongs to, e.g.: message, knowledge_base, agent
   isActive: boolean('is_active').default(true).notNull(), // Whether it's active
 
   ...timestamps,
@@ -38,18 +38,20 @@ export type PermissionItem = typeof permissions.$inferSelect;
 export const rolePermissions = pgTable(
   'rbac_role_permissions',
   {
-    roleId: text('role_id')
+    roleId: integer('role_id')
       .references(() => roles.id, { onDelete: 'cascade' })
       .notNull(),
-    permissionId: text('permission_id')
+    permissionId: integer('permission_id')
       .references(() => permissions.id, { onDelete: 'cascade' })
       .notNull(),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
-  (self) => ({
-    id: primaryKey({ columns: [self.roleId, self.permissionId] }),
-  }),
+  (self) => [
+    primaryKey({ columns: [self.roleId, self.permissionId] }),
+    index('rbac_role_permissions_role_id_idx').on(self.roleId),
+    index('rbac_role_permissions_permission_id_idx').on(self.permissionId),
+  ],
 );
 
 export type NewRolePermission = typeof rolePermissions.$inferInsert;
@@ -62,16 +64,18 @@ export const userRoles = pgTable(
     userId: text('user_id')
       .references(() => users.id, { onDelete: 'cascade' })
       .notNull(),
-    roleId: text('role_id')
+    roleId: integer('role_id')
       .references(() => roles.id, { onDelete: 'cascade' })
       .notNull(),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     expiresAt: timestamp('expires_at', { withTimezone: true }), // Support for temporary roles
   },
-  (self) => ({
-    id: primaryKey({ columns: [self.userId, self.roleId] }),
-  }),
+  (self) => [
+    primaryKey({ columns: [self.userId, self.roleId] }),
+    index('rbac_user_roles_user_id_idx').on(self.userId),
+    index('rbac_user_roles_role_id_idx').on(self.roleId),
+  ],
 );
 
 export type NewUserRole = typeof userRoles.$inferInsert;
