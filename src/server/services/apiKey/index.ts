@@ -22,7 +22,7 @@ export class ApiKeyService {
    * 删除指定的 API Key
    * @param id - API Key ID
    */
-  async delete(id: string): Promise<void> {
+  async delete(id: number): Promise<void> {
     await this.model.delete(id);
   }
 
@@ -38,7 +38,7 @@ export class ApiKeyService {
    * @param id - API Key ID
    * @returns API Key 信息
    */
-  async getById(id: string): Promise<ApiKeyItem | undefined> {
+  async getById(id: number): Promise<ApiKeyItem | undefined> {
     return this.model.findById(id);
   }
 
@@ -55,7 +55,7 @@ export class ApiKeyService {
    * @param id - API Key ID
    * @param params - 更新参数
    */
-  async update(id: string, params: UpdateApiKeyParams): Promise<void> {
+  async update(id: number, params: UpdateApiKeyParams): Promise<void> {
     await this.model.update(id, params);
   }
 
@@ -72,7 +72,7 @@ export class ApiKeyService {
    * 更新 API Key 的最后使用时间
    * @param id - API Key ID
    */
-  async updateLastUsed(id: string): Promise<void> {
+  async updateLastUsed(id: number): Promise<void> {
     await this.model.updateLastUsed(id);
   }
 }

@@ -20,7 +20,7 @@ export interface UpdateApiKeyParams {
 export interface ApiKeyUsage {
   createdAt: Date;
   expiresAt: Date | null;
-  id: string;
+  id: number;
   lastUsedAt: Date | null;
   name: string;
 }

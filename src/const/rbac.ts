@@ -2,7 +2,7 @@
  * RBAC Permission Constants Definition
  * Complete permission system based on all functional modules in the project
  */
-export const PERMISSIONS = {
+export const BASIC_PERMISSIONS = {
   // ==================== Agent Management ====================
   AGENT_CREATE: 'agent:create',
 
@@ -222,52 +222,32 @@ export const PERMISSIONS = {
 } as const;
 
 /**
+ * Operation Scope Constants Definition
+ */
+export const OPERATION_SCOPE = ['ALL', 'WORKSPACE', 'OWNER'] as const;
+
+/**
+ * Combine all basic permissions with operation scope
+ */
+export const FULL_PERMISSIONS = Object.values(BASIC_PERMISSIONS).reduce(
+  (acc, permission) => {
+    acc[permission] = OPERATION_SCOPE.map((scope) => `${permission}:${scope}`);
+
+    return acc;
+  },
+  {} as Record<string, string[]>,
+);
+
+/**
  * RBAC Role Constants Definition
  */
 export const ROLES = {
-  ADMIN: 'admin',
-  USER: 'user',
-} as const;
-
-/**
- * Permission Module Categories
- */
-export const PERMISSION_MODULES = {
-  AGENT: 'agent',
-  AI_MODEL: 'ai_model',
-  AI_PROVIDER: 'ai_provider',
-  API_KEY: 'api_key',
-  ASYNC_TASK: 'async_task',
-  AUDIT: 'audit',
-  AUTH: 'auth',
-  DATA: 'data',
-  DOCUMENT: 'document',
-  FILE: 'file',
-  KNOWLEDGE_BASE: 'knowledge_base',
-  MESSAGE: 'message',
-  PLUGIN: 'plugin',
-  RAG: 'rag',
-  RBAC: 'rbac',
-  SESSION: 'session',
-  SESSION_GROUP: 'session_group',
-  SYSTEM: 'system',
-  TOPIC: 'topic',
-  USER: 'user',
+  SUPER_ADMIN: 'super_admin',
 } as const;
 
 /**
  * Role Description Mapping
  */
 export const ROLE_DESCRIPTIONS = {
-  [ROLES.ADMIN]: 'Administrator with all system permissions',
-  [ROLES.USER]: 'Regular user with basic usage permissions',
-} as const;
-
-/**
- * Default Role Permission Mapping Example
- * Note: This is just an example, actual permission assignment is configured by administrators in the system
- */
-export const DEFAULT_ROLE_PERMISSIONS_DEMO = {
-  [ROLES.ADMIN]: Object.values(PERMISSIONS),
-  [ROLES.USER]: [],
+  [ROLES.SUPER_ADMIN]: 'Administrator with all system permissions',
 } as const;

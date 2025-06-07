@@ -43,7 +43,7 @@ const ApiKeyList: FC = () => {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, params }: { id: string; params: UpdateApiKeyParams }) =>
+    mutationFn: ({ id, params }: { id: number; params: UpdateApiKeyParams }) =>
       apiKeyService.update(id, params),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['apiKeys'] });
@@ -63,7 +63,7 @@ const ApiKeyList: FC = () => {
 
   const handleModalOk = (values: CreateApiKeyParams | UpdateApiKeyParams) => {
     if (editingApiKey) {
-      updateMutation.mutate({ id: editingApiKey.id, params: values });
+      updateMutation.mutate({ id: editingApiKey.id!, params: values });
     } else {
       createMutation.mutate(values as CreateApiKeyParams);
     }

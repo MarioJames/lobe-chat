@@ -12,7 +12,7 @@ export interface IApiKeyService {
    * 删除指定的 API Key
    * @param id - API Key ID
    */
-  delete: (id: string) => Promise<void>;
+  delete: (id: number) => Promise<void>;
 
   /**
    * 删除所有 API Key
@@ -24,7 +24,7 @@ export interface IApiKeyService {
    * @param id - API Key ID
    * @returns API Key 信息
    */
-  getById: (id: string) => Promise<ApiKeyItem>;
+  getById: (id: number) => Promise<ApiKeyItem>;
 
   /**
    * 获取所有 API Key 列表
@@ -37,7 +37,7 @@ export interface IApiKeyService {
    * @param id - API Key ID
    * @param params - 更新参数
    */
-  update: (id: string, params: UpdateApiKeyParams) => Promise<void>;
+  update: (id: number, params: UpdateApiKeyParams) => Promise<void>;
 
   /**
    * 验证 API Key 是否有效

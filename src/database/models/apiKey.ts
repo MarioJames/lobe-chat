@@ -1,7 +1,6 @@
 import { and, desc, eq } from 'drizzle-orm/expressions';
 
 import { LobeChatDatabase } from '@/database/type';
-import { idGenerator } from '@/database/utils/idGenerator';
 import { ApiKeyUtils } from '@/utils/apiKey';
 
 import { ApiKeyItem, NewApiKeyItem, apiKeys } from '../schemas';
@@ -19,13 +18,13 @@ export class ApiKeyModel {
     const key = ApiKeyUtils.generateKey();
     const [result] = await this.db
       .insert(apiKeys)
-      .values({ ...params, id: idGenerator('api_key'), key, userId: this.userId })
+      .values({ ...params, key, userId: this.userId })
       .returning();
 
     return result;
   };
 
-  delete = async (id: string) => {
+  delete = async (id: number) => {
     return this.db.delete(apiKeys).where(and(eq(apiKeys.id, id), eq(apiKeys.userId, this.userId)));
   };
 
@@ -40,7 +39,7 @@ export class ApiKeyModel {
     });
   };
 
-  findById = async (id: string) => {
+  findById = async (id: number) => {
     return this.db.query.apiKeys.findFirst({
       where: and(eq(apiKeys.id, id), eq(apiKeys.userId, this.userId)),
     });
@@ -63,14 +62,14 @@ export class ApiKeyModel {
     return true;
   };
 
-  update = async (id: string, value: Partial<ApiKeyItem>) => {
+  update = async (id: number, value: Partial<ApiKeyItem>) => {
     return this.db
       .update(apiKeys)
       .set({ ...value, updatedAt: new Date() })
       .where(and(eq(apiKeys.id, id), eq(apiKeys.userId, this.userId)));
   };
 
-  updateLastUsed = async (id: string) => {
+  updateLastUsed = async (id: number) => {
     return this.db
       .update(apiKeys)
       .set({ lastUsedAt: new Date(), updatedAt: new Date() })

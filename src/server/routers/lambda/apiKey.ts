@@ -33,12 +33,12 @@ export const apiKeyRouter = router({
   }),
 
   deleteApiKey: apiKeyProcedure
-    .input(z.object({ id: z.string() }))
+    .input(z.object({ id: z.number() }))
     .mutation(async ({ input, ctx }) => {
       return ctx.apiKeyModel.delete(input.id);
     }),
 
-  getApiKey: apiKeyProcedure.input(z.object({ id: z.string() })).query(async ({ input, ctx }) => {
+  getApiKey: apiKeyProcedure.input(z.object({ id: z.number() })).query(async ({ input, ctx }) => {
     return ctx.apiKeyModel.findById(input.id);
   }),
 
@@ -49,7 +49,7 @@ export const apiKeyRouter = router({
   updateApiKey: apiKeyProcedure
     .input(
       z.object({
-        id: z.string(),
+        id: z.number(),
         value: z.object({
           description: z.string().optional(),
           enabled: z.boolean().optional(),
