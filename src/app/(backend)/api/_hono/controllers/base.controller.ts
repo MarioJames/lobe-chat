@@ -171,6 +171,45 @@ export abstract class BaseController {
   }
 
   /**
+   * 获取认证类型（从中间件设置的上下文中）
+   * @param c Hono Context
+   * @returns 认证类型，如果未认证则返回null
+   */
+  protected getAuthType(c: Context): string | null {
+    return c.get('authType') || null;
+  }
+
+  /**
+   * 获取认证数据（从中间件设置的上下文中）
+   * @param c Hono Context
+   * @returns 认证数据对象，如果未认证则返回null
+   */
+  protected getAuthData(c: Context): any | null {
+    return c.get('authData') || null;
+  }
+
+  /**
+   * 检查用户是否已认证
+   * @param c Hono Context
+   * @returns 是否已认证
+   */
+  protected isAuthenticated(c: Context): boolean {
+    return !!this.getUserId(c);
+  }
+
+  /**
+   * 获取认证信息摘要
+   * @param c Hono Context
+   * @returns 认证信息摘要
+   */
+  protected getAuthSummary(c: Context): { authType: string | null; userId: string | null } {
+    return {
+      authType: this.getAuthType(c),
+      userId: this.getUserId(c),
+    };
+  }
+
+  /**
    * 参数验证辅助方法
    * @param value 待验证的值
    * @param name 参数名称
