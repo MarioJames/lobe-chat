@@ -492,38 +492,27 @@
   },
   {
     "sql": [
-      "CREATE TABLE \"api_keys\" (\n\t\"id\" text PRIMARY KEY NOT NULL,\n\t\"name\" text NOT NULL,\n\t\"key\" text NOT NULL,\n\t\"description\" text,\n\t\"enabled\" boolean DEFAULT true,\n\t\"expires_at\" timestamp with time zone,\n\t\"last_used_at\" timestamp with time zone,\n\t\"user_id\" text NOT NULL,\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"api_keys_key_unique\" UNIQUE(\"key\")\n);\n",
-      "\nCREATE TABLE \"permissions\" (\n\t\"id\" text PRIMARY KEY NOT NULL,\n\t\"code\" text NOT NULL,\n\t\"name\" text NOT NULL,\n\t\"description\" text,\n\t\"module\" text NOT NULL,\n\t\"is_active\" boolean DEFAULT true NOT NULL,\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"permissions_code_unique\" UNIQUE(\"code\")\n);\n",
-      "\nCREATE TABLE \"role_permissions\" (\n\t\"role_id\" text NOT NULL,\n\t\"permission_id\" text NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"role_permissions_role_id_permission_id_pk\" PRIMARY KEY(\"role_id\",\"permission_id\")\n);\n",
-      "\nCREATE TABLE \"roles\" (\n\t\"id\" text PRIMARY KEY NOT NULL,\n\t\"name\" text NOT NULL,\n\t\"display_name\" text NOT NULL,\n\t\"description\" text,\n\t\"is_system\" boolean DEFAULT false NOT NULL,\n\t\"is_active\" boolean DEFAULT true NOT NULL,\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"roles_name_unique\" UNIQUE(\"name\")\n);\n",
-      "\nCREATE TABLE \"user_roles\" (\n\t\"user_id\" text NOT NULL,\n\t\"role_id\" text NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"expires_at\" timestamp with time zone,\n\tCONSTRAINT \"user_roles_user_id_role_id_pk\" PRIMARY KEY(\"user_id\",\"role_id\")\n);\n",
-      "\nALTER TABLE \"api_keys\" ADD CONSTRAINT \"api_keys_user_id_users_id_fk\" FOREIGN KEY (\"user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;",
-      "\nALTER TABLE \"role_permissions\" ADD CONSTRAINT \"role_permissions_role_id_roles_id_fk\" FOREIGN KEY (\"role_id\") REFERENCES \"public\".\"roles\"(\"id\") ON DELETE cascade ON UPDATE no action;",
-      "\nALTER TABLE \"role_permissions\" ADD CONSTRAINT \"role_permissions_permission_id_permissions_id_fk\" FOREIGN KEY (\"permission_id\") REFERENCES \"public\".\"permissions\"(\"id\") ON DELETE cascade ON UPDATE no action;",
-      "\nALTER TABLE \"user_roles\" ADD CONSTRAINT \"user_roles_user_id_users_id_fk\" FOREIGN KEY (\"user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;",
-      "\nALTER TABLE \"user_roles\" ADD CONSTRAINT \"user_roles_role_id_roles_id_fk\" FOREIGN KEY (\"role_id\") REFERENCES \"public\".\"roles\"(\"id\") ON DELETE cascade ON UPDATE no action;"
-    ],
-    "bps": true,
-    "folderMillis": 1749142377136,
-    "hash": "6c9e4b4fcfa932587626a1e218faf242ae42225f9c5a3369533110eef5b97838"
-  },
-  {
-    "sql": [
-      "CREATE TABLE \"rbac_permissions\" (\n\t\"id\" text PRIMARY KEY NOT NULL,\n\t\"code\" text NOT NULL,\n\t\"name\" text NOT NULL,\n\t\"description\" text,\n\t\"module\" text NOT NULL,\n\t\"is_active\" boolean DEFAULT true NOT NULL,\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"rbac_permissions_code_unique\" UNIQUE(\"code\")\n);\n",
-      "\nCREATE TABLE \"rbac_role_permissions\" (\n\t\"role_id\" text NOT NULL,\n\t\"permission_id\" text NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"rbac_role_permissions_role_id_permission_id_pk\" PRIMARY KEY(\"role_id\",\"permission_id\")\n);\n",
-      "\nCREATE TABLE \"rbac_roles\" (\n\t\"id\" text PRIMARY KEY NOT NULL,\n\t\"name\" text NOT NULL,\n\t\"display_name\" text NOT NULL,\n\t\"description\" text,\n\t\"is_system\" boolean DEFAULT false NOT NULL,\n\t\"is_active\" boolean DEFAULT true NOT NULL,\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"rbac_roles_name_unique\" UNIQUE(\"name\")\n);\n",
-      "\nCREATE TABLE \"rbac_user_roles\" (\n\t\"user_id\" text NOT NULL,\n\t\"role_id\" text NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"expires_at\" timestamp with time zone,\n\tCONSTRAINT \"rbac_user_roles_user_id_role_id_pk\" PRIMARY KEY(\"user_id\",\"role_id\")\n);\n",
-      "\nDROP TABLE \"permissions\" CASCADE;",
-      "\nDROP TABLE \"role_permissions\" CASCADE;",
-      "\nDROP TABLE \"roles\" CASCADE;",
-      "\nDROP TABLE \"user_roles\" CASCADE;",
+      "CREATE TABLE \"rbac_permissions\" (\n\t\"id\" integer PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY (sequence name \"rbac_permissions_id_seq\" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),\n\t\"code\" text NOT NULL,\n\t\"name\" text NOT NULL,\n\t\"description\" text,\n\t\"category\" text NOT NULL,\n\t\"is_active\" boolean DEFAULT true NOT NULL,\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"rbac_permissions_code_unique\" UNIQUE(\"code\")\n);\n",
+      "\nCREATE TABLE \"rbac_role_permissions\" (\n\t\"role_id\" integer NOT NULL,\n\t\"permission_id\" integer NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"rbac_role_permissions_role_id_permission_id_pk\" PRIMARY KEY(\"role_id\",\"permission_id\")\n);\n",
+      "\nCREATE TABLE \"rbac_roles\" (\n\t\"id\" integer PRIMARY KEY GENERATED BY DEFAULT AS IDENTITY (sequence name \"rbac_roles_id_seq\" INCREMENT BY 1 MINVALUE 1 MAXVALUE 2147483647 START WITH 1 CACHE 1),\n\t\"name\" text NOT NULL,\n\t\"display_name\" text NOT NULL,\n\t\"description\" text,\n\t\"is_system\" boolean DEFAULT false NOT NULL,\n\t\"is_active\" boolean DEFAULT true NOT NULL,\n\t\"accessed_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"updated_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\tCONSTRAINT \"rbac_roles_name_unique\" UNIQUE(\"name\")\n);\n",
+      "\nCREATE TABLE \"rbac_user_roles\" (\n\t\"user_id\" text NOT NULL,\n\t\"role_id\" integer NOT NULL,\n\t\"created_at\" timestamp with time zone DEFAULT now() NOT NULL,\n\t\"expires_at\" timestamp with time zone,\n\tCONSTRAINT \"rbac_user_roles_user_id_role_id_pk\" PRIMARY KEY(\"user_id\",\"role_id\")\n);\n",
       "\nALTER TABLE \"rbac_role_permissions\" ADD CONSTRAINT \"rbac_role_permissions_role_id_rbac_roles_id_fk\" FOREIGN KEY (\"role_id\") REFERENCES \"public\".\"rbac_roles\"(\"id\") ON DELETE cascade ON UPDATE no action;",
       "\nALTER TABLE \"rbac_role_permissions\" ADD CONSTRAINT \"rbac_role_permissions_permission_id_rbac_permissions_id_fk\" FOREIGN KEY (\"permission_id\") REFERENCES \"public\".\"rbac_permissions\"(\"id\") ON DELETE cascade ON UPDATE no action;",
       "\nALTER TABLE \"rbac_user_roles\" ADD CONSTRAINT \"rbac_user_roles_user_id_users_id_fk\" FOREIGN KEY (\"user_id\") REFERENCES \"public\".\"users\"(\"id\") ON DELETE cascade ON UPDATE no action;",
-      "\nALTER TABLE \"rbac_user_roles\" ADD CONSTRAINT \"rbac_user_roles_role_id_rbac_roles_id_fk\" FOREIGN KEY (\"role_id\") REFERENCES \"public\".\"rbac_roles\"(\"id\") ON DELETE cascade ON UPDATE no action;"
+      "\nALTER TABLE \"rbac_user_roles\" ADD CONSTRAINT \"rbac_user_roles_role_id_rbac_roles_id_fk\" FOREIGN KEY (\"role_id\") REFERENCES \"public\".\"rbac_roles\"(\"id\") ON DELETE cascade ON UPDATE no action;",
+      "\nCREATE INDEX \"rbac_role_permissions_role_id_idx\" ON \"rbac_role_permissions\" USING btree (\"role_id\");",
+      "\nCREATE INDEX \"rbac_role_permissions_permission_id_idx\" ON \"rbac_role_permissions\" USING btree (\"permission_id\");",
+      "\nCREATE INDEX \"rbac_user_roles_user_id_idx\" ON \"rbac_user_roles\" USING btree (\"user_id\");",
+      "\nCREATE INDEX \"rbac_user_roles_role_id_idx\" ON \"rbac_user_roles\" USING btree (\"role_id\");"
     ],
     "bps": true,
-    "folderMillis": 1749142922688,
-    "hash": "a2eb89501d16eeccd148e959310e639d66edf7c65dc021c2fe15207912657309"
+    "folderMillis": 1749301573666,
+    "hash": "a7ccf007fd185ff922823148d1eae6fafe652fc98d2fd2793f84a84f29e93cd1"
+  },
+  {
+    "sql": ["ALTER TABLE \"ai_providers\" ADD COLUMN \"config\" jsonb;"],
+    "bps": true,
+    "folderMillis": 1749309388370,
+    "hash": "39cea379f08ee4cb944875c0b67f7791387b508c2d47958bb4cd501ed1ef33eb"
   }
 ]
