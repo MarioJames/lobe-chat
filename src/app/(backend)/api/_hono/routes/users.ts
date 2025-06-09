@@ -1,6 +1,6 @@
 import { Hono } from 'hono';
 
-import { UserController } from '../controllers/v1/user.controller';
+import { UserController } from '../controllers';
 import { requireAuth } from '../middleware';
 
 export default function registryUserRouters(app: Hono) {
