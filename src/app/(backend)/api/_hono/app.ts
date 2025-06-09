@@ -6,13 +6,10 @@ import { prettyJSON } from 'hono/pretty-json';
 // 导入用户认证中间件（支持OIDC和API Key两种认证方式）
 import { userAuthMiddleware } from './middleware/oidc-auth';
 // 导入控制器
-import registryV1Routers from './routes/v1';
+import registerRouters from './routes';
 
 // 创建Hono应用实例
 const app = new Hono().basePath('/api');
-
-// 配置Edge Runtime兼容性
-export const runtime = 'edge';
 
 // 全局中间件
 app.use('*', cors());
@@ -26,8 +23,6 @@ app.onError((error: Error, c) => {
   return c.json({ error: error.message }, 500);
 });
 
-// ===== 基础端点 =====
-
 // 健康检查端点
 app.get('/health', (c) => {
   return c.json({
@@ -38,6 +33,6 @@ app.get('/health', (c) => {
 });
 
 // 注册V1路由
-registryV1Routers(app);
+registerRouters(app);
 
 export { app as honoApp };

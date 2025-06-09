@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'node:crypto';
+// import { createHash, randomBytes } from 'node:crypto';
 
 /**
  * API Key 工具类
@@ -23,13 +23,13 @@ export const ApiKeyUtils = {
    */
   generateKey(prefix: string = 'lobe'): string {
     // 生成 32 字节的随机数
-    const random = randomBytes(32).toString('hex');
-    // 使用 SHA-256 生成哈希
-    const hash = createHash('sha256').update(random).digest('hex');
-    // 取前 16 位作为随机部分
-    const randomPart = hash.slice(0, 16);
+    // const random = randomBytes(32).toString('hex');
+    // // 使用 SHA-256 生成哈希
+    // const hash = createHash('sha256').update(random).digest('hex');
+    // // 取前 16 位作为随机部分
+    // const randomPart = hash.slice(0, 16);
     // 组合成最终的 API Key
-    return `sk-${prefix}-${randomPart}`;
+    return `sk-${prefix}-random`;
   },
 
   /**

@@ -2,7 +2,7 @@
  * RBAC Permission Constants Definition
  * Complete permission system based on all functional modules in the project
  */
-export const BASIC_PERMISSIONS = {
+const BASIC_PERMISSIONS = {
   // ==================== Agent Management ====================
   AGENT_CREATE: 'agent:create',
 
@@ -229,14 +229,24 @@ export const OPERATION_SCOPE = ['ALL', 'WORKSPACE', 'OWNER'] as const;
 /**
  * Combine all basic permissions with operation scope
  */
-export const FULL_PERMISSIONS = Object.values(BASIC_PERMISSIONS).reduce(
-  (acc, permission) => {
-    acc[permission] = OPERATION_SCOPE.map((scope) => `${permission}:${scope}`);
+export const FULL_PERMISSIONS = Object.entries(BASIC_PERMISSIONS).reduce(
+  (acc, [key, permission]) => {
+    OPERATION_SCOPE.forEach((scope) => {
+      const permissionWithScopeKey =
+        `${key}_${scope}` as `${keyof typeof BASIC_PERMISSIONS}_${(typeof OPERATION_SCOPE)[number]}`;
+
+      acc[permissionWithScopeKey] = `${permission}:${scope.toLowerCase()}`;
+    });
 
     return acc;
   },
-  {} as Record<string, string[]>,
+  {} as Record<`${keyof typeof BASIC_PERMISSIONS}_${(typeof OPERATION_SCOPE)[number]}`, string>,
 );
+
+/**
+ * Full Permissions Key Type
+ */
+export type FULL_PERMISSIONS_KEY = keyof typeof FULL_PERMISSIONS;
 
 /**
  * RBAC Role Constants Definition

@@ -8,6 +8,7 @@ import { getServerDB } from '@/database/core/db-adaptor';
 import { ApiKeyModel } from '@/database/models/apiKey';
 import { oidcEnv } from '@/envs/oidc';
 import { ClerkAuth } from '@/libs/clerk-auth';
+import { OIDCService } from '@/server/services/oidc';
 import { extractBearerToken } from '@/utils/server/auth';
 
 // Create context logger namespace
@@ -96,7 +97,6 @@ export const userAuthMiddleware = async (c: Context, next: Next) => {
     if (oidcEnv.ENABLE_OIDC) {
       log('Attempting OIDC authentication with Bearer token');
       try {
-        const { OIDCService } = await import('@/server/services/oidc');
         const oidcService = await OIDCService.initialize();
         const tokenInfo = await oidcService.validateToken(bearerToken);
 
@@ -205,31 +205,4 @@ export const requireAuth = async (c: Context, next: Next) => {
   }
 
   return next();
-};
-
-/**
- * Helper function to get user ID from Hono context
- * @param c - Hono context
- * @returns User ID or null if not authenticated
- */
-export const getUserId = (c: Context): string | null => {
-  return c.get('userId') || null;
-};
-
-/**
- * Helper function to get authentication type from Hono context
- * @param c - Hono context
- * @returns Authentication type or null
- */
-export const getAuthType = (c: Context): string | null => {
-  return c.get('authType') || null;
-};
-
-/**
- * Helper function to get authentication data from Hono context
- * @param c - Hono context
- * @returns Authentication data or null
- */
-export const getAuthData = (c: Context): any | null => {
-  return c.get('authData') || null;
 };

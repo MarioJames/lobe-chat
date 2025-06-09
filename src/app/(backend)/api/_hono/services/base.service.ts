@@ -1,11 +1,17 @@
+import { LobeChatDatabase } from '@/database/type';
+
+import { IBaseService } from '../types/api';
+
 /**
  * 基础服务类
  * 提供统一的服务层基础功能，与项目现有服务层模式保持一致
  */
-export abstract class BaseService {
+export abstract class BaseService implements IBaseService {
   protected userId?: string;
+  public db: LobeChatDatabase;
 
-  constructor(userId?: string) {
+  constructor(db: LobeChatDatabase, userId?: string) {
+    this.db = db;
     this.userId = userId;
   }
 

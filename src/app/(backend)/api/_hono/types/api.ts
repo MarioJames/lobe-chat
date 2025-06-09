@@ -1,3 +1,5 @@
+import { LobeChatDatabase } from '@/database/type';
+
 /**
  * 标准API响应格式
  */
@@ -76,9 +78,11 @@ export interface ControllerConstructor<T = any> {
 /**
  * 服务接口基类
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface IBaseService {
-  // 基础服务接口，具体实现由子类处理
+  /**
+   * 数据库实例
+   */
+  db?: LobeChatDatabase;
 }
 
 /**

@@ -1,6 +1,9 @@
 import { Context } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 
+import { getServerDB } from '@/database/core/db-adaptor';
+import { LobeChatDatabase } from '@/database/type';
+
 import { ApiResponse } from '../types/api';
 
 /**
@@ -8,6 +11,19 @@ import { ApiResponse } from '../types/api';
  * 提供统一的响应格式化、错误处理和通用工具方法
  */
 export abstract class BaseController {
+  private _db: LobeChatDatabase | null = null;
+
+  /**
+   * 获取数据库连接实例
+   * 延迟初始化，避免在模块导入时就初始化数据库
+   */
+  protected async getDatabase(): Promise<LobeChatDatabase> {
+    if (!this._db) {
+      this._db = await getServerDB();
+    }
+    return this._db;
+  }
+
   /**
    * 成功响应格式化
    * @param c Hono Context

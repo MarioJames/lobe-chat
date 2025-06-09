@@ -5,6 +5,8 @@ import { HTTPException } from 'hono/http-exception';
 import { getServerDB } from '@/database/core/db-adaptor';
 import { RbacModel } from '@/database/models/rbac';
 
+import { getUserId } from '../utils';
+
 // Create context logger namespace
 const log = debug('lobe-hono:permission-middleware');
 
@@ -40,7 +42,7 @@ export interface PermissionCheckOptions {
  * @param options - Permission check configuration
  * @returns Hono middleware function
  */
-export const requirePermission = (options: PermissionCheckOptions) => {
+const requirePermission = (options: PermissionCheckOptions) => {
   return async (c: Context, next: Next) => {
     // Development mode bypass if enabled
     if (options.skipInDev && process.env.NODE_ENV === 'development') {
@@ -49,7 +51,7 @@ export const requirePermission = (options: PermissionCheckOptions) => {
     }
 
     // Get user ID from context (set by authentication middleware)
-    const userId = c.get('userId');
+    const userId = getUserId(c);
 
     if (!userId) {
       log('Permission check failed: user not authenticated');
@@ -167,40 +169,4 @@ export const requireAnyPermission = (permissionCodes: string[], errorMessage?: s
     operator: 'OR',
     permissions: permissionCodes,
   });
-};
-
-/**
- * Helper function to get user permissions from context
- * Useful for handlers that need to know what permissions were checked
- * @param c - Hono context
- * @returns Permission check result or null if no check was performed
- */
-export const getCheckedPermissions = (c: Context) => {
-  return c.get('checkedPermissions') || null;
-};
-
-/**
- * Helper function to manually check permissions in handlers
- * @param c - Hono context
- * @param permissionCode - Permission code to check
- * @returns Boolean indicating if user has the permission
- */
-export const checkPermissionInHandler = async (
-  c: Context,
-  permissionCode: string,
-): Promise<boolean> => {
-  const userId = c.get('userId');
-
-  if (!userId) {
-    return false;
-  }
-
-  try {
-    const serverDB = await getServerDB();
-    const rbacModel = new RbacModel(serverDB, userId);
-    return await rbacModel.hasPermission(permissionCode);
-  } catch (error) {
-    log('Error checking permission in handler: %O', error);
-    return false;
-  }
 };
