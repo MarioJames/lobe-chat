@@ -149,7 +149,6 @@ const isProtectedRoute = createRouteMatcher([
   '/files(.*)',
   '/onboard(.*)',
   '/oauth(.*)',
-  '/api/v1(.*)', // Hono API
   // ↓ cloud ↓
 ]);
 

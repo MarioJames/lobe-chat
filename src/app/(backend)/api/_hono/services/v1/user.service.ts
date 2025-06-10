@@ -3,8 +3,8 @@ import { eq } from 'drizzle-orm/expressions';
 import { UserItem, users } from '@/database/schemas';
 import { LobeChatDatabase } from '@/database/type';
 
-import { IBaseService, ServiceResult } from '../types/api';
-import { BaseService } from './base.service';
+import { IBaseService, ServiceResult } from '../../types/api';
+import { BaseService } from '../base.service';
 
 /**
  * 用户服务接口

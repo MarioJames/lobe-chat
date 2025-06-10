@@ -1,10 +1,10 @@
 import { Hono } from 'hono';
 
-import { UserController } from '../controllers';
-import { requireAuth } from '../middleware';
+import { UserController } from '../../controllers';
+import { requireAuth } from '../../middleware';
 
 export default function registryUserRouters(app: Hono) {
-  app.get('/user/current', requireAuth, async (c) => {
+  app.get('/v1/user/current', requireAuth, async (c) => {
     console.log('获取当前用户信息');
 
     const userController = new UserController();

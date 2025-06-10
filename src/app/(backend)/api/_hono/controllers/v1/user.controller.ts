@@ -1,7 +1,9 @@
 import { Context } from 'hono';
 
-import { UserService } from '../services';
-import { BaseController } from './base.controller';
+import { v1Services } from '../../services';
+import { BaseController } from '../base.controller';
+
+const { UserService } = v1Services;
 
 /**
  * 用户控制器类

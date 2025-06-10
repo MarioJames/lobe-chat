@@ -1,13 +1,8 @@
 import { Hono } from 'hono';
 
-import registerUserRouters from './users';
+import registerV1Routers from './v1';
 
 export default function registerRouters(app: Hono) {
-  // 注册用户相关路由
-  registerUserRouters(app);
-
-  // 未来可以在这里注册其他业务模块路由
-  // registryMessageRouters(app);
-  // registryFileRouters(app);
-  // registrySettingsRouters(app);
+  // 注册 v1 相关路由
+  registerV1Routers(app);
 }
