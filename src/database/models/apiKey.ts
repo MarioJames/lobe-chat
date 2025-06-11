@@ -1,7 +1,7 @@
 import { and, desc, eq } from 'drizzle-orm/expressions';
 
 import { LobeChatDatabase } from '@/database/type';
-import { ApiKeyUtils } from '@/utils/apiKey';
+import { generateApiKey, isApiKeyExpired, validateApiKeyFormat } from '@/utils/apiKey';
 
 import { ApiKeyItem, NewApiKeyItem, apiKeys } from '../schemas';
 
@@ -15,7 +15,7 @@ export class ApiKeyModel {
   }
 
   create = async (params: Omit<NewApiKeyItem, 'userId' | 'id' | 'key'>) => {
-    const key = ApiKeyUtils.generateKey();
+    const key = generateApiKey();
     const [result] = await this.db
       .insert(apiKeys)
       .values({ ...params, key, userId: this.userId })
@@ -46,7 +46,7 @@ export class ApiKeyModel {
   };
 
   findByKey = async (key: string) => {
-    if (!ApiKeyUtils.validateKeyFormat(key)) {
+    if (!validateApiKeyFormat(key)) {
       return null;
     }
     return this.db.query.apiKeys.findFirst({
@@ -58,7 +58,7 @@ export class ApiKeyModel {
     const apiKey = await this.findByKey(key);
     if (!apiKey) return false;
     if (!apiKey.enabled) return false;
-    if (ApiKeyUtils.isExpired(apiKey.expiresAt)) return false;
+    if (isApiKeyExpired(apiKey.expiresAt)) return false;
     return true;
   };
 

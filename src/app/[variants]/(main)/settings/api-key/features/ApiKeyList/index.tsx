@@ -1,12 +1,15 @@
+import { Button } from '@lobehub/ui';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { Button, Table } from 'antd';
+import { Flex, Switch, Table } from 'antd';
 import { createStyles } from 'antd-style';
+import { Pencil, Trash } from 'lucide-react';
 import { FC, useState } from 'react';
 
 import { apiKeyService } from '@/services/apiKey';
 import { ApiKeyItem, CreateApiKeyParams, UpdateApiKeyParams } from '@/types/apiKey';
 
 import ApiKeyModal from '../ApiKeyModal';
+import ApiKeyDisplay from './Key';
 
 const useStyles = createStyles(({ css, token }) => ({
   container: css`
@@ -27,6 +30,7 @@ const ApiKeyList: FC = () => {
   const { styles } = useStyles();
   const [modalOpen, setModalOpen] = useState(false);
   const [editingApiKey, setEditingApiKey] = useState<ApiKeyItem | undefined>();
+
   const queryClient = useQueryClient();
 
   const { data: apiKeys = [], isLoading } = useQuery<ApiKeyItem[]>({
@@ -48,6 +52,13 @@ const ApiKeyList: FC = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['apiKeys'] });
       setModalOpen(false);
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => apiKeyService.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['apiKeys'] });
     },
   });
 
@@ -76,14 +87,30 @@ const ApiKeyList: FC = () => {
       title: '名称',
     },
     {
+      dataIndex: 'key',
+      key: 'key',
+      render: (key: string) => <ApiKeyDisplay apiKey={key} />,
+      title: 'Key',
+      width: '30%',
+    },
+    {
       dataIndex: 'description',
       key: 'description',
+      render: (desc: string) => desc || '-',
       title: '描述',
     },
     {
       dataIndex: 'enabled',
       key: 'enabled',
-      render: (enabled: boolean) => (enabled ? '启用' : '禁用'),
+      render: (enabled: boolean, record: ApiKeyItem) => (
+        <Switch
+          checked={enabled}
+          loading={updateMutation.isPending}
+          onChange={(checked) => {
+            updateMutation.mutate({ id: record.id!, params: { enabled: checked } });
+          }}
+        />
+      ),
       title: '状态',
     },
     {
@@ -101,9 +128,22 @@ const ApiKeyList: FC = () => {
     {
       key: 'action',
       render: (_: any, record: ApiKeyItem) => (
-        <Button onClick={() => handleEdit(record)} type="link">
-          编辑
-        </Button>
+        <Flex gap={4}>
+          <Button
+            icon={Pencil}
+            onClick={() => handleEdit(record)}
+            size="small"
+            title="编辑"
+            type="text"
+          />
+          <Button
+            icon={Trash}
+            onClick={() => deleteMutation.mutate(record.id!)}
+            size="small"
+            title="删除"
+            type="text"
+          />
+        </Flex>
       ),
       title: '操作',
     },
