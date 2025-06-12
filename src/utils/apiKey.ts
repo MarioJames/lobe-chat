@@ -10,7 +10,7 @@ import { createHash, randomBytes } from 'node:crypto';
  * @param prefix - API Key 前缀，用于标识不同的用途
  * @returns 生成的 API Key
  */
-export function generateApiKey(prefix: string = 'lobe'): string {
+export function generateApiKey(): string {
   // 生成 32 字节的随机数
   const random = randomBytes(32).toString('hex');
   // 使用 SHA-256 生成哈希
@@ -18,7 +18,7 @@ export function generateApiKey(prefix: string = 'lobe'): string {
   // 取前 16 位作为随机部分
   const randomPart = hash.slice(0, 16);
   // 组合成最终的 API Key
-  return `sk-${prefix}-${randomPart}`;
+  return `lb-${randomPart}`;
 }
 
 /**
@@ -38,6 +38,6 @@ export function isApiKeyExpired(expiresAt: Date | null): boolean {
  */
 export function validateApiKeyFormat(key: string): boolean {
   // 检查格式: sk-{prefix}-{random}
-  const pattern = /^sk-[\da-z]+-[\da-f]{16}$/;
+  const pattern = /^lb-[\da-f]{16}$/;
   return pattern.test(key);
 }

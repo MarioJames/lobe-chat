@@ -1,14 +1,13 @@
 import debug from 'debug';
 import { Context, Next } from 'hono';
 import { HTTPException } from 'hono/http-exception';
-import { NextRequest } from 'next/server';
 
-import { LOBE_CHAT_AUTH_HEADER, enableClerk, enableNextAuth } from '@/const/auth';
+import { LOBE_CHAT_AUTH_HEADER } from '@/const/auth';
 import { getServerDB } from '@/database/core/db-adaptor';
 import { ApiKeyModel } from '@/database/models/apiKey';
 import { oidcEnv } from '@/envs/oidc';
-import { ClerkAuth } from '@/libs/clerk-auth';
 import { OIDCService } from '@/server/services/oidc';
+import { validateApiKeyFormat } from '@/utils/apiKey';
 import { extractBearerToken } from '@/utils/server/auth';
 
 // Create context logger namespace
@@ -93,7 +92,20 @@ export const userAuthMiddleware = async (c: Context, next: Next) => {
 
   // Try Bearer token authentication (OIDC first, then API Key)
   if (bearerToken) {
-    // 1. Try OIDC authentication first
+    // 1. if bearerToken is valid API-KEY, try API Key authentication
+    if (validateApiKeyFormat(bearerToken)) {
+      userId = await validateApiKey(bearerToken);
+      if (userId) {
+        authType = 'apikey';
+        authData = {
+          apiKey: bearerToken,
+          userId: userId,
+        };
+        log('API Key authentication successful, userId: %s', userId);
+      }
+    }
+
+    // 2. Try OIDC authentication, need ensure OIDC is ENABLE
     if (oidcEnv.ENABLE_OIDC) {
       log('Attempting OIDC authentication with Bearer token');
       try {
@@ -114,63 +126,6 @@ export const userAuthMiddleware = async (c: Context, next: Next) => {
         // Continue to try API Key authentication
       }
     }
-
-    // 2. If OIDC failed or not enabled, try API Key authentication
-    if (!userId) {
-      log('Attempting API Key authentication with Bearer token');
-      userId = await validateApiKey(bearerToken);
-      if (userId) {
-        authType = 'apikey';
-        authData = {
-          apiKey: bearerToken,
-          userId: userId,
-        };
-        log('API Key authentication successful, userId: %s', userId);
-      }
-    }
-  }
-
-  // Fallback to other authentication methods if Bearer token auth failed
-  if (!userId) {
-    // Try Clerk authentication
-    if (enableClerk) {
-      log('Attempting Clerk authentication');
-      try {
-        const clerkAuth = new ClerkAuth();
-        const request = new Request(c.req.url, {
-          headers: c.req.raw.headers,
-          method: c.req.method,
-        });
-        const result = clerkAuth.getAuthFromRequest(request as NextRequest);
-
-        if (result.userId) {
-          userId = result.userId;
-          authType = 'clerk';
-          authData = result.clerkAuth;
-          log('Clerk authentication successful, userId: %s', userId);
-        }
-      } catch (error) {
-        log('Clerk authentication error: %O', error);
-      }
-    }
-
-    // Try NextAuth authentication
-    if (!userId && enableNextAuth) {
-      log('Attempting NextAuth authentication');
-      try {
-        const { default: NextAuthEdge } = await import('@/libs/next-auth/edge');
-        const session = await NextAuthEdge.auth();
-
-        if (session?.user?.id) {
-          userId = session.user.id;
-          authType = 'nextauth';
-          authData = session.user;
-          log('NextAuth authentication successful, userId: %s', userId);
-        }
-      } catch (error) {
-        log('NextAuth authentication error: %O', error);
-      }
-    }
   }
 
   // Set authentication context in Hono context
@@ -189,7 +144,9 @@ export const userAuthMiddleware = async (c: Context, next: Next) => {
     c.set('authType', null);
   }
 
-  return next();
+  await next();
+
+  // todo: update API-KEY last usage time
 };
 
 /**
