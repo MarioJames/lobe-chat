@@ -204,7 +204,6 @@ export class UserModel {
       .insert(users)
       .values({ ...params })
       .returning();
-
     return { duplicate: false, user };
   };
 
