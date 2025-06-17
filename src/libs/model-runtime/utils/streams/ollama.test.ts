@@ -30,7 +30,7 @@ describe('OllamaStream', () => {
       });
 
       const protocolStream = OllamaStream(mockOllamaStream);
-    
+
       const decoder = new TextDecoder();
       const chunks = [];
 
@@ -62,7 +62,7 @@ describe('OllamaStream', () => {
           'id: chat_2',
           'event: stop',
           `data: "finished"\n`,
-        ].map((line) => `${line}\n`)
+        ].map((line) => `${line}\n`),
       );
     });
 
