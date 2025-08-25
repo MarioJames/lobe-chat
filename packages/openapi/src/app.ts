@@ -7,6 +7,7 @@ import { prettyJSON } from 'hono/pretty-json';
 import { userAuthMiddleware } from './middleware/auth';
 // 导入路由
 import routes from './routes';
+import { loggingMiddleware } from './middleware/logging';
 
 // 创建Hono应用实例
 const app = new Hono().basePath('/api/v1');
@@ -16,6 +17,7 @@ app.use('*', cors());
 app.use('*', logger());
 app.use('*', prettyJSON());
 app.use('*', userAuthMiddleware); // 用户认证中间件
+app.use('*', loggingMiddleware); // 操作日志中间件（鉴权后）
 
 // 错误处理中间件
 app.onError((error: Error, c) => {
