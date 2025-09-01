@@ -4,10 +4,11 @@ import { getServerDB } from '@/database/core/db-adaptor';
 
 import { asyncAuth } from './asyncAuth';
 import { asyncTrpc } from './init';
+import { loggingMiddleware } from './middleware/logging';
 
 const log = debug('lobe-async:middleware');
 
-export const publicProcedure = asyncTrpc.procedure;
+export const publicProcedure = asyncTrpc.procedure.use(loggingMiddleware);
 
 export const asyncRouter = asyncTrpc.router;
 
@@ -28,6 +29,6 @@ const dbMiddleware = asyncTrpc.middleware(async (opts) => {
   }
 });
 
-export const asyncAuthedProcedure = asyncTrpc.procedure.use(dbMiddleware).use(asyncAuth);
+export const asyncAuthedProcedure = asyncTrpc.procedure.use(dbMiddleware).use(asyncAuth).use(loggingMiddleware);
 
 export const createAsyncCallerFactory = asyncTrpc.createCallerFactory;

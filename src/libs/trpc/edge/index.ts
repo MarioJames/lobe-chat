@@ -12,6 +12,7 @@ import { isDesktop } from '@/const/version';
 
 import { edgeTrpc } from './init';
 import { jwtPayloadChecker } from './middleware/jwtPayload';
+import { loggingMiddleware } from './middleware/logging';
 
 /**
  * Create a router
@@ -23,14 +24,16 @@ export const router = edgeTrpc.router;
  * Create an unprotected procedure
  * @link https://trpc.io/docs/v11/procedures
  **/
-export const publicProcedure = edgeTrpc.procedure.use(({ next, ctx }) => {
-  return next({
-    ctx: { userId: isDesktop ? DESKTOP_USER_ID : ctx.userId },
-  });
-});
+export const publicProcedure = edgeTrpc.procedure
+  .use(({ next, ctx }) => {
+    return next({
+      ctx: { userId: isDesktop ? DESKTOP_USER_ID : ctx.userId },
+    });
+  })
+  .use(loggingMiddleware);
 
 // procedure that asserts that the user add the password
-export const passwordProcedure = edgeTrpc.procedure.use(jwtPayloadChecker);
+export const passwordProcedure = edgeTrpc.procedure.use(jwtPayloadChecker).use(loggingMiddleware);
 
 /**
  * Merge multiple routers together

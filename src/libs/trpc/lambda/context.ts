@@ -37,6 +37,7 @@ export interface AuthContext {
   resHeaders?: Headers;
   userAgent?: string;
   userId?: string | null;
+  ip?: string;
 }
 
 /**
@@ -51,6 +52,7 @@ export const createContextInner = async (params?: {
   oidcAuth?: OIDCAuth | null;
   userAgent?: string;
   userId?: string | null;
+  ip?: string;
 }): Promise<AuthContext> => {
   log('createContextInner called with params: %O', params);
   const responseHeaders = new Headers();
@@ -64,6 +66,7 @@ export const createContextInner = async (params?: {
     resHeaders: responseHeaders,
     userAgent: params?.userAgent,
     userId: params?.userId,
+    ip: params?.ip,
   };
 };
 
@@ -78,7 +81,7 @@ export const createLambdaContext = async (request: NextRequest): Promise<LambdaC
   // IT WON'T GO INTO PRODUCTION ANYMORE
   const isDebugApi = request.headers.get('lobe-auth-dev-backend-api') === '1';
   if (process.env.NODE_ENV === 'development' && isDebugApi) {
-    return { userId: process.env.MOCK_DEV_USER_ID };
+    return { userId: process.env.MOCK_DEV_USER_ID } as any;
   }
 
   log('createLambdaContext called for request');
@@ -86,6 +89,8 @@ export const createLambdaContext = async (request: NextRequest): Promise<LambdaC
 
   const authorization = request.headers.get(LOBE_CHAT_AUTH_HEADER);
   const userAgent = request.headers.get('user-agent') || undefined;
+  const forwardedFor = request.headers.get('x-forwarded-for') || '';
+  const ip = forwardedFor.split(',')[0]?.trim() || undefined;
 
   // get marketAccessToken from cookies
   const cookieHeader = request.headers.get('cookie');
@@ -97,6 +102,7 @@ export const createLambdaContext = async (request: NextRequest): Promise<LambdaC
     authorizationHeader: authorization,
     marketAccessToken,
     userAgent,
+    ip,
   };
   log('LobeChat Authorization header: %s', authorization ? 'exists' : 'not found');
 

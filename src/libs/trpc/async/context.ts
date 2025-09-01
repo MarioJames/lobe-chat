@@ -12,6 +12,8 @@ export interface AsyncAuthContext {
   secret: string;
   serverDB?: LobeChatDatabase;
   userId?: string | null;
+  userAgent?: string;
+  ip?: string;
 }
 
 /**
@@ -22,10 +24,14 @@ export const createAsyncContextInner = async (params?: {
   jwtPayload?: ClientSecretPayload;
   secret?: string;
   userId?: string | null;
+  userAgent?: string;
+  ip?: string;
 }): Promise<AsyncAuthContext> => ({
   jwtPayload: params?.jwtPayload || {},
   secret: params?.secret || '',
   userId: params?.userId,
+  userAgent: params?.userAgent,
+  ip: params?.ip,
 });
 
 export type AsyncContext = Awaited<ReturnType<typeof createAsyncContextInner>>;
@@ -37,6 +43,9 @@ export const createAsyncRouteContext = async (request: NextRequest): Promise<Asy
 
   const authorization = request.headers.get('Authorization');
   const lobeChatAuthorization = request.headers.get(LOBE_CHAT_AUTH_HEADER);
+  const userAgent = request.headers.get('user-agent') || undefined;
+  const forwardedFor = request.headers.get('x-forwarded-for') || '';
+  const ip = forwardedFor.split(',')[0]?.trim() || undefined;
 
   log('Authorization header present: %s', !!authorization);
   log('LobeChat auth header present: %s', !!lobeChatAuthorization);
@@ -70,7 +79,7 @@ export const createAsyncRouteContext = async (request: NextRequest): Promise<Asy
       Object.keys(payload || {}),
     );
 
-    return createAsyncContextInner({ jwtPayload: payload, secret, userId });
+    return createAsyncContextInner({ jwtPayload: payload, secret, userId, userAgent, ip });
   } catch (error) {
     log('Error creating async route context: %O', error);
     throw error;

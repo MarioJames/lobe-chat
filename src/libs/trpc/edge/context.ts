@@ -15,6 +15,8 @@ export interface AuthContext {
   jwtPayload?: ClientSecretPayload | null;
   nextAuth?: User;
   userId?: string | null;
+  userAgent?: string;
+  ip?: string;
 }
 
 /**
@@ -26,11 +28,15 @@ export const createContextInner = async (params?: {
   clerkAuth?: IClerkAuth;
   nextAuth?: User;
   userId?: string | null;
+  userAgent?: string;
+  ip?: string;
 }): Promise<AuthContext> => ({
   authorizationHeader: params?.authorizationHeader,
   clerkAuth: params?.clerkAuth,
   nextAuth: params?.nextAuth,
   userId: params?.userId,
+  userAgent: params?.userAgent,
+  ip: params?.ip,
 });
 
 export type EdgeContext = Awaited<ReturnType<typeof createContextInner>>;
@@ -43,6 +49,9 @@ export const createEdgeContext = async (request: NextRequest): Promise<EdgeConte
   // for API-response caching see https://trpc.io/docs/v11/caching
 
   const authorization = request.headers.get(LOBE_CHAT_AUTH_HEADER);
+  const userAgent = request.headers.get('user-agent') || undefined;
+  const forwardedFor = request.headers.get('x-forwarded-for') || '';
+  const ip = forwardedFor.split(',')[0]?.trim() || undefined;
 
   let userId;
   let auth;
@@ -53,7 +62,7 @@ export const createEdgeContext = async (request: NextRequest): Promise<EdgeConte
     auth = result.clerkAuth;
     userId = result.userId;
 
-    return createContextInner({ authorizationHeader: authorization, clerkAuth: auth, userId });
+    return createContextInner({ authorizationHeader: authorization, clerkAuth: auth, userId, userAgent, ip });
   }
 
   if (enableNextAuth) {
@@ -65,11 +74,11 @@ export const createEdgeContext = async (request: NextRequest): Promise<EdgeConte
         auth = session.user;
         userId = session.user.id;
       }
-      return createContextInner({ authorizationHeader: authorization, nextAuth: auth, userId });
+      return createContextInner({ authorizationHeader: authorization, nextAuth: auth, userId, userAgent, ip });
     } catch (e) {
       console.error('next auth err', e);
     }
   }
 
-  return createContextInner({ authorizationHeader: authorization, userId });
+  return createContextInner({ authorizationHeader: authorization, userId, userAgent, ip });
 };
