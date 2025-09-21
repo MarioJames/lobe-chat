@@ -9,6 +9,8 @@
       "on": "Mostra barra degli strumenti di formattazione"
     }
   },
+  "cancel": "Annulla",
+  "confirm": "Conferma",
   "file": {
     "error": "Errore: {{message}}",
     "uploading": "Caricamento file in corso..."
@@ -21,6 +23,17 @@
     "open": "Apri link",
     "placeholder": "Inserisci URL del link",
     "unlink": "Rimuovi link"
+  },
+  "math": {
+    "placeholder": "Inserisci la formula TeX"
+  },
+  "slash": {
+    "h1": "Titolo di primo livello",
+    "h2": "Titolo di secondo livello",
+    "h3": "Titolo di terzo livello",
+    "hr": "Linea di separazione",
+    "table": "Tabella",
+    "tex": "Formula TeX"
   },
   "table": {
     "delete": "Elimina tabella",
@@ -41,7 +54,9 @@
     "link": "Collegamento",
     "numberList": "Elenco numerato",
     "strikethrough": "Testo barrato",
-    "table": "Inserisci tabella",
+    "table": "tabella",
+    "taskList": "Elenco attività",
+    "tex": "Formula TeX",
     "underline": "Sottolineato"
   }
 }

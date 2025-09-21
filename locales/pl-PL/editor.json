@@ -9,6 +9,8 @@
       "on": "Pokaż pasek narzędzi formatowania"
     }
   },
+  "cancel": "Anuluj",
+  "confirm": "Potwierdź",
   "file": {
     "error": "Błąd: {{message}}",
     "uploading": "Przesyłanie pliku..."
@@ -21,6 +23,17 @@
     "open": "Otwórz link",
     "placeholder": "Wpisz adres URL linku",
     "unlink": "Usuń link"
+  },
+  "math": {
+    "placeholder": "Wprowadź formułę TeX"
+  },
+  "slash": {
+    "h1": "Nagłówek poziomu 1",
+    "h2": "Nagłówek poziomu 2",
+    "h3": "Nagłówek poziomu 3",
+    "hr": "Linia pozioma",
+    "table": "Tabela",
+    "tex": "Formuła TeX"
   },
   "table": {
     "delete": "Usuń tabelę",
@@ -41,7 +54,9 @@
     "link": "Link",
     "numberList": "Lista numerowana",
     "strikethrough": "Przekreślenie",
-    "table": "Wstaw tabelę",
+    "table": "tabela",
+    "taskList": "Lista zadań",
+    "tex": "Formuła TeX",
     "underline": "Podkreślenie"
   }
 }
