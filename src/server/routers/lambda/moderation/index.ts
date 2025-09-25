@@ -1,25 +1,38 @@
 import { z } from 'zod';
 
 import { publicProcedure, router } from '@/libs/trpc/lambda';
-import { checkSensitiveText } from '@/services/admin/sensitive';
+import { SensitiveWordCheckResult, checkSensitiveText } from '@/services/admin/sensitive';
+
+const RoleIdsSchema = z.union([z.string(), z.array(z.string())]).optional();
+const RuleIdsSchema = z.union([z.string(), z.array(z.string())]).optional();
 
 export const moderationRouter = router({
   checkText: publicProcedure
     .input(
       z.object({
-        infraId: z.string().optional(),
-        modelId: z.string().optional(),
+        options: z.object({
+          infraId: z.string().optional(),
+          modelId: z.string(),
+          roleIds: RoleIdsSchema,
+          ruleIds: RuleIdsSchema,
+          userId: z.string(),
+        }),
         text: z.string(),
       }),
     )
     .mutation(async ({ input }) => {
-      const res = (await checkSensitiveText({
-        infraId: input.infraId,
-        modelId: input.modelId,
+      const res = await checkSensitiveText({
+        options: {
+          infraId: input.options?.infraId,
+          modelId: input.options?.modelId,
+          roleIds: input.options?.roleIds,
+          ruleIds: input.options?.ruleIds,
+          userId: input.options?.userId,
+        },
         text: input.text,
-      })) as { matched: boolean; reply: string };
+      });
 
-      return res;
+      return res as SensitiveWordCheckResult;
     }),
 });
 
