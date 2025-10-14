@@ -109,10 +109,15 @@ export const POST = checkAuth(async (req: Request, { params, jwtPayload, createR
 
               try {
                 const mres = await checkSensitiveText({
-                  infraId: provider,
-                  modelId: data.model as string,
+                  options: {
+                    infraId: provider,
+                    modelId: data.model,
+                    userId: jwtPayload.userId!,
+                  },
                   text: aggregatedText,
                 });
+
+                console.log('mres:', mres);
 
                 if (mres?.hasSensitiveWords) {
                   const replyText = mres?.violations?.[0]?.reply || '内容不合规';
