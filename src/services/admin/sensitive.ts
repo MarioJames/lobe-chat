@@ -57,6 +57,7 @@ export const checkSensitiveText = async (params: AdminSensitiveCheckInput) => {
   const timer = setTimeout(() => controller.abort('moderation_timeout'), 10_000);
 
   try {
+    // @ts-expect-error
     const res = (await adminTrpc.sensitiveWord.checkText.mutate(params, {
       signal: controller.signal,
     })) as SensitiveWordCheckResult;
