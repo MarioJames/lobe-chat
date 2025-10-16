@@ -11,7 +11,7 @@ export const adminEnv = createEnv({
     ADMIN_TRPC_URL: process.env.ADMIN_TRPC_URL,
   },
   server: {
-    ADMIN_INTERNAL_SECRET: z.string(),
-    ADMIN_TRPC_URL: z.string().url(),
+    ADMIN_INTERNAL_SECRET: z.string().optional(),
+    ADMIN_TRPC_URL: z.string().url().optional(),
   },
 });

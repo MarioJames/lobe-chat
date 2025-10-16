@@ -9,10 +9,10 @@ export const adminTrpc = createTRPCProxyClient<AppRouter>({
   links: [
     httpBatchLink({
       headers: () => ({
-        'x-internal-token': adminEnv.ADMIN_INTERNAL_SECRET,
+        'x-internal-token': adminEnv?.ADMIN_INTERNAL_SECRET ?? '',
       }),
       transformer: superjson,
-      url: adminEnv.ADMIN_TRPC_URL,
+      url: adminEnv?.ADMIN_TRPC_URL ?? '',
     }),
   ],
 });
