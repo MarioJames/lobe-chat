@@ -66,6 +66,10 @@ export interface AiProviderSettings {
    */
   disableBrowserRequest?: boolean;
   /**
+   * whether show model fetcher in the provider config
+   */
+  hiddenInProviderList?: boolean;
+  /**
    * whether provider support edit model
    *
    * @default true

@@ -14,6 +14,7 @@ import ActionDropdown from '@/features/ChatInput/ActionBar/components/ActionDrop
 import { useEnabledChatModels } from '@/hooks/useEnabledChatModels';
 import { useAgentStore } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/slices/chat';
+import { useAiInfraStore } from '@/store/aiInfra';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 import { EnabledProviderWithModels } from '@/types/aiProvider';
 
@@ -58,6 +59,7 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
   const { showLLM } = useServerConfigStore(featureFlagsSelectors);
   const router = useRouter();
   const enabledList = useEnabledChatModels();
+  const runtimeConfig = useAiInfraStore((s) => s.aiProviderRuntimeConfig);
 
   const items = useMemo<ItemType[]>(() => {
     const getModelItems = (provider: EnabledProviderWithModels) => {
@@ -121,7 +123,7 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
             provider={provider.id}
             source={provider.source}
           />
-          {showLLM && (
+          {showLLM && !runtimeConfig?.[provider.id]?.settings?.hiddenInProviderList && (
             <Link
               href={
                 isDeprecatedEdition
@@ -140,7 +142,7 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
       ),
       type: 'group',
     }));
-  }, [enabledList]);
+  }, [enabledList, runtimeConfig, showLLM]);
 
   const icon = <div className={styles.tag}>{children}</div>;
 

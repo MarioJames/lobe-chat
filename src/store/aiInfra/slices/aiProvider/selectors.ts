@@ -5,10 +5,18 @@ import { GlobalLLMProviderKey } from '@/types/user/settings';
 
 // List
 const enabledAiProviderList = (s: AIProviderStoreState) =>
-  s.aiProviderList.filter((item) => item.enabled).sort((a, b) => a.sort! - b.sort!);
+  s.aiProviderList
+    .filter(
+      (item) =>
+        item.enabled && !s.aiProviderRuntimeConfig?.[item.id]?.settings?.hiddenInProviderList,
+    )
+    .sort((a, b) => a.sort! - b.sort!);
 
 const disabledAiProviderList = (s: AIProviderStoreState) =>
-  s.aiProviderList.filter((item) => !item.enabled);
+  s.aiProviderList.filter(
+    (item) =>
+      !item.enabled && !s.aiProviderRuntimeConfig?.[item.id]?.settings?.hiddenInProviderList,
+  );
 
 const enabledImageModelList = (s: AIProviderStoreState) => s.enabledImageModelList || [];
 
@@ -101,6 +109,12 @@ const isProviderHasBuiltinSearchConfig = (id: string) => (s: AIProviderStoreStat
   return !!providerCfg?.settings.searchMode && providerCfg?.settings.searchMode !== 'internal';
 };
 
+const isProviderHiddenInProviderList = (id: string) => (s: AIProviderStoreState) => {
+  const providerCfg = providerConfigById(id)(s);
+
+  return !!providerCfg?.settings.hiddenInProviderList;
+};
+
 const isProviderEnableResponseApi = (id: string) => (s: AIProviderStoreState) => {
   const providerCfg = providerConfigById(id)(s);
 
@@ -128,6 +142,7 @@ export const aiProviderSelectors = {
   isProviderFetchOnClient,
   isProviderHasBuiltinSearch,
   isProviderHasBuiltinSearchConfig,
+  isProviderHiddenInProviderList,
   isProviderLoading,
   providerConfigById,
   providerKeyVaults,
