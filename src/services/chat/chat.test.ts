@@ -1,7 +1,10 @@
 import { LobeTool } from '@lobechat/types';
+import { UIChatMessage } from '@lobechat/types';
+import { ChatErrorType } from '@lobechat/types';
+import { ChatStreamPayload } from '@lobechat/types';
 import { LobeChatPluginManifest } from '@lobehub/chat-plugin-sdk';
 import { act } from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { type Mock, afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { DEFAULT_USER_AVATAR } from '@/const/meta';
 import { DEFAULT_AGENT_CONFIG } from '@/const/settings';
@@ -14,10 +17,8 @@ import { toolSelectors } from '@/store/tool/selectors';
 import { modelProviderSelectors } from '@/store/user/selectors';
 import { DalleManifest } from '@/tools/dalle';
 import { WebBrowsingManifest } from '@/tools/web-browsing';
-import { ChatErrorType } from '@/types/index';
-import { ChatImageItem, ChatMessage } from '@/types/message';
-import { ChatStreamPayload, type OpenAIChatMessage } from '@/types/openai/chat';
 
+import { API_ENDPOINTS } from '../_url';
 import * as helpers from './helper';
 import { chatService } from './index';
 
@@ -79,7 +80,7 @@ describe('ChatService', () => {
   describe('createAssistantMessage', () => {
     it('should process messages and call getChatCompletion with the right parameters', async () => {
       const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
-      const messages = [{ content: 'Hello', role: 'user' }] as ChatMessage[];
+      const messages = [{ content: 'Hello', role: 'user' }] as UIChatMessage[];
       const enabledPlugins = ['plugin1'];
       await act(async () => {
         useToolStore.setState({
@@ -126,7 +127,7 @@ describe('ChatService', () => {
     describe('extendParams functionality', () => {
       it('should add reasoning parameters when model supports enableReasoning and user enables it', async () => {
         const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
-        const messages = [{ content: 'Test reasoning', role: 'user' }] as ChatMessage[];
+        const messages = [{ content: 'Test reasoning', role: 'user' }] as UIChatMessage[];
 
         // Mock aiModelSelectors for extend params support
         vi.spyOn(aiModelSelectors, 'isModelHasExtendParams').mockReturnValue(() => true);
@@ -159,7 +160,7 @@ describe('ChatService', () => {
 
       it('should disable reasoning when model supports enableReasoning but user disables it', async () => {
         const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
-        const messages = [{ content: 'Test no reasoning', role: 'user' }] as ChatMessage[];
+        const messages = [{ content: 'Test no reasoning', role: 'user' }] as UIChatMessage[];
 
         // Mock aiModelSelectors for extend params support
         vi.spyOn(aiModelSelectors, 'isModelHasExtendParams').mockReturnValue(() => true);
@@ -191,7 +192,7 @@ describe('ChatService', () => {
 
       it('should use default budget when reasoningBudgetToken is not set', async () => {
         const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
-        const messages = [{ content: 'Test default budget', role: 'user' }] as ChatMessage[];
+        const messages = [{ content: 'Test default budget', role: 'user' }] as UIChatMessage[];
 
         // Mock aiModelSelectors for extend params support
         vi.spyOn(aiModelSelectors, 'isModelHasExtendParams').mockReturnValue(() => true);
@@ -224,7 +225,7 @@ describe('ChatService', () => {
 
       it('should set reasoning_effort when model supports reasoningEffort and user configures it', async () => {
         const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
-        const messages = [{ content: 'Test reasoning effort', role: 'user' }] as ChatMessage[];
+        const messages = [{ content: 'Test reasoning effort', role: 'user' }] as UIChatMessage[];
 
         // Mock aiModelSelectors for extend params support
         vi.spyOn(aiModelSelectors, 'isModelHasExtendParams').mockReturnValue(() => true);
@@ -253,7 +254,7 @@ describe('ChatService', () => {
 
       it('should set thinkingBudget when model supports thinkingBudget and user configures it', async () => {
         const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
-        const messages = [{ content: 'Test thinking budget', role: 'user' }] as ChatMessage[];
+        const messages = [{ content: 'Test thinking budget', role: 'user' }] as UIChatMessage[];
 
         // Mock aiModelSelectors for extend params support
         vi.spyOn(aiModelSelectors, 'isModelHasExtendParams').mockReturnValue(() => true);
@@ -301,7 +302,7 @@ describe('ChatService', () => {
               },
             ],
           }, // Message with files
-        ] as ChatMessage[];
+        ] as UIChatMessage[];
 
         const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
         await chatService.createAssistantMessage({
@@ -341,7 +342,7 @@ describe('ChatService', () => {
         const messages = [
           { content: 'Hello', role: 'user', files: ['file2'] }, // Message with files
           { content: 'Hey', role: 'assistant' }, // Regular user message
-        ] as ChatMessage[];
+        ] as UIChatMessage[];
 
         const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
         await chatService.createAssistantMessage({ messages, plugins: [] });
@@ -390,7 +391,7 @@ describe('ChatService', () => {
             meta: {},
             updatedAt: Date.now(),
           },
-        ] as ChatMessage[];
+        ] as UIChatMessage[];
 
         // Spy on processImageList method
         // const processImageListSpy = vi.spyOn(chatService as any, 'processImageList');
@@ -462,7 +463,7 @@ describe('ChatService', () => {
             meta: {},
             updatedAt: Date.now(),
           },
-        ] as ChatMessage[];
+        ] as UIChatMessage[];
 
         // Spy on processImageList method
         const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
@@ -549,7 +550,7 @@ describe('ChatService', () => {
             meta: {},
             updatedAt: Date.now(),
           },
-        ] as ChatMessage[];
+        ] as UIChatMessage[];
 
         const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
 
@@ -604,7 +605,7 @@ describe('ChatService', () => {
               avatar: DEFAULT_USER_AVATAR,
             },
           },
-        ] as ChatMessage[];
+        ] as UIChatMessage[];
 
         act(() => {
           useToolStore.setState({
@@ -704,7 +705,7 @@ describe('ChatService', () => {
             role: 'user',
             content: 'https://vercel.com/ 请分析 chatGPT 关键词\n\n',
           },
-        ] as ChatMessage[];
+        ] as UIChatMessage[];
 
         act(() => {
           useToolStore.setState({
@@ -806,7 +807,7 @@ describe('ChatService', () => {
             role: 'user',
             content: 'https://vercel.com/ 请分析 chatGPT 关键词\n\n',
           },
-        ] as ChatMessage[];
+        ] as UIChatMessage[];
 
         await chatService.createAssistantMessage({
           messages,
@@ -846,7 +847,7 @@ describe('ChatService', () => {
               avatar: DEFAULT_USER_AVATAR,
             },
           },
-        ] as ChatMessage[];
+        ] as UIChatMessage[];
 
         await chatService.createAssistantMessage({
           messages,
@@ -869,7 +870,7 @@ describe('ChatService', () => {
       it('should add WebBrowsingManifest when search is enabled and not using model built-in search', async () => {
         const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
 
-        const messages = [{ content: 'Search for something', role: 'user' }] as ChatMessage[];
+        const messages = [{ content: 'Search for something', role: 'user' }] as UIChatMessage[];
 
         // Mock agent store state with search enabled
         vi.spyOn(agentChatConfigSelectors, 'currentChatConfig').mockReturnValueOnce({
@@ -920,7 +921,7 @@ describe('ChatService', () => {
       it('should enable built-in search when model supports it and useModelBuiltinSearch is true', async () => {
         const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
 
-        const messages = [{ content: 'Search for something', role: 'user' }] as ChatMessage[];
+        const messages = [{ content: 'Search for something', role: 'user' }] as UIChatMessage[];
 
         // Mock agent store state with search enabled and useModelBuiltinSearch enabled
         vi.spyOn(agentChatConfigSelectors, 'currentChatConfig').mockReturnValueOnce({
@@ -965,7 +966,7 @@ describe('ChatService', () => {
       it('should not enable search when searchMode is off', async () => {
         const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
 
-        const messages = [{ content: 'Search for something', role: 'user' }] as ChatMessage[];
+        const messages = [{ content: 'Search for something', role: 'user' }] as UIChatMessage[];
 
         // Mock agent store state with search disabled
         vi.spyOn(agentChatConfigSelectors, 'currentChatConfig').mockReturnValueOnce({
@@ -1277,7 +1278,7 @@ describe('ChatService private methods', () => {
   describe('extendParams', () => {
     it('should set enabledContextCaching to false when model supports disableContextCaching and user enables it', async () => {
       const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
-      const messages = [{ content: 'Test context caching', role: 'user' }] as ChatMessage[];
+      const messages = [{ content: 'Test context caching', role: 'user' }] as UIChatMessage[];
 
       // Mock aiModelSelectors for extend params support
       vi.spyOn(aiModelSelectors, 'isModelHasExtendParams').mockReturnValue(() => true);
@@ -1308,7 +1309,9 @@ describe('ChatService private methods', () => {
 
     it('should not set enabledContextCaching when disableContextCaching is false', async () => {
       const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
-      const messages = [{ content: 'Test context caching enabled', role: 'user' }] as ChatMessage[];
+      const messages = [
+        { content: 'Test context caching enabled', role: 'user' },
+      ] as UIChatMessage[];
 
       // Mock aiModelSelectors for extend params support
       vi.spyOn(aiModelSelectors, 'isModelHasExtendParams').mockReturnValue(() => true);
@@ -1336,7 +1339,7 @@ describe('ChatService private methods', () => {
 
     it('should set reasoning_effort when model supports reasoningEffort and user configures it', async () => {
       const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
-      const messages = [{ content: 'Test reasoning effort', role: 'user' }] as ChatMessage[];
+      const messages = [{ content: 'Test reasoning effort', role: 'user' }] as UIChatMessage[];
 
       // Mock aiModelSelectors for extend params support
       vi.spyOn(aiModelSelectors, 'isModelHasExtendParams').mockReturnValue(() => true);
@@ -1365,7 +1368,7 @@ describe('ChatService private methods', () => {
 
     it('should set thinkingBudget when model supports thinkingBudget and user configures it', async () => {
       const getChatCompletionSpy = vi.spyOn(chatService, 'getChatCompletion');
-      const messages = [{ content: 'Test thinking budget', role: 'user' }] as ChatMessage[];
+      const messages = [{ content: 'Test thinking budget', role: 'user' }] as UIChatMessage[];
 
       // Mock aiModelSelectors for extend params support
       vi.spyOn(aiModelSelectors, 'isModelHasExtendParams').mockReturnValue(() => true);
