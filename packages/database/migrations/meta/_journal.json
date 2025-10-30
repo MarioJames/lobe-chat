@@ -280,6 +280,13 @@
       "when": 1761554153406,
       "tag": "0039_add_editor_data",
       "breakpoints": true
+    },
+    {
+      "idx": 40,
+      "version": "7",
+      "when": 1761832625062,
+      "tag": "0040_enhance_knowledge_base",
+      "breakpoints": true
     }
   ],
   "version": "6"

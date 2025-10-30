@@ -1,4 +1,5 @@
 /* eslint-disable sort-keys-fix/sort-keys-fix  */
+import { sql } from 'drizzle-orm';
 import {
   boolean,
   index,
@@ -18,6 +19,7 @@ import { FileSource } from '@/types/files';
 import { idGenerator } from '../utils/idGenerator';
 import { accessedAt, createdAt, timestamps } from './_helpers';
 import { asyncTasks } from './asyncTask';
+import { roles } from './rbac';
 import { users } from './user';
 
 export const globalFiles = pgTable('global_files', {
@@ -95,11 +97,10 @@ export const knowledgeBases = pgTable(
     avatar: text('avatar'),
 
     // different types of knowledge bases need to be distinguished
-    type: text('type'),
-    userId: text('user_id')
-      .references(() => users.id, { onDelete: 'cascade' })
-      .notNull(),
+    type: varchar('type', { enum: ['personal', 'shared'], length: 20 }).default('personal'),
+    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
     clientId: text('client_id'),
+    enabled: boolean('enabled').default(true).notNull(),
 
     isPublic: boolean('is_public').default(false),
 
@@ -112,6 +113,9 @@ export const knowledgeBases = pgTable(
       t.clientId,
       t.userId,
     ),
+    userIdUnique: uniqueIndex('knowledge_bases_user_id_unique').on(t.userId),
+    typeUnique: uniqueIndex('knowledge_bases_type_unique').on(t.type),
+    enabledUnique: uniqueIndex('knowledge_bases_enabled_unique').on(t.enabled),
   }),
 );
 
@@ -143,3 +147,42 @@ export const knowledgeBaseFiles = pgTable(
     }),
   }),
 );
+
+// Knowledge base grants table
+export const knowledgeBaseGrants = pgTable(
+  'knowledge_base_grants',
+  {
+    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+
+    knowledgeBaseId: text('knowledge_base_id')
+      .references(() => knowledgeBases.id, { onDelete: 'cascade' })
+      .notNull(),
+
+    granteeType: varchar('grantee_type', { enum: ['user', 'role'], length: 20 }).notNull(),
+    granteeUserId: text('grantee_user_id').references(() => users.id, { onDelete: 'cascade' }),
+    granteeRoleId: integer('grantee_role_id').references(() => roles.id, { onDelete: 'cascade' }),
+
+    permission: varchar('permission', { enum: ['read', 'write', 'manage'], length: 20 })
+      .default('read')
+      .notNull(),
+
+    ...timestamps,
+  },
+  (t) => ({
+    // 确保同一条记录只能有一种授权方式
+    chkGranteeEitherOr: sql`CHECK ((${t.granteeType} = 'user' AND ${t.granteeUserId} IS NOT NULL AND ${t.granteeRoleId} IS NULL) OR (${t.granteeType} = 'role' AND ${t.granteeRoleId} IS NOT NULL AND ${t.granteeUserId} IS NULL))`,
+
+    // 唯一索引，避免重复授权
+    granteeUserUnique: uniqueIndex('knowledge_base_grants_grantee_user_unique').on(
+      t.knowledgeBaseId,
+      t.granteeUserId,
+    ),
+    granteeRoleUnique: uniqueIndex('knowledge_base_grants_grantee_role_unique').on(
+      t.knowledgeBaseId,
+      t.granteeRoleId,
+    ),
+  }),
+);
+
+export type NewKnowledgeBaseGrant = typeof knowledgeBaseGrants.$inferInsert;
+export type KnowledgeBaseGrantItem = typeof knowledgeBaseGrants.$inferSelect;
