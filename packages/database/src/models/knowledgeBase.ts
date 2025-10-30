@@ -105,6 +105,7 @@ export class KnowledgeBaseModel {
         settings: knowledgeBases.settings,
         type: knowledgeBases.type,
         updatedAt: knowledgeBases.updatedAt,
+        userId: knowledgeBases.userId, // 前端需要用于判断是否为所有者
       })
       .from(knowledgeBases)
       .leftJoin(userGrant, eq(knowledgeBases.id, userGrant.knowledgeBaseId))

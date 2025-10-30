@@ -13,6 +13,7 @@ import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAddFilesToKnowledgeBaseModal } from '@/features/KnowledgeBaseModal';
+import { useKnowledgeBaseAccessControl } from '@/hooks/useKnowledgeBaseAccessControl';
 import { useFileStore } from '@/store/file';
 import { useKnowledgeBaseStore } from '@/store/knowledgeBase';
 import { downloadFile } from '@/utils/client/downloadFile';
@@ -33,10 +34,47 @@ const DropdownMenu = memo<DropdownMenuProps>(({ id, knowledgeBaseId, url, filena
     s.removeFilesFromKnowledgeBase,
   ]);
 
+  const { isReadOnly } = useKnowledgeBaseAccessControl(knowledgeBaseId);
   const inKnowledgeBase = !!knowledgeBaseId;
   const { open } = useAddFilesToKnowledgeBaseModal();
 
   const items = useMemo(() => {
+    // 基础的复制链接、下载操作
+    const commonActions = [
+      {
+        icon: <Icon icon={LinkIcon} />,
+        key: 'copyUrl',
+        label: t('FileManager.actions.copyUrl'),
+        onClick: async ({ domEvent }) => {
+          domEvent.stopPropagation();
+          await copyToClipboard(url);
+          message.success(t('FileManager.actions.copyUrlSuccess'));
+        },
+      },
+      {
+        icon: <Icon icon={DownloadIcon} />,
+        key: 'download',
+        label: t('download', { ns: 'common' }),
+        onClick: async ({ domEvent }) => {
+          domEvent.stopPropagation();
+          const key = 'file-downloading';
+          message.loading({
+            content: t('FileManager.actions.downloading'),
+            duration: 0,
+            key,
+          });
+          await downloadFile(url, filename);
+          message.destroy(key);
+        },
+      },
+    ] as ItemType[];
+
+    // 只读模式下，只保留基础操作
+    if (isReadOnly) {
+      return commonActions;
+    }
+
+    // 完整权限模式
     const knowledgeBaseActions = (
       inKnowledgeBase
         ? [
@@ -92,32 +130,7 @@ const DropdownMenu = memo<DropdownMenuProps>(({ id, knowledgeBaseId, url, filena
         {
           type: 'divider',
         },
-        {
-          icon: <Icon icon={LinkIcon} />,
-          key: 'copyUrl',
-          label: t('FileManager.actions.copyUrl'),
-          onClick: async ({ domEvent }) => {
-            domEvent.stopPropagation();
-            await copyToClipboard(url);
-            message.success(t('FileManager.actions.copyUrlSuccess'));
-          },
-        },
-        {
-          icon: <Icon icon={DownloadIcon} />,
-          key: 'download',
-          label: t('download', { ns: 'common' }),
-          onClick: async ({ domEvent }) => {
-            domEvent.stopPropagation();
-            const key = 'file-downloading';
-            message.loading({
-              content: t('FileManager.actions.downloading'),
-              duration: 0,
-              key,
-            });
-            await downloadFile(url, filename);
-            message.destroy(key);
-          },
-        },
+        ...commonActions,
         {
           type: 'divider',
         },
@@ -139,7 +152,8 @@ const DropdownMenu = memo<DropdownMenuProps>(({ id, knowledgeBaseId, url, filena
         },
       ] as ItemType[]
     ).filter(Boolean);
-  }, [inKnowledgeBase]);
+  }, [inKnowledgeBase, isReadOnly]);
+
   return (
     <Dropdown menu={{ items }}>
       <ActionIcon icon={MoreHorizontalIcon} size={'small'} />

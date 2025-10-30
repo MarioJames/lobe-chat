@@ -8,6 +8,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import DragUpload from '@/components/DragUpload';
+import { useKnowledgeBaseAccessControl } from '@/hooks/useKnowledgeBaseAccessControl';
 import { useFileStore } from '@/store/file';
 
 const hotArea = css`
@@ -21,6 +22,7 @@ const hotArea = css`
 
 const UploadFileButton = ({ knowledgeBaseId }: { knowledgeBaseId?: string }) => {
   const { t } = useTranslation('file');
+  const { isReadOnly } = useKnowledgeBaseAccessControl(knowledgeBaseId);
 
   const pushDockFileList = useFileStore((s) => s.pushDockFileList);
   const items = useMemo<MenuProps['items']>(
@@ -63,6 +65,12 @@ const UploadFileButton = ({ knowledgeBaseId }: { knowledgeBaseId?: string }) => 
     ],
     [],
   );
+
+  // 在知识库详情页中，如果是只读模式则不显示上传按钮（共享知识库只读）
+  if (isReadOnly) {
+    return null;
+  }
+
   return (
     <>
       <Dropdown menu={{ items }} placement="bottomRight">

@@ -23,6 +23,7 @@ export interface KnowledgeBaseItem {
   // different types of knowledge bases need to be distinguished
   type: string | null;
   updatedAt: Date;
+  userId?: string | null;
 }
 
 export interface CreateKnowledgeBaseParams {

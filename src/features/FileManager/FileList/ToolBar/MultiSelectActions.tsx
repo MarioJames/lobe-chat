@@ -28,6 +28,7 @@ export type MultiSelectActionType =
 
 interface MultiSelectActionsProps {
   isInKnowledgeBase?: boolean;
+  isReadOnly?: boolean;
   onActionClick: (type: MultiSelectActionType) => Promise<void>;
   onClickCheckbox: () => void;
   selectCount: number;
@@ -35,12 +36,18 @@ interface MultiSelectActionsProps {
 }
 
 const MultiSelectActions = memo<MultiSelectActionsProps>(
-  ({ selectCount, isInKnowledgeBase, total, onActionClick, onClickCheckbox }) => {
+  ({ selectCount, isInKnowledgeBase, isReadOnly, total, onActionClick, onClickCheckbox }) => {
     const { t } = useTranslation(['components', 'common']);
     const { styles } = useStyles();
 
     const isSelectedFiles = selectCount > 0;
     const { modal, message } = App.useApp();
+
+    // 只读模式下，不显示多选操作
+    if (isReadOnly) {
+      return null;
+    }
+
     return (
       <Flexbox align={'center'} gap={12} horizontal>
         <Flexbox

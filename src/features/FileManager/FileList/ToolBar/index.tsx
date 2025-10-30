@@ -4,6 +4,7 @@ import { memo } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 import { useAddFilesToKnowledgeBaseModal } from '@/features/KnowledgeBaseModal';
+import { useKnowledgeBaseAccessControl } from '@/hooks/useKnowledgeBaseAccessControl';
 import { useFileStore } from '@/store/file';
 import { useKnowledgeBaseStore } from '@/store/knowledgeBase';
 import { isChunkingUnsupported } from '@/utils/isChunkingUnsupported';
@@ -59,6 +60,7 @@ const ToolBar = memo<MultiSelectActionsProps>(
       s.removeFilesFromKnowledgeBase,
     ]);
 
+    const { isReadOnly } = useKnowledgeBaseAccessControl(knowledgeBaseId);
     const { open } = useAddFilesToKnowledgeBaseModal();
 
     const onActionClick = async (type: MultiSelectActionType) => {
@@ -109,6 +111,7 @@ const ToolBar = memo<MultiSelectActionsProps>(
       <Flexbox align={'center'} className={styles.container} horizontal justify={'space-between'}>
         <MultiSelectActions
           isInKnowledgeBase={isInKnowledgeBase}
+          isReadOnly={isReadOnly}
           onActionClick={onActionClick}
           onClickCheckbox={() => {
             setSelectedFileIds(selectCount === total ? [] : totalFileIds);

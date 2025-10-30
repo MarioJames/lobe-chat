@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { Center, Flexbox } from 'react-layout-kit';
 
 import FileIcon from '@/components/FileIcon';
+import { useKnowledgeBaseAccessControl } from '@/hooks/useKnowledgeBaseAccessControl';
 import { fileManagerSelectors, useFileStore } from '@/store/file';
 import { FileListItem } from '@/types/files';
 import { formatSize } from '@/utils/format';
@@ -110,6 +111,7 @@ const FileRenderItem = memo<FileRenderItemProps>(
       s.parseFilesToChunks,
     ]);
 
+    const { isReadOnly } = useKnowledgeBaseAccessControl(knowledgeBaseId);
     const isSupportedForChunking = !isChunkingUnsupported(fileType);
 
     const displayTime =
@@ -169,13 +171,15 @@ const FileRenderItem = memo<FileRenderItemProps>(
                     root: { pointerEvents: 'none' },
                   }}
                   title={t(
-                    isSupportedForChunking
-                      ? 'FileManager.actions.chunkingTooltip'
-                      : 'FileManager.actions.chunkingUnsupported',
+                    isReadOnly
+                      ? 'FileManager.actions.chunkingUnsupported'
+                      : isSupportedForChunking
+                        ? 'FileManager.actions.chunkingTooltip'
+                        : 'FileManager.actions.chunkingUnsupported',
                   )}
                 >
                   <Button
-                    disabled={!isSupportedForChunking}
+                    disabled={!isSupportedForChunking || isReadOnly}
                     icon={FileBoxIcon}
                     loading={isCreatingFileParseTask}
                     onClick={() => {
@@ -202,6 +206,7 @@ const FileRenderItem = memo<FileRenderItemProps>(
                   embeddingStatus={embeddingStatus}
                   finishEmbedding={finishEmbedding}
                   id={id}
+                  isReadOnly={isReadOnly}
                 />
               </div>
             )}
