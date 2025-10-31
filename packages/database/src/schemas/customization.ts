@@ -10,8 +10,8 @@ import type { BaseConfig, DefaultAgentConfig, WelcomeConfig } from '@/types/cust
  * 用于存储平台的所有自定义配置，整个表只有一行数据（id=1）
  *
  * 使用方式：
- * - 查询：SELECT * FROM customization_config WHERE id = 1
- * - 更新：UPDATE customization_config SET base = ..., updated_by = ... WHERE id = 1
+ * - 查询：SELECT * FROM customization WHERE id = 1
+ * - 更新：UPDATE customization SET base = ..., updated_by = ... WHERE id = 1
  *
  * 注意：
  * - id 固定为 1，应用层始终使用 UPDATE WHERE id = 1
