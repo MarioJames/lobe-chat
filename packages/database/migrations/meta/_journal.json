@@ -284,8 +284,15 @@
     {
       "idx": 40,
       "version": "7",
-      "when": 1761832625062,
-      "tag": "0040_enhance_knowledge_base",
+      "when": 1762261677986,
+      "tag": "0040_init_hub_customization",
+      "breakpoints": true
+    },
+    {
+      "idx": 41,
+      "version": "7",
+      "when": 1762261998341,
+      "tag": "0041_enhance_knowledge_base",
       "breakpoints": true
     }
   ],

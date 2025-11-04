@@ -56,6 +56,7 @@ export const agents = pgTable(
     tts: jsonb('tts').$type<LobeAgentTTSConfig>(),
 
     virtual: boolean('virtual').default(false),
+    enabled: boolean('enabled').default(false),
 
     openingMessage: text('opening_message'),
     openingQuestions: text('opening_questions').array().default([]),
@@ -66,6 +67,7 @@ export const agents = pgTable(
     clientIdUnique: uniqueIndex('client_id_user_id_unique').on(t.clientId, t.userId),
     titleIndex: index('agents_title_idx').on(t.title),
     descriptionIndex: index('agents_description_idx').on(t.description),
+    enabledIndex: index('agents_enabled_idx').on(t.enabled),
   }),
 );
 
