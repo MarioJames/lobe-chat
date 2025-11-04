@@ -66,6 +66,14 @@ export class SessionModel {
     // 查询所有会话
     const result = await this.query();
 
+    // 过滤掉绑定到未启用 Agent 的会话（仅对 type='agent' 生效）
+    const filtered = result.filter((item: any) => {
+      if (item.type === 'group') return true;
+      const agent = item?.agentsToSessions?.[0]?.agent as AgentItem | undefined;
+      // 默认兼容：若无 enabled 字段则认为启用，仅当显式 false 才过滤
+      return agent?.enabled !== false;
+    });
+
     const groups = await this.db.query.sessionGroups.findMany({
       orderBy: [asc(sessionGroups.sort), desc(sessionGroups.createdAt)],
       where: eq(sessions.userId, this.userId),
@@ -73,7 +81,7 @@ export class SessionModel {
 
     return {
       sessionGroups: groups as unknown as ChatSessionList['sessionGroups'],
-      sessions: result.map((item) => this.mapSessionItem(item as any)),
+      sessions: filtered.map((item) => this.mapSessionItem(item as any)),
     };
   };
 

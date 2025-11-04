@@ -1,7 +1,9 @@
 /* eslint-disable sort-keys-fix/sort-keys-fix  */
+import { sql } from 'drizzle-orm';
 import {
   boolean,
   index,
+  integer,
   jsonb,
   pgTable,
   primaryKey,
@@ -16,6 +18,7 @@ import { LobeAgentChatConfig, LobeAgentTTSConfig } from '@/types/agent';
 import { idGenerator, randomSlug } from '../utils/idGenerator';
 import { timestamps } from './_helpers';
 import { files, knowledgeBases } from './file';
+import { roles } from './rbac';
 import { users } from './user';
 
 // Agent table is the main table for storing agents
@@ -42,9 +45,7 @@ export const agents = pgTable(
 
     clientId: text('client_id'),
 
-    userId: text('user_id')
-      .references(() => users.id, { onDelete: 'cascade' })
-      .notNull(),
+    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
 
     chatConfig: jsonb('chat_config').$type<LobeAgentChatConfig>(),
 
@@ -115,5 +116,36 @@ export const agentsFiles = pgTable(
   },
   (t) => ({
     pk: primaryKey({ columns: [t.fileId, t.agentId, t.userId] }),
+  }),
+);
+
+export const agentsGrants = pgTable(
+  'agents_grants',
+  {
+    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+
+    agentId: text('agent_id')
+      .references(() => agents.id, { onDelete: 'cascade' })
+      .notNull(),
+
+    granteeType: varchar('grantee_type', { enum: ['user', 'role'], length: 20 }).notNull(),
+    granteeUserId: text('grantee_user_id').references(() => users.id, { onDelete: 'cascade' }),
+    granteeRoleId: integer('grantee_role_id').references(() => roles.id, { onDelete: 'cascade' }),
+
+    ...timestamps,
+  },
+  (t) => ({
+    // 确保同一条记录只能有一种授权方式
+    chkGranteeEitherOr: sql`CHECK ((${t.granteeType} = 'user' AND ${t.granteeUserId} IS NOT NULL AND ${t.granteeRoleId} IS NULL) OR (${t.granteeType} = 'role' AND ${t.granteeRoleId} IS NOT NULL AND ${t.granteeUserId} IS NULL))`,
+
+    // 唯一索引，避免重复授权
+    granteeUserUnique: uniqueIndex('agents_grants_grantee_user_unique').on(
+      t.agentId,
+      t.granteeUserId,
+    ),
+    granteeRoleUnique: uniqueIndex('agents_grants_grantee_role_unique').on(
+      t.agentId,
+      t.granteeRoleId,
+    ),
   }),
 );

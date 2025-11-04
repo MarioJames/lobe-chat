@@ -294,6 +294,13 @@
       "when": 1762261998341,
       "tag": "0041_enhance_knowledge_base",
       "breakpoints": true
+    },
+    {
+      "idx": 42,
+      "version": "7",
+      "when": 1762263016681,
+      "tag": "0042_init_agents_grants",
+      "breakpoints": true
     }
   ],
   "version": "6"
