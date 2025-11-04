@@ -10,7 +10,7 @@ CREATE TABLE "announcements" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "customization_config" (
+CREATE TABLE "customization" (
 	"id" integer PRIMARY KEY DEFAULT 1 NOT NULL,
 	"base" jsonb,
 	"welcome" jsonb,
@@ -19,5 +19,7 @@ CREATE TABLE "customization_config" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+ALTER TABLE "agents" ADD COLUMN "enabled" boolean DEFAULT false NOT NULL;--> statement-breakpoint
 CREATE INDEX "announcements_effective_time_idx" ON "announcements" USING btree ("effective_start_at","effective_end_at");--> statement-breakpoint
-CREATE INDEX "announcements_created_at_idx" ON "announcements" USING btree ("created_at");
+CREATE INDEX "announcements_created_at_idx" ON "announcements" USING btree ("created_at");--> statement-breakpoint
+CREATE INDEX "agents_enabled_idx" ON "agents" USING btree ("enabled");

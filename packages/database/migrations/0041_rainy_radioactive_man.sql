@@ -1,1 +1,0 @@
-ALTER TABLE "customization_config" RENAME TO "customization";
