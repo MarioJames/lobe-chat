@@ -6,7 +6,7 @@
   },
   "dialect": "postgresql",
   "enums": {},
-  "id": "e71c0c49-d674-4c6c-9d69-13d25fcf2e82",
+  "id": "3e15c4bb-3b58-43ac-bf05-224ef34fce01",
   "policies": {},
   "prevId": "9edc49c4-9737-4faa-bcd1-9ab61c376dd9",
   "roles": {},
@@ -1751,7 +1751,7 @@
           "name": "user_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": true
+          "notNull": false
         },
         "file_type": {
           "name": "file_type",
