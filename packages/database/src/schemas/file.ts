@@ -45,9 +45,7 @@ export const files = pgTable(
       .$defaultFn(() => idGenerator('files'))
       .primaryKey(),
 
-    userId: text('user_id')
-      .references(() => users.id, { onDelete: 'cascade' })
-      .notNull(),
+    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
     /**
      * mime
      */
