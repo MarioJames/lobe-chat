@@ -1,8 +1,7 @@
 import { and, desc, eq } from 'drizzle-orm';
 
-import { LobeChatDatabase } from '../type';
-
 import { DocumentItem, NewDocument, documents } from '../schemas';
+import { LobeChatDatabase } from '../type';
 
 export class DocumentModel {
   private userId: string;
@@ -50,5 +49,11 @@ export class DocumentModel {
       .update(documents)
       .set({ ...value, updatedAt: new Date() })
       .where(and(eq(documents.id, id), eq(documents.userId, this.userId)));
+  };
+
+  findByFileId = async (fileId: string) => {
+    return this.db.query.documents.findFirst({
+      where: and(eq(documents.fileId, fileId), eq(documents.userId, this.userId)),
+    });
   };
 }

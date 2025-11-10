@@ -219,7 +219,7 @@ export const createPluginStoreSlice: StateCreator<
         );
       },
       revalidateOnFocus: false,
-      suspense: true,
+      suspense: false,
     }),
   useFetchPluginList: (params) => {
     const locale = globalHelpers.getCurrentLanguage();
@@ -263,5 +263,6 @@ export const createPluginStoreSlice: StateCreator<
   useFetchPluginStore: () =>
     useSWR<DiscoverPluginItem[]>('loadPluginStore', get().loadPluginStore, {
       revalidateOnFocus: false,
+      suspense: false,
     }),
 });
