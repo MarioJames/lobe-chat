@@ -2107,7 +2107,7 @@
           "name": "user_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "client_id": {
           "name": "client_id",

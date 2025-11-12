@@ -9,9 +9,7 @@ CREATE TABLE "agents_grants" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-ALTER TABLE "agents" ALTER COLUMN "user_id" DROP NOT NULL;--> statement-breakpoint
 ALTER TABLE "agents" ALTER COLUMN "enabled" DROP NOT NULL;--> statement-breakpoint
-ALTER TABLE "files" ALTER COLUMN "user_id" DROP NOT NULL;--> statement-breakpoint
 ALTER TABLE "agents_grants" ADD CONSTRAINT "agents_grants_agent_id_agents_id_fk" FOREIGN KEY ("agent_id") REFERENCES "public"."agents"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "agents_grants" ADD CONSTRAINT "agents_grants_grantee_user_id_users_id_fk" FOREIGN KEY ("grantee_user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "agents_grants" ADD CONSTRAINT "agents_grants_grantee_role_id_rbac_roles_id_fk" FOREIGN KEY ("grantee_role_id") REFERENCES "public"."rbac_roles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

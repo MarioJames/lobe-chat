@@ -12,7 +12,6 @@ CREATE TABLE "knowledge_base_grants" (
 --> statement-breakpoint
 ALTER TABLE "knowledge_bases" ALTER COLUMN "type" SET DATA TYPE varchar(20);--> statement-breakpoint
 ALTER TABLE "knowledge_bases" ALTER COLUMN "type" SET DEFAULT 'personal';--> statement-breakpoint
-ALTER TABLE "knowledge_bases" ALTER COLUMN "user_id" DROP NOT NULL;--> statement-breakpoint
 ALTER TABLE "knowledge_bases" ADD COLUMN "enabled" boolean DEFAULT true NOT NULL;--> statement-breakpoint
 ALTER TABLE "knowledge_base_grants" ADD CONSTRAINT "knowledge_base_grants_knowledge_base_id_knowledge_bases_id_fk" FOREIGN KEY ("knowledge_base_id") REFERENCES "public"."knowledge_bases"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "knowledge_base_grants" ADD CONSTRAINT "knowledge_base_grants_grantee_user_id_users_id_fk" FOREIGN KEY ("grantee_user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
