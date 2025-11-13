@@ -5,7 +5,7 @@ import { z } from 'zod';
 
 import { SessionItem, TopicItem, UserItem } from '@/database/schemas';
 
-import { IPaginationQuery, PaginationQueryResponse, PaginationQuerySchema } from '.';
+import { IPaginationQuery, PaginationQueryResponse, PaginationQuerySchema } from './common.type';
 
 // ==================== Message Query Types ====================
 

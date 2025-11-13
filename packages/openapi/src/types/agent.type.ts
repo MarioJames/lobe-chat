@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import { AgentItem } from '@/database/schemas';
 
-import { IPaginationQuery, PaginationQueryResponse } from '.';
+import { IPaginationQuery, PaginationQueryResponse } from './common.type';
 
 // ==================== Agent CRUD Types ====================
 
