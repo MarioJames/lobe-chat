@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 import { AgentItem, SessionItem, UserItem } from '@/database/schemas';
 
-import { IPaginationQuery, PaginationQueryResponse, PaginationQuerySchema } from '.';
+import { IPaginationQuery, PaginationQueryResponse, PaginationQuerySchema } from './common.type';
 
 // ==================== Session CRUD Types ====================
 

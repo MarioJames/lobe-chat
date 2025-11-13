@@ -45,7 +45,9 @@ export const agents = pgTable(
 
     clientId: text('client_id'),
 
-    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .references(() => users.id, { onDelete: 'cascade' })
+      .notNull(),
 
     chatConfig: jsonb('chat_config').$type<LobeAgentChatConfig>(),
 

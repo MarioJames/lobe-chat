@@ -45,7 +45,9 @@ export const files = pgTable(
       .$defaultFn(() => idGenerator('files'))
       .primaryKey(),
 
-    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .references(() => users.id, { onDelete: 'cascade' })
+      .notNull(),
     /**
      * mime
      */
@@ -96,7 +98,9 @@ export const knowledgeBases = pgTable(
 
     // different types of knowledge bases need to be distinguished
     type: varchar('type', { enum: ['personal', 'shared'], length: 20 }).default('personal'),
-    userId: text('user_id').references(() => users.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .references(() => users.id, { onDelete: 'cascade' })
+      .notNull(),
     clientId: text('client_id'),
     enabled: boolean('enabled').default(true).notNull(),
 

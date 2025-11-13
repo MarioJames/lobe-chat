@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { TopicItem, UserItem } from '@/database/schemas';
 
-import { IPaginationQuery, PaginationQueryResponse, PaginationQuerySchema } from '.';
+import { IPaginationQuery, PaginationQueryResponse, PaginationQuerySchema } from './common.type';
 
 // ==================== Topic Query Types ====================
 
