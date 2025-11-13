@@ -4,7 +4,14 @@
   "private": true,
   "main": "./src/index.ts",
   "dependencies": {
-    "formidable": "^3.5.0"
+    "@hono/zod-validator": "^0.7.2",
+    "@lobechat/types": "workspace:*",
+    "drizzle-orm": "^0.44.6",
+    "formidable": "^3.5.0",
+    "hono": "^4.7.11",
+    "js-sha256": "^0.11.1",
+    "lodash": "^4.17.21",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/formidable": "^3.0.0"

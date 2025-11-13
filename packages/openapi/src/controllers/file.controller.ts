@@ -30,7 +30,14 @@ export class FileController extends BaseController {
       // 处理 multipart/form-data（返回对象：{ fields, files }）
       const formData = await this.getFormData(c);
       const files: File[] = [];
-      const fileEntries = formData.getAll('files');
+
+      // 兼容写法：从 'files' 或 'files[]' 字段获取文件
+      // 因为Stainless SDK 会将数组字段自动添加 [] 后缀
+      let fileEntries = formData.getAll('files');
+      if (fileEntries.length === 0) {
+        fileEntries = formData.getAll('files[]');
+      }
+
       for (const file of fileEntries) {
         if (file instanceof File) files.push(file);
       }
