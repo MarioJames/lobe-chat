@@ -2,12 +2,46 @@ import debug from 'debug';
 import { Context, Next } from 'hono';
 import { HTTPException } from 'hono/http-exception';
 
+import { getServerDB } from '@/database/core/db-adaptor';
+import { ApiKeyModel } from '@/database/models/apiKey';
 import { oidcEnv } from '@/envs/oidc';
 import { validateOIDCJWT } from '@/libs/oidc-provider/jwt';
+import { KeyVaultsGateKeeper } from '@/server/modules/KeyVaultsEncrypt';
+import { validateApiKeyFormat } from '@/utils/apiKey';
 import { extractBearerToken } from '@/utils/server/auth';
 
 // Create context logger namespace
 const log = debug('lobe-hono:auth-middleware');
+
+// API Key cache configuration
+const API_KEY_CACHE_TTL = 5 * 60 * 1000; // 5 minutes in milliseconds
+
+interface ApiKeyCacheEntry {
+  apiKeyId: number;
+  apiKeyName: string;
+  expiresAt: Date | null;
+  timestamp: number;
+  userId: string;
+}
+
+// In-memory cache for API Key validation results
+const apiKeyCache = new Map<string, ApiKeyCacheEntry>();
+
+/**
+ * Clean up expired cache entries periodically
+ */
+const cleanupApiKeyCache = () => {
+  const now = Date.now();
+  for (const [key, entry] of apiKeyCache.entries()) {
+    if (now - entry.timestamp > API_KEY_CACHE_TTL) {
+      apiKeyCache.delete(key);
+      log('Removed expired API Key from cache: %s', key.slice(0, 10) + '...');
+    }
+  }
+};
+
+// Run cache cleanup every 10 minutes
+setInterval(cleanupApiKeyCache, 10 * 60 * 1000);
 
 /**
  * Standard Hono authentication middleware
@@ -33,22 +67,128 @@ export const userAuthMiddleware = async (c: Context, next: Next) => {
   let authType: string | null = null;
   let authData: any = null;
 
-  // Try Bearer token authentication (OIDC first, then API Key)
-  if (bearerToken && oidcEnv.ENABLE_OIDC) {
-    log('Attempting OIDC authentication with Bearer token');
+  // Try Bearer token authentication - check format first to determine type
+  if (bearerToken) {
+    log('Bearer token received: %s...', bearerToken.slice(0, 10));
 
-    try {
-      // Use direct JWT validation instead of OIDCService
-      const tokenInfo = await validateOIDCJWT(bearerToken);
+    // Check if bearerToken matches API Key format (lb-{16 alphanumeric chars})
+    const isApiKeyFormat = validateApiKeyFormat(bearerToken);
+    log('API Key format validation result: %s', isApiKeyFormat);
 
-      userId = tokenInfo.userId;
-      authType = 'oidc';
-      authData = tokenInfo.tokenData;
+    if (isApiKeyFormat) {
+      // Try API Key authentication
+      log('Bearer token matches API Key format, attempting API Key authentication');
 
-      log('OIDC authentication successful, userId: %s', userId);
-    } catch (error) {
-      log('OIDC authentication failed: %O', error);
-      // Continue to try API Key authentication
+      // Check cache first
+      const cachedEntry = apiKeyCache.get(bearerToken);
+      const now = Date.now();
+
+      if (cachedEntry && now - cachedEntry.timestamp < API_KEY_CACHE_TTL) {
+        // Check if cached API Key is expired
+        const isExpired = cachedEntry.expiresAt && new Date() > new Date(cachedEntry.expiresAt);
+
+        if (!isExpired) {
+          userId = cachedEntry.userId;
+          authType = 'apikey';
+          authData = { apiKeyId: cachedEntry.apiKeyId, apiKeyName: cachedEntry.apiKeyName };
+
+          log(
+            'API Key authentication successful (from cache), userId: %s, apiKeyId: %d',
+            userId,
+            cachedEntry.apiKeyId,
+          );
+        } else {
+          log('Cached API Key is expired, removing from cache');
+          apiKeyCache.delete(bearerToken);
+        }
+      } else {
+        // Cache miss or expired, query database
+        log('API Key cache miss, querying database');
+
+        try {
+          // Get database instance
+          const db = await getServerDB();
+          log('Database connection established');
+
+          // Initialize decryption gatekeeper
+          const gateKeeper = await KeyVaultsGateKeeper.initWithEnvKey();
+          const decryptor = (key: string) => gateKeeper.decrypt(key);
+          log('Decryption gatekeeper initialized');
+
+          // Find API Key in database
+          const apiKeyModel = new ApiKeyModel(db, ''); // userId not needed for findByKey
+          log('Searching for API Key in database...');
+          const apiKeyRecord = await apiKeyModel.findByKey(bearerToken, decryptor);
+          log('API Key database query result: %s', apiKeyRecord ? 'found' : 'not found');
+
+          if (apiKeyRecord) {
+            log(
+              'API Key record - enabled: %s, userId: %s, expiresAt: %s',
+              apiKeyRecord.enabled,
+              apiKeyRecord.userId,
+              apiKeyRecord.expiresAt,
+            );
+            // Validate API Key is enabled and not expired
+            if (apiKeyRecord.enabled) {
+              const isExpired =
+                apiKeyRecord.expiresAt && new Date() > new Date(apiKeyRecord.expiresAt);
+
+              if (!isExpired) {
+                userId = apiKeyRecord.userId;
+                authType = 'apikey';
+                authData = { apiKeyId: apiKeyRecord.id, apiKeyName: apiKeyRecord.name };
+
+                // Cache the validated API Key
+                apiKeyCache.set(bearerToken, {
+                  apiKeyId: apiKeyRecord.id,
+                  apiKeyName: apiKeyRecord.name,
+                  expiresAt: apiKeyRecord.expiresAt,
+                  timestamp: now,
+                  userId: apiKeyRecord.userId,
+                });
+
+                log(
+                  'API Key authentication successful, userId: %s, apiKeyId: %d (cached)',
+                  userId,
+                  apiKeyRecord.id,
+                );
+
+                // Update last used timestamp (fire and forget)
+                const userApiKeyModel = new ApiKeyModel(db, apiKeyRecord.userId);
+                userApiKeyModel.updateLastUsed(apiKeyRecord.id).catch((err) => {
+                  log('Failed to update API Key last used timestamp: %O', err);
+                });
+              } else {
+                log('API Key is expired');
+              }
+            } else {
+              log('API Key is disabled');
+            }
+          } else {
+            log('API Key not found in database');
+          }
+        } catch (error) {
+          log('API Key authentication failed: %O', error);
+        }
+      }
+    } else if (oidcEnv.ENABLE_OIDC) {
+      // Try OIDC authentication
+      log('Bearer token does not match API Key format, attempting OIDC authentication');
+
+      try {
+        // Use direct JWT validation instead of OIDCService
+        const tokenInfo = await validateOIDCJWT(bearerToken);
+
+        userId = tokenInfo.userId;
+        authType = 'oidc';
+        authData = tokenInfo.tokenData;
+
+        log('OIDC authentication successful, userId: %s', userId);
+      } catch (error) {
+        log('OIDC authentication failed: %O', error);
+      }
+    } else {
+      log('Bearer token provided but does not match API Key format and OIDC is not enabled');
     }
   }
 

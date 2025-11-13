@@ -43,7 +43,7 @@ export const apiKeyRouter = router({
   getApiKey: apiKeyProcedure
     .input(z.object({ apiKey: z.string() }))
     .query(async ({ input, ctx }) => {
-      return ctx.apiKeyModel.findByKey(input.apiKey, ctx.gateKeeper.encrypt);
+      return ctx.apiKeyModel.findByKey(input.apiKey, ctx.gateKeeper.decrypt);
     }),
 
   getApiKeyById: apiKeyProcedure
@@ -75,6 +75,6 @@ export const apiKeyRouter = router({
   validateApiKey: apiKeyProcedure
     .input(z.object({ key: z.string() }))
     .query(async ({ input, ctx }) => {
-      return ctx.apiKeyModel.validateKey(input.key);
+      return ctx.apiKeyModel.validateKey(input.key, ctx.gateKeeper.decrypt);
     }),
 });

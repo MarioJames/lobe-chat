@@ -1,12 +1,14 @@
 import { and, desc, eq } from 'drizzle-orm';
 
-import { LobeChatDatabase } from '../type';
 import { generateApiKey, isApiKeyExpired, validateApiKeyFormat } from '@/utils/apiKey';
 
 import { ApiKeyItem, NewApiKeyItem, apiKeys } from '../schemas';
+import { LobeChatDatabase } from '../type';
 
 type EncryptAPIKeyVaults = (keyVaults: string) => Promise<string>;
-type DecryptAPIKeyVaults = (keyVaults: string) => Promise<{ plaintext: string }>;
+type DecryptAPIKeyVaults = (
+  keyVaults: string,
+) => Promise<{ plaintext: string; wasAuthentic: boolean }>;
 
 const defaultSerialize = (s: string) => s;
 
@@ -70,22 +72,42 @@ export class ApiKeyModel {
     return decryptedResults;
   };
 
-  findByKey = async (key: string, encryptor?: EncryptAPIKeyVaults) => {
+  findByKey = async (key: string, decryptor?: DecryptAPIKeyVaults) => {
     if (!validateApiKeyFormat(key)) {
       return null;
     }
 
-    const encrypt = encryptor || defaultSerialize;
+    // Since API keys are encrypted with AES-GCM (which uses random IV),
+    // we cannot search by encrypted value. Instead, we need to decrypt
+    // all keys and compare with the plaintext.
 
-    const encryptedKey = await encrypt(key);
+    if (!decryptor) {
+      // Without decryptor, we cannot find the key
+      return null;
+    }
 
-    return this.db.query.apiKeys.findFirst({
-      where: eq(apiKeys.key, encryptedKey),
-    });
+    // Get all API keys from database
+    const allKeys = await this.db.query.apiKeys.findMany();
+
+    // Try to find matching key by decrypting each one
+    for (const apiKey of allKeys) {
+      try {
+        const { plaintext, wasAuthentic } = await decryptor(apiKey.key);
+
+        if (wasAuthentic && plaintext === key) {
+          return apiKey;
+        }
+      } catch {
+        // Skip keys that cannot be decrypted
+        continue;
+      }
+    }
+
+    return null;
   };
 
-  validateKey = async (key: string) => {
-    const apiKey = await this.findByKey(key);
+  validateKey = async (key: string, decryptor?: DecryptAPIKeyVaults) => {
+    const apiKey = await this.findByKey(key, decryptor);
 
     if (!apiKey) return false;
     if (!apiKey.enabled) return false;
