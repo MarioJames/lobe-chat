@@ -25,12 +25,27 @@ export const BaseConfigSchema = z.object({
 export type BaseConfig = z.infer<typeof BaseConfigSchema>;
 
 /**
+ * 推荐助手的详细信息
+ */
+export const RecommendedAgentSchema = z.object({
+  avatar: z.string().nullable(), 
+  backgroundColor: z.string().nullable(),
+  description: z.string().nullable(),
+  id: z.string(),
+  tags: z.array(z.string()).nullable(),
+  title: z.string().nullable(),
+});
+
+export type RecommendedAgent = z.infer<typeof RecommendedAgentSchema>;
+
+/**
  * 欢迎界面配置 - 推荐模式
  */
 export const WelcomeRecommendedConfigSchema = z.object({
   defaultQuestions: z.array(z.string()).default([]), // 默认常见问题
   newUserQuestions: z.array(z.string()).default([]), // 新用户常见问题
   recommendedAgentIds: z.array(z.string()).default([]), // 推荐助手 ID 列表
+  recommendedAgents: z.array(RecommendedAgentSchema).optional(), // 推荐助手详情
   welcomeContent: z.string().optional(), // 支持 Markdown
 });
 

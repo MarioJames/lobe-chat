@@ -1,6 +1,7 @@
-import { and, desc, eq, gte, lte } from 'drizzle-orm';
+import { and, desc, eq, gte, inArray, lte } from 'drizzle-orm';
 
 import { AnnouncementSelectItem, announcements, customization } from '../schemas';
+import { agents } from '../schemas/agent';
 import { LobeChatDatabase } from '../type';
 
 /**
@@ -25,7 +26,44 @@ export class CustomizationModel {
       .where(eq(customization.id, 1))
       .limit(1);
 
-    return result[0] ?? null;
+    const config = result[0] ?? null;
+
+    // 如果配置不存在或者不是推荐模式，直接返回
+    if (!config || config.welcome?.type !== 'recommended') {
+      return config;
+    }
+
+    // 获取推荐助手 ID 列表
+    const recommendedAgentIds = config.welcome?.config?.recommendedAgentIds || [];
+
+    // 如果没有推荐助手，直接返回
+    if (recommendedAgentIds.length === 0) {
+      return config;
+    }
+
+    // 批量查询推荐助手的详细信息
+    const recommendedAgents = await this.db
+      .select({
+        avatar: agents.avatar,
+        backgroundColor: agents.backgroundColor,
+        description: agents.description,
+        id: agents.id,
+        tags: agents.tags,
+        title: agents.title,
+      })
+      .from(agents)
+      .where(inArray(agents.id, recommendedAgentIds));
+
+    return {
+      ...config,
+      welcome: {
+        ...config.welcome,
+        config: {
+          ...config.welcome.config,
+          recommendedAgents,
+        },
+      },
+    };
   };
 
   // ============== 公告相关方法 ==============
