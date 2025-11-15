@@ -5,6 +5,7 @@ import { FileUploadService } from '../services/file.service';
 import {
   BatchFileUploadRequest,
   BatchGetFilesRequest,
+  FileChunkRequest,
   FileListQuery,
   FileParseRequest,
   FileUrlRequest,
@@ -198,6 +199,50 @@ export class FileController extends BaseController {
       const result = await fileService.parseFile(id, options);
 
       return this.success(c, result, 'File parsed successfully');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  /**
+   * 创建分块任务（可选自动触发嵌入）
+   * POST /files/:id/chunks
+   */
+  async createChunkTask(c: Context) {
+    try {
+      const userId = this.getUserId(c)!; // requireAuth 已确保 userId 存在
+      const { id } = this.getParams(c);
+      const body = await this.getBody<Partial<FileChunkRequest>>(c);
+
+      const db = await this.getDatabase();
+      const fileService = new FileUploadService(db, userId);
+
+      const result = await fileService.createChunkTask(id, {
+        autoEmbedding: body?.autoEmbedding,
+        skipExist: body?.skipExist,
+      });
+
+      return this.success(c, result, 'Chunking task created');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  /**
+   * 查询文件分块结果和状态
+   * GET /files/:id/chunks
+   */
+  async getFileChunkStatus(c: Context) {
+    try {
+      const userId = this.getUserId(c)!; // requireAuth 已确保 userId 存在
+      const { id } = this.getParams(c);
+
+      const db = await this.getDatabase();
+      const fileService = new FileUploadService(db, userId);
+
+      const result = await fileService.getFileChunkStatus(id);
+
+      return this.success(c, result, 'File chunk status retrieved successfully');
     } catch (error) {
       return this.handleError(c, error);
     }

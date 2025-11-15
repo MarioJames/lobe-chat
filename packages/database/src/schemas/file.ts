@@ -115,9 +115,12 @@ export const knowledgeBases = pgTable(
       t.clientId,
       t.userId,
     ),
-    userIdUnique: uniqueIndex('knowledge_bases_user_id_unique').on(t.userId),
-    typeUnique: uniqueIndex('knowledge_bases_type_unique').on(t.type),
-    enabledUnique: uniqueIndex('knowledge_bases_enabled_unique').on(t.enabled),
+    // 复合索引：用于加速按用户ID、类型、启用状态的组合查询
+    userTypeEnabledIdx: index('knowledge_bases_user_type_enabled_idx').on(
+      t.userId,
+      t.type,
+      t.enabled,
+    ),
   }),
 );
 

@@ -24,7 +24,7 @@ export class KnowledgeBaseModel {
   create = async (params: Omit<NewKnowledgeBase, 'userId'>) => {
     const [result] = await this.db
       .insert(knowledgeBases)
-      .values({ ...params, userId: this.userId })
+      .values({ userId: this.userId, ...params })
       .returning();
 
     return result;

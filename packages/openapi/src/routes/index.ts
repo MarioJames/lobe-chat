@@ -1,6 +1,7 @@
 import AgentRoutes from './agents.route';
 // import ChatRoutes from './chat.route';
 import FileRoutes from './files.route';
+import KnowledgeBaseRoutes from './knowledgeBases.route';
 import MessageTranslationsRoutes from './message-translations.route';
 import MessageRoutes from './message.route';
 import ModelRoutes from './models.route';
@@ -16,6 +17,7 @@ export default {
   'agents': AgentRoutes,
   // 'chat': ChatRoutes,
   'files': FileRoutes,
+  'knowledge-bases': KnowledgeBaseRoutes,
   'message-translations': MessageTranslationsRoutes,
   'messages': MessageRoutes,
   'models': ModelRoutes,

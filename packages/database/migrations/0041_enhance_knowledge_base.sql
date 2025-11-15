@@ -18,6 +18,4 @@ ALTER TABLE "knowledge_base_grants" ADD CONSTRAINT "knowledge_base_grants_grante
 ALTER TABLE "knowledge_base_grants" ADD CONSTRAINT "knowledge_base_grants_grantee_role_id_rbac_roles_id_fk" FOREIGN KEY ("grantee_role_id") REFERENCES "public"."rbac_roles"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 CREATE UNIQUE INDEX "knowledge_base_grants_grantee_user_unique" ON "knowledge_base_grants" USING btree ("knowledge_base_id","grantee_user_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "knowledge_base_grants_grantee_role_unique" ON "knowledge_base_grants" USING btree ("knowledge_base_id","grantee_role_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "knowledge_bases_user_id_unique" ON "knowledge_bases" USING btree ("user_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "knowledge_bases_type_unique" ON "knowledge_bases" USING btree ("type");--> statement-breakpoint
-CREATE UNIQUE INDEX "knowledge_bases_enabled_unique" ON "knowledge_bases" USING btree ("enabled");
+CREATE INDEX "knowledge_bases_user_type_enabled_idx" ON "knowledge_bases" USING btree ("user_id","type","enabled");
