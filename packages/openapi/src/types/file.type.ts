@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import { FileItem } from '@/database/schemas';
+import { FileItem, KnowledgeBaseItem } from '@/database/schemas';
 
 import { IPaginationQuery, PaginationQueryResponse, PaginationQuerySchema } from './common.type';
 
@@ -58,15 +58,12 @@ export interface PublicFileUploadRequest {
 export interface FileListQuery extends IPaginationQuery {
   /** 文件类型过滤 */
   fileType?: string;
-  /** 知识库ID */
-  knowledgeBaseId?: string;
   /** 用户ID */
   userId?: string;
 }
 
 export const FileListQuerySchema = PaginationQuerySchema.extend({
   fileType: z.string().optional(),
-  knowledgeBaseId: z.string().nullish(),
   userId: z.string().optional(),
 });
 
@@ -263,7 +260,10 @@ export interface FileChunkResponse {
 /**
  * 文件列表项（包含可选的分块状态信息）
  */
-export interface FileListItem extends Partial<FileItem>, Partial<FileChunkStatusResponse> {}
+export interface FileListItem extends Partial<FileItem>, Partial<FileChunkStatusResponse> {
+  /** 关联的知识库列表 */
+  knowledgeBases?: Array<KnowledgeBaseItem>;
+}
 
 /**
  * 异步任务错误信息

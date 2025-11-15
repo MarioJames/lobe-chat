@@ -2582,6 +2582,17 @@ components:
           $ref: '#/components/schemas/FileChunkError'
           nullable: true
         finishEmbedding: { type: boolean, nullable: true }
+        knowledgeBases:
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              name: { type: string }
+              avatar: { type: string, nullable: true }
+              description: { type: string, nullable: true }
+            required: [id, name]
     FileDetail:
       type: object
       properties:

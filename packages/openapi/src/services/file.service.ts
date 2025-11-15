@@ -1,5 +1,5 @@
 import { AsyncTaskStatus, AsyncTaskType, FileMetadata } from '@lobechat/types';
-import { and, count, desc, eq, ilike, inArray } from 'drizzle-orm';
+import { and, count, desc, eq, ilike } from 'drizzle-orm';
 import { sha256 } from 'js-sha256';
 
 import { AsyncTaskModel } from '@/database/models/asyncTask';
@@ -170,54 +170,13 @@ export class FileUploadService extends BaseService {
       const { limit, offset } = processPaginationConditions(request);
 
       // 构建查询条件
-      const { keyword, fileType, knowledgeBaseId } = request;
+      const { keyword, fileType } = request;
 
       const whereConditions = [];
-      let fileIds: string[] = [];
 
-      // 如果指定了知识库ID,先查询关联表获取文件ID列表
-      if (knowledgeBaseId) {
-        const knowledgeBaseFileRecords = await this.db
-          .select({ fileId: knowledgeBaseFiles.fileId })
-          .from(knowledgeBaseFiles)
-          .where(eq(knowledgeBaseFiles.knowledgeBaseId, knowledgeBaseId));
-
-        fileIds = knowledgeBaseFileRecords.map((record) => record.fileId);
-
-        this.log('info', 'Found files in knowledge base', {
-          count: fileIds.length,
-          fileIds,
-          knowledgeBaseId,
-        });
-
-        // 如果知识库中没有文件,直接返回空结果
-        if (fileIds.length === 0) {
-          this.log('info', 'No files found in knowledge base', { knowledgeBaseId });
-          return {
-            files: [],
-            total: 0,
-          };
-        }
-
-        // 添加文件ID过滤条件
-        whereConditions.push(inArray(files.id, fileIds));
-
-        // 检查用户是否有全局权限 (ALL/WORKSPACE scope)
-        const hasGlobalPermission = await this.hasGlobalPermission('FILE_READ');
-
-        this.log('info', 'Permission check for knowledge base query', {
-          hasGlobalPermission,
-          userId: permissionResult?.condition?.userId,
-        });
-        // 只有拥有全局权限的用户才跳过 userId 过滤，否则依旧需要根据用户ID过滤
-        if (!hasGlobalPermission && permissionResult?.condition?.userId) {
-          whereConditions.push(eq(files.userId, permissionResult.condition.userId));
-        }
-      } else {
-        // 添加权限相关的查询条件
-        if (permissionResult?.condition?.userId) {
-          whereConditions.push(eq(files.userId, permissionResult.condition.userId));
-        }
+      // 添加权限相关的查询条件
+      if (permissionResult?.condition?.userId) {
+        whereConditions.push(eq(files.userId, permissionResult.condition.userId));
       }
 
       // 添加模糊查询条件
@@ -232,20 +191,49 @@ export class FileUploadService extends BaseService {
 
       const whereClause = and(...whereConditions);
 
-      // 执行分页查询
+      // 使用 Drizzle 关系查询获取文件及其关联的知识库列表
+      const queryOptions: any = {
+        orderBy: desc(files.createdAt),
+        where: whereClause,
+        with: {
+          knowledgeBases: {
+            columns: {},
+            with: {
+              knowledgeBase: {
+                columns: {
+                  avatar: true,
+                  description: true,
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      };
+
+      // 动态添加分页参数
+      if (limit !== undefined) {
+        queryOptions.limit = limit;
+      }
+      if (offset !== undefined) {
+        queryOptions.offset = offset;
+      }
+
       const [filesResult, totalResult] = await Promise.all([
-        this.db.query.files.findMany({
-          limit: limit,
-          offset: offset,
-          orderBy: desc(files.createdAt),
-          where: whereClause,
-        }),
+        this.db.query.files.findMany(queryOptions),
         this.db.select({ count: count() }).from(files).where(whereClause),
       ]);
 
       // 转换为响应格式
       const responseFiles = await Promise.all(
-        filesResult.map((file) => this.convertToResponse(file)),
+        filesResult.map(async (file: any) => {
+          const base = await this.convertToResponse(file);
+          return {
+            ...base,
+            knowledgeBases: file.knowledgeBases?.map((kb: any) => kb.knowledgeBase) || [],
+          };
+        }),
       );
 
       this.log('info', 'File list retrieved successfully', {

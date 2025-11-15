@@ -8,7 +8,7 @@ import { aiModels, aiProviders } from './aiInfra';
 import { asyncTasks } from './asyncTask';
 import { chatGroups, chatGroupsAgents } from './chatGroup';
 import { documentChunks, documents } from './document';
-import { files, knowledgeBases } from './file';
+import { files, knowledgeBaseFiles, knowledgeBases } from './file';
 import { generationBatches, generationTopics, generations } from './generation';
 import { messageGroups, messageTTS, messageTranslates, messages, messagesFiles } from './message';
 import { chunks, unstructuredChunks } from './rag';
@@ -224,6 +224,7 @@ export const filesRelations = relations(files, ({ many, one }) => ({
   sessions: many(filesToSessions),
   agents: many(agentsFiles),
   documents: many(documents, { relationName: 'fileDocuments' }),
+  knowledgeBases: many(knowledgeBaseFiles),
   generation: one(generations, {
     fields: [files.id],
     references: [generations.fileId],
@@ -235,6 +236,23 @@ export const filesRelations = relations(files, ({ many, one }) => ({
   embeddingTask: one(asyncTasks, {
     fields: [files.embeddingTaskId],
     references: [asyncTasks.id],
+  }),
+}));
+
+// Knowledge Base 相关关系定义
+export const knowledgeBasesRelations = relations(knowledgeBases, ({ many }) => ({
+  files: many(knowledgeBaseFiles),
+  agents: many(agentsKnowledgeBases),
+}));
+
+export const knowledgeBaseFilesRelations = relations(knowledgeBaseFiles, ({ one }) => ({
+  file: one(files, {
+    fields: [knowledgeBaseFiles.fileId],
+    references: [files.id],
+  }),
+  knowledgeBase: one(knowledgeBases, {
+    fields: [knowledgeBaseFiles.knowledgeBaseId],
+    references: [knowledgeBases.id],
   }),
 }));
 
