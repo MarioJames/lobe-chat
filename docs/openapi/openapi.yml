@@ -2714,7 +2714,7 @@ components:
                 total: { type: integer }
                 knowledgeBases:
                   type: array
-                  items: { $ref: '#/components/schemas/KnowledgeBase' }
+                  items: { $ref: '#/components/schemas/KnowledgeBaseListItem' }
               required: [total, knowledgeBases]
     ApiResponseKnowledgeBase:
       allOf:
@@ -2759,6 +2759,14 @@ components:
         createdAt: { type: string, format: date-time }
         updatedAt: { type: string, format: date-time }
       required: [id, name, userId, enabled, accessedAt, createdAt, updatedAt]
+    KnowledgeBaseListItem:
+      allOf:
+        - $ref: '#/components/schemas/KnowledgeBase'
+        - type: object
+          properties:
+            isAuthorized:
+              type: boolean
+              description: Whether current user is authorized to access this knowledge base
     CreateKnowledgeBaseRequest:
       type: object
       properties:

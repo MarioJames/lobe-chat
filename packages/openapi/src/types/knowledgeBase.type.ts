@@ -40,9 +40,14 @@ export const KnowledgeBaseFileListQuerySchema = PaginationQuerySchema.extend({
 /**
  * 知识库列表响应类型
  */
+export interface KnowledgeBaseListItem extends KnowledgeBaseItem {
+  /** 当前用户是否被授权 */
+  isAuthorized: boolean;
+}
+
 export type KnowledgeBaseListResponse = PaginationQueryResponse<{
   /** 知识库列表 */
-  knowledgeBases: KnowledgeBaseItem[];
+  knowledgeBases: KnowledgeBaseListItem[];
 }>;
 
 // ==================== Knowledge Base Management Types ====================

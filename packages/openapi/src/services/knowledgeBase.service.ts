@@ -1,7 +1,13 @@
-import { and, count, desc, eq, ilike, or } from 'drizzle-orm';
+import { and, count, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm';
 
 import { KnowledgeBaseModel } from '@/database/models/knowledgeBase';
-import { KnowledgeBaseItem, NewKnowledgeBase, knowledgeBases } from '@/database/schemas';
+import {
+  KnowledgeBaseItem,
+  NewKnowledgeBase,
+  knowledgeBaseGrants,
+  knowledgeBases,
+  userRoles,
+} from '@/database/schemas';
 import { LobeChatDatabase } from '@/database/type';
 
 import { BaseService } from '../common/base.service';
@@ -77,7 +83,6 @@ export class KnowledgeBaseService extends BaseService {
 
       const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
 
-      // 执行分页查询
       const [kbResult, totalResult] = await Promise.all([
         this.db.query.knowledgeBases.findMany({
           limit: limit,
@@ -88,13 +93,69 @@ export class KnowledgeBaseService extends BaseService {
         this.db.select({ count: count() }).from(knowledgeBases).where(whereClause),
       ]);
 
+      const knowledgeBaseIds = kbResult.map((item) => item.id);
+
+      const authorizedKnowledgeBaseIdSet = new Set<string>();
+
+      // 根据知识库的 id 查询被授权的情况（个人授权和角色授权）
+      if (knowledgeBaseIds.length > 0) {
+        const [userGrants, roleGrants] = await Promise.all([
+          this.db
+            .select({ knowledgeBaseId: knowledgeBaseGrants.knowledgeBaseId })
+            .from(knowledgeBaseGrants)
+            .where(
+              and(
+                eq(knowledgeBaseGrants.granteeType, 'user'),
+                eq(knowledgeBaseGrants.granteeUserId, this.userId),
+                inArray(knowledgeBaseGrants.knowledgeBaseId, knowledgeBaseIds),
+              ),
+            ),
+          this.db
+            .select({ knowledgeBaseId: knowledgeBaseGrants.knowledgeBaseId })
+            .from(knowledgeBaseGrants)
+            .innerJoin(
+              userRoles,
+              and(
+                eq(knowledgeBaseGrants.granteeRoleId, userRoles.roleId),
+                eq(userRoles.userId, this.userId),
+                or(sql`${userRoles.expiresAt} IS NULL`, sql`${userRoles.expiresAt} > now()`),
+              ),
+            )
+            .where(
+              and(
+                eq(knowledgeBaseGrants.granteeType, 'role'),
+                inArray(knowledgeBaseGrants.knowledgeBaseId, knowledgeBaseIds),
+              ),
+            ),
+        ]);
+
+        for (const grant of userGrants) {
+          authorizedKnowledgeBaseIdSet.add(grant.knowledgeBaseId);
+        }
+
+        for (const grant of roleGrants) {
+          authorizedKnowledgeBaseIdSet.add(grant.knowledgeBaseId);
+        }
+      }
+
+      const knowledgeBasesWithAuthorization = kbResult.map((item) => {
+        const isPersonalOwned = item.type === 'personal' && item.userId === this.userId;
+        const isPublic = item.isPublic === true;
+        const isAuthorizedByGrant = authorizedKnowledgeBaseIdSet.has(item.id);
+
+        return {
+          ...item,
+          isAuthorized: isPersonalOwned || isPublic || isAuthorizedByGrant,
+        };
+      });
+
       this.log('info', 'Knowledge base list retrieved successfully', {
-        count: kbResult.length,
+        count: knowledgeBasesWithAuthorization.length,
         total: totalResult[0]?.count || 0,
       });
 
       return {
-        knowledgeBases: kbResult,
+        knowledgeBases: knowledgeBasesWithAuthorization,
         total: totalResult[0]?.count || 0,
       };
     } catch (error) {

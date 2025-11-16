@@ -232,6 +232,7 @@ resources:
       api_response_knowledge_base: "#/components/schemas/ApiResponseKnowledgeBase"
       api_response_knowledge_base_delete: "#/components/schemas/ApiResponseKnowledgeBaseDelete"
       knowledge_base: "#/components/schemas/KnowledgeBase"
+      knowledge_base_list_item: "#/components/schemas/KnowledgeBaseListItem"
       create_knowledge_base_request: "#/components/schemas/CreateKnowledgeBaseRequest"
       update_knowledge_base_request: "#/components/schemas/UpdateKnowledgeBaseRequest"
       kb_api_response_file_list: "#/components/schemas/ApiResponseFileList"
