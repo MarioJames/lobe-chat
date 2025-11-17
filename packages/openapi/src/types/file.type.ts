@@ -58,8 +58,6 @@ export interface PublicFileUploadRequest {
 export interface FileListQuery {
   /** 文件类型过滤 */
   fileType?: string;
-  /** 知识库ID */
-  knowledgeBaseId?: string;
   /** 页码（从1开始） */
   page?: number;
   /** 每页数量 */
@@ -72,7 +70,6 @@ export interface FileListQuery {
 
 export const FileListQuerySchema = z.object({
   fileType: z.string().nullish(),
-  knowledgeBaseId: z.string().nullish(),
   page: z
     .string()
     .transform((val) => parseInt(val, 10))

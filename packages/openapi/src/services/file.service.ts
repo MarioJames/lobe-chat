@@ -1,10 +1,10 @@
 import { FileMetadata } from '@lobechat/types';
-import { and, count, desc, eq, ilike, inArray } from 'drizzle-orm';
+import { and, count, desc, eq, ilike } from 'drizzle-orm';
 import { sha256 } from 'js-sha256';
 
 import { DocumentModel } from '@/database/models/document';
 import { FileModel } from '@/database/models/file';
-import { FileItem, files, filesToSessions, knowledgeBaseFiles } from '@/database/schemas';
+import { FileItem, files, filesToSessions } from '@/database/schemas';
 import { LobeChatDatabase } from '@/database/type';
 import { S3 } from '@/server/modules/S3';
 import { DocumentService } from '@/server/services/document';
@@ -156,54 +156,13 @@ export class FileUploadService extends BaseService {
       const { limit, offset } = processPaginationConditions(request);
 
       // 构建查询条件
-      const { search, fileType, knowledgeBaseId } = request;
+      const { search, fileType } = request;
 
       const whereConditions = [];
-      let fileIds: string[] = [];
 
-      // 如果指定了知识库ID,先查询关联表获取文件ID列表
-      if (knowledgeBaseId) {
-        const knowledgeBaseFileRecords = await this.db
-          .select({ fileId: knowledgeBaseFiles.fileId })
-          .from(knowledgeBaseFiles)
-          .where(eq(knowledgeBaseFiles.knowledgeBaseId, knowledgeBaseId));
-
-        fileIds = knowledgeBaseFileRecords.map((record) => record.fileId);
-
-        this.log('info', 'Found files in knowledge base', {
-          count: fileIds.length,
-          fileIds,
-          knowledgeBaseId,
-        });
-
-        // 如果知识库中没有文件,直接返回空结果
-        if (fileIds.length === 0) {
-          this.log('info', 'No files found in knowledge base', { knowledgeBaseId });
-          return {
-            files: [],
-            total: 0,
-          };
-        }
-
-        // 添加文件ID过滤条件
-        whereConditions.push(inArray(files.id, fileIds));
-
-        // 检查用户是否有全局权限 (ALL/WORKSPACE scope)
-        const hasGlobalPermission = await this.hasGlobalPermission('FILE_READ');
-
-        this.log('info', 'Permission check for knowledge base query', {
-          hasGlobalPermission,
-          userId: permissionResult?.condition?.userId,
-        });
-        // 只有拥有全局权限的用户才跳过 userId 过滤，否则依旧需要根据用户ID过滤
-        if (!hasGlobalPermission && permissionResult?.condition?.userId) {
-          whereConditions.push(eq(files.userId, permissionResult.condition.userId));
-        }
-      } else {
-        // 添加权限相关的查询条件
-        if (permissionResult?.condition?.userId) {
-          whereConditions.push(eq(files.userId, permissionResult.condition.userId));
-        }
+      // 添加权限相关的查询条件
+      if (permissionResult?.condition?.userId) {
+        whereConditions.push(eq(files.userId, permissionResult.condition.userId));
       }
 
       // 添加模糊查询条件

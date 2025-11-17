@@ -26,7 +26,6 @@ const app = new Hono();
  * - fileType: string (optional) - 文件类型过滤
  * - search: string (optional) - 搜索关键词
  * - userId: string (optional) - 用户ID，如果提供则获取指定用户文件
- * - knowledgeBaseId: string (optional) - 知识库ID，如果提供则获取指定知识库的文件
  */
 app.get(
   '/',
