@@ -4,7 +4,6 @@ import { ClientSecretPayload } from '@lobechat/types';
 import { AsyncTaskModel } from '@/database/models/asyncTask';
 import { FileModel } from '@/database/models/file';
 import { ChunkContentParams, ContentChunk } from '@/server/modules/ContentChunk';
-import { createAsyncCaller } from '@/server/routers/async';
 import {
   AsyncTaskError,
   AsyncTaskErrorType,
@@ -44,6 +43,8 @@ export class ChunkService {
 
     await this.fileModel.update(fileId, { embeddingTaskId: asyncTaskId });
 
+    // dynamic import to avoid circular dependency with async router
+    const { createAsyncCaller } = await import('@/server/routers/async/caller');
     const asyncCaller = await createAsyncCaller({ jwtPayload: payload, userId: this.userId });
 
     // trigger embedding task asynchronously
@@ -83,6 +84,8 @@ export class ChunkService {
 
     await this.fileModel.update(fileId, { chunkTaskId: asyncTaskId });
 
+    // dynamic import to avoid circular dependency with async router
+    const { createAsyncCaller } = await import('@/server/routers/async/caller');
     const asyncCaller = await createAsyncCaller({ jwtPayload: payload, userId: this.userId });
 
     // trigger parse file task asynchronously
