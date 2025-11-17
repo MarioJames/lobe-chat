@@ -561,6 +561,7 @@ export class FileUploadService extends BaseService {
               name: file.name,
               size: file.size,
               url: existingFileCheck.url || '',
+              userId: this.userId,
             };
 
             const createResult = await this.fileModel.create(fileRecord, false); // 不插入全局表，因为已存在
@@ -606,6 +607,7 @@ export class FileUploadService extends BaseService {
         name: file.name,
         size: file.size,
         url: metadata.path,
+        userId: this.userId,
       };
 
       const createResult = await this.fileModel.create(fileRecord, true);
