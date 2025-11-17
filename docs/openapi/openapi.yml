@@ -1,0 +1,3342 @@
+openapi: 3.1.0
+info:
+  title: LobeChat OpenAPI
+  version: 1.0.0
+  description: Unified OpenAPI spec merged from all route specs under packages/openapi/src/routes (excluding chat.route.ts).
+servers:
+  - url: /api/v1
+security:
+  - BearerAuth: []
+
+paths:
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Get current authenticated user
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseUser' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+
+  /users:
+    get:
+      tags: [Users]
+      summary: List users (searchable, paginated)
+      parameters:
+        - in: query
+          name: keyword
+          schema: { type: string, maxLength: 100 }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 100 }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseUserList' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    post:
+      tags: [Users]
+      summary: Create user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateUserRequest' }
+      responses:
+        '200':
+          {
+            description: Created,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseUser' } },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /users/{id}:
+    parameters:
+      - name: id
+        x-stainless-param-name: userId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Users]
+      summary: Get user by ID
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseUser' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    patch:
+      tags: [Users]
+      summary: Update user (partial)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateUserRequest' }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseUser' } },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    delete:
+      tags: [Users]
+      summary: Delete user
+      responses:
+        '200':
+          {
+            description: Deleted,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /users/{id}/roles:
+    parameters:
+      - name: id
+        x-stainless-param-name: userId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Users]
+      summary: Get user roles
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseUserRoles' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    patch:
+      tags: [Users]
+      summary: Update user roles (add/remove)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateUserRolesRequest' }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseUserRoles' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    delete:
+      tags: [Users]
+      summary: Clear all roles of user
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: '#/components/schemas/ApiResponseUserRolesCleared',
+                      },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /agents:
+    get:
+      tags: [Agents]
+      summary: List agents
+      parameters:
+        - in: query
+          name: keyword
+          schema: { type: string, maxLength: 100 }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 100 }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseAgentList' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    post:
+      tags: [Agents]
+      summary: Create agent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateAgentRequest' }
+      responses:
+        '200':
+          {
+            description: Created,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseAgent' } },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /agents/{id}:
+    parameters:
+      - name: id
+        x-stainless-param-name: agentId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Agents]
+      summary: Get agent by ID
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseAgent' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    patch:
+      tags: [Agents]
+      summary: Update agent (partial)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateAgentRequest' }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseAgent' } },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    delete:
+      tags: [Agents]
+      summary: Delete agent
+      responses:
+        '200':
+          {
+            description: Deleted,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /files:
+    get:
+      tags: [Files]
+      summary: List files (paginated, searchable, filterable)
+      description: |
+        Get paginated list of files with optional filtering by file type, search keyword, and user ID.
+        - Requires FILE_READ permission
+        - Returns files with complete metadata including URL, hash, and metadata
+      parameters:
+        - in: query
+          name: keyword
+          schema: { type: string, maxLength: 100 }
+          description: Search keyword for file name (case-insensitive)
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+          description: Page number (default 1)
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 100 }
+          description: Items per page (default 20, max 100)
+        - in: query
+          name: fileType
+          schema: { type: string }
+          description: Filter by file type (e.g., "image/", "application/pdf")
+        - in: query
+          name: userId
+          schema: { type: string }
+          description: Filter by user ID (requires appropriate permission)
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseFileList' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    post:
+      tags: [Files]
+      summary: Upload a single file
+      description: |
+        Upload a file to the system with optional metadata.
+        - Requires FILE_UPLOAD permission
+        - Supports automatic deduplication based on file hash
+        - Returns file detail including parse result for non-image files
+        - Maximum file size: 100MB
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file:
+                  type: string
+                  format: binary
+                  description: The file to upload (required)
+                knowledgeBaseId:
+                  type: string
+                  nullable: true
+                  description: Optional knowledge base ID to associate with the file
+                sessionId:
+                  type: string
+                  nullable: true
+                  description: Optional session ID to create file-session relation
+                skipCheckFileType:
+                  type: boolean
+                  nullable: true
+                  description: Skip file type validation (default false)
+                directory:
+                  type: string
+                  nullable: true
+                  description: Custom upload directory (default "uploads")
+              required: [file]
+      responses:
+        '200':
+          {
+            description: File uploaded successfully,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseFileDetail' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /files/{id}:
+    parameters:
+      - name: id
+        x-stainless-param-name: fileId
+        in: path
+        required: true
+        schema: { type: string }
+        description: Unique file identifier
+    get:
+      tags: [Files]
+      summary: Get file detail by ID
+      description: |
+        Retrieve detailed information about a specific file.
+        - Requires FILE_READ permission
+        - For images: returns file metadata only
+        - For documents: returns file metadata + parsed content (if available)
+        - Automatically parses document content on first access
+      responses:
+        '200':
+          {
+            description: File detail retrieved successfully,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseFileDetail' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    delete:
+      tags: [Files]
+      summary: Delete a file
+      description: |
+        Permanently delete a file from the system.
+        - Requires FILE_DELETE permission
+        - Deletes both the file record and the actual file from storage (S3)
+        - Cannot be undone
+      responses:
+        '200':
+          {
+            description: File deleted successfully,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /files/{id}/url:
+    parameters:
+      - name: id
+        x-stainless-param-name: fileId
+        in: path
+        required: true
+        schema: { type: string }
+        description: Unique file identifier
+      - in: query
+        name: expiresIn
+        schema: { type: integer, minimum: 1 }
+        description: URL expiration time in seconds (default 3600)
+    get:
+      tags: [Files]
+      summary: Generate presigned URL for file access
+      description: |
+        Generate a temporary presigned URL for direct file access.
+        - Requires FILE_READ permission
+        - URL is time-limited and secure
+        - Useful for downloading or previewing files
+        - Default expiration: 1 hour (3600 seconds)
+      responses:
+        '200':
+          {
+            description: Presigned URL generated successfully,
+            content:
+              {
+                application/json:
+                  {
+                    schema: { $ref: '#/components/schemas/ApiResponseFileUrl' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /files/{id}/parses:
+    parameters:
+      - name: id
+        x-stainless-param-name: fileId
+        in: path
+        required: true
+        schema: { type: string }
+        description: Unique file identifier
+      - in: query
+        name: skipExist
+        schema: { type: boolean }
+        description: Force re-parse even if already parsed (default false)
+    post:
+      tags: [Files]
+      summary: Parse file content
+      description: |
+        Extract text content from document files (PDF, Word, Excel, etc).
+        - Requires FILE_UPDATE permission
+        - Only supports document file types (not images/videos)
+        - Returns cached result if already parsed (unless skipExist=true)
+        - Includes metadata like page count, character count, etc.
+        - Parse results are stored for future retrieval
+      responses:
+        '200':
+          {
+            description: File parsed successfully,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseFileParse' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /files/{id}/chunks:
+    parameters:
+      - name: id
+        x-stainless-param-name: fileId
+        in: path
+        required: true
+        schema: { type: string }
+        description: Unique file identifier
+    post:
+      tags: [Files]
+      summary: Create file chunking task
+      description: |
+        Trigger an asynchronous chunking task for a file, with optional auto-embedding.
+        - Requires FILE_UPDATE permission
+        - If skipExist=true, will not create a new task when one already exists
+        - When autoEmbedding=true, an embedding task will be scheduled after chunking
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                skipExist:
+                  type: boolean
+                  nullable: true
+                  description: Skip creating a new chunking task if one already exists
+                autoEmbedding:
+                  type: boolean
+                  nullable: true
+                  description: Automatically trigger an embedding task after chunking
+      responses:
+        '200':
+          {
+            description: Chunking task created,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: '#/components/schemas/ApiResponseFileChunkTask',
+                      },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    get:
+      tags: [Files]
+      summary: Get file chunking status and details
+      description: |
+        Query the chunking result and related async task status for a file.
+        - Requires FILE_READ permission
+        - Returns current chunk count
+        - Includes chunking task status and error
+        - Includes embedding task status, error and completion flag
+      responses:
+        '200':
+          {
+            description: File chunk status retrieved successfully,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: '#/components/schemas/ApiResponseFileChunkStatus',
+                      },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /files/batches:
+    post:
+      tags: [Files]
+      summary: Batch upload multiple files
+      description: |
+        Upload multiple files in a single request.
+        - Requires FILE_UPLOAD permission
+        - Each file is processed independently
+        - Returns summary with successful and failed uploads
+        - Supports automatic deduplication
+        - Maximum file size per file: 100MB
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                files:
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Array of files to upload (required)
+                knowledgeBaseId:
+                  type: string
+                  nullable: true
+                  description: Optional knowledge base ID for all files
+                sessionId:
+                  type: string
+                  nullable: true
+                  description: Optional session ID to create file-session relations
+                skipCheckFileType:
+                  type: boolean
+                  nullable: true
+                  description: Skip file type validation for all files (default false)
+                directory:
+                  type: string
+                  nullable: true
+                  description: Custom upload directory for all files (default "uploads")
+              required: [files]
+      responses:
+        '200':
+          {
+            description: Batch upload completed (may include partial failures),
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: '#/components/schemas/ApiResponseBatchFileUpload',
+                      },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /files/queries:
+    post:
+      tags: [Files]
+      summary: Batch retrieve file details by IDs
+      description: |
+        Retrieve detailed information for multiple files in a single request.
+        - Requires FILE_READ permission
+        - Processes all file IDs in parallel
+        - Returns both successful and failed retrievals
+        - Each file includes metadata and parsed content (for documents)
+        - Failed retrievals include error messages
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileIds:
+                  type: array
+                  items: { type: string }
+                  minItems: 1
+                  description: Array of file IDs to retrieve (required, at least 1)
+              required: [fileIds]
+      responses:
+        '200':
+          {
+            description: Batch retrieval completed (may include partial failures),
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseBatchGetFiles' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /knowledge-bases:
+    get:
+      tags: [KnowledgeBases]
+      summary: List knowledge bases (paginated, searchable, filterable)
+      description: |
+        Get paginated list of knowledge bases with optional filtering and search.
+        - Requires KNOWLEDGE_BASE_READ permission
+        - Returns knowledge bases accessible by the current user
+        - Supports filtering by type (personal/shared) and enabled status
+      parameters:
+        - in: query
+          name: keyword
+          schema: { type: string, maxLength: 100 }
+          description: Search keyword for name or description (case-insensitive)
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+          description: Page number (default 1)
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 100 }
+          description: Items per page (default 20, max 100)
+        - in: query
+          name: type
+          schema: { type: string, enum: [personal, shared] }
+          description: Filter by knowledge base type
+        - in: query
+          name: enabled
+          schema: { type: boolean }
+          description: Filter by enabled status
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: '#/components/schemas/ApiResponseKnowledgeBaseList',
+                      },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    post:
+      tags: [KnowledgeBases]
+      summary: Create a new knowledge base
+      description: |
+        Create a new knowledge base with specified properties.
+        - Requires KNOWLEDGE_BASE_CREATE permission
+        - Returns the created knowledge base with complete metadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                  description: Knowledge base name (required)
+                description:
+                  type: string
+                  maxLength: 1000
+                  nullable: true
+                  description: Knowledge base description
+                avatar:
+                  type: string
+                  format: uri
+                  nullable: true
+                  description: Knowledge base avatar URL
+                type:
+                  type: string
+                  enum: [personal, shared]
+                  nullable: true
+                  description: Knowledge base type (default personal)
+                isPublic:
+                  type: boolean
+                  nullable: true
+                  description: Whether the knowledge base is public (default false)
+                settings:
+                  type: object
+                  additionalProperties: true
+                  nullable: true
+                  description: Knowledge base settings
+              required: [name]
+      responses:
+        '200':
+          {
+            description: Knowledge base created successfully,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: '#/components/schemas/ApiResponseKnowledgeBase',
+                      },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /knowledge-bases/{id}:
+    parameters:
+      - name: id
+        x-stainless-param-name: knowledgeBaseId
+        in: path
+        required: true
+        schema: { type: string }
+        description: Unique knowledge base identifier
+    get:
+      tags: [KnowledgeBases]
+      summary: Get knowledge base detail by ID
+      description: |
+        Retrieve detailed information about a specific knowledge base.
+        - Requires KNOWLEDGE_BASE_READ permission
+        - Checks access permissions and enabled status
+        - Returns complete knowledge base metadata
+      responses:
+        '200':
+          {
+            description: Knowledge base retrieved successfully,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: '#/components/schemas/ApiResponseKnowledgeBase',
+                      },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    patch:
+      tags: [KnowledgeBases]
+      summary: Update knowledge base (partial)
+      description: |
+        Update knowledge base properties.
+        - Requires KNOWLEDGE_BASE_UPDATE permission
+        - Only the owner can update the knowledge base
+        - All fields are optional
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  minLength: 1
+                  maxLength: 255
+                  nullable: true
+                  description: Knowledge base name
+                description:
+                  type: string
+                  maxLength: 1000
+                  nullable: true
+                  description: Knowledge base description
+                avatar:
+                  type: string
+                  format: uri
+                  nullable: true
+                  description: Knowledge base avatar URL
+                type:
+                  type: string
+                  enum: [personal, shared]
+                  nullable: true
+                  description: Knowledge base type
+                isPublic:
+                  type: boolean
+                  nullable: true
+                  description: Whether the knowledge base is public
+                enabled:
+                  type: boolean
+                  nullable: true
+                  description: Whether the knowledge base is enabled
+                settings:
+                  type: object
+                  additionalProperties: true
+                  nullable: true
+                  description: Knowledge base settings
+      responses:
+        '200':
+          {
+            description: Knowledge base updated successfully,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: '#/components/schemas/ApiResponseKnowledgeBase',
+                      },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    delete:
+      tags: [KnowledgeBases]
+      summary: Delete a knowledge base
+      description: |
+        Permanently delete a knowledge base.
+        - Requires KNOWLEDGE_BASE_DELETE permission
+        - Only the owner can delete the knowledge base
+        - Cascades delete to related files and grants
+        - Cannot be undone
+      responses:
+        '200':
+          {
+            description: Knowledge base deleted successfully,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: '#/components/schemas/ApiResponseKnowledgeBaseDelete',
+                      },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /knowledge-bases/{id}/files:
+    parameters:
+      - name: id
+        x-stainless-param-name: knowledgeBaseId
+        in: path
+        required: true
+        schema: { type: string }
+        description: Unique knowledge base identifier
+      - in: query
+        name: keyword
+        schema: { type: string, maxLength: 100 }
+        description: Search keyword for file name (case-insensitive)
+      - in: query
+        name: page
+        schema: { type: integer, minimum: 1 }
+        description: Page number (default 1)
+      - in: query
+        name: pageSize
+        schema: { type: integer, minimum: 1, maximum: 100 }
+        description: Items per page (default 20, max 100)
+      - in: query
+        name: fileType
+        schema: { type: string }
+        description: Filter by file type (e.g., "image/", "application/pdf")
+    get:
+      tags: [KnowledgeBases]
+      summary: List files in a knowledge base
+      description: |
+        Get a paginated list of files that belong to a specific knowledge base.
+        - Requires KNOWLEDGE_BASE_READ permission
+        - Returns the same file structure as the global file list
+        - Supports pagination and basic filtering by file type and search keyword
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema: { $ref: '#/components/schemas/ApiResponseFileList' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /messages/count:
+    get:
+      tags: [Messages]
+      summary: Count messages
+      parameters:
+        - in: query
+          name: topicIds
+          schema: { type: string }
+          description: Comma-separated topic IDs
+        - in: query
+          name: userId
+          schema: { type: string }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseCount' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /messages:
+    get:
+      tags: [Messages]
+      summary: List messages
+      parameters:
+        - in: query
+          name: keyword
+          schema: { type: string, maxLength: 100 }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 100 }
+        - in: query
+          name: topicId
+          schema: { type: string }
+        - in: query
+          name: sessionId
+          schema: { type: string }
+        - in: query
+          name: userId
+          schema: { type: string }
+        - in: query
+          name: role
+          schema:
+            { type: string, enum: ['user', 'system', 'assistant', 'tool'] }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseMessageList' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    delete:
+      tags: [Messages]
+      summary: Delete messages (batch)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                messageIds:
+                  type: array
+                  items: { type: string }
+              required: [messageIds]
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: '#/components/schemas/ApiResponseBatchDeleteResult',
+                      },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    post:
+      tags: [Messages]
+      summary: Create message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateMessageRequest' }
+      responses:
+        '200':
+          {
+            description: Created,
+            content:
+              {
+                application/json:
+                  {
+                    schema: { $ref: '#/components/schemas/ApiResponseMessage' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /messages/{id}:
+    parameters:
+      - name: id
+        x-stainless-param-name: messageId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Messages]
+      summary: Get message by ID
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema: { $ref: '#/components/schemas/ApiResponseMessage' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    delete:
+      tags: [Messages]
+      summary: Delete message by ID
+      responses:
+        '200':
+          {
+            description: Deleted,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /messages/repies:
+    post:
+      tags: [Messages]
+      summary: Create message and AI reply
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateMessageRequest' }
+      responses:
+        '200':
+          {
+            description: Created,
+            content:
+              {
+                application/json:
+                  {
+                    schema: { $ref: '#/components/schemas/ApiResponseMessage' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /message-translations/{messageId}:
+    parameters:
+      - name: messageId
+        in: path
+        required: true
+        schema: { type: string }
+    post:
+      tags: [MessageTranslations]
+      summary: Translate a message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TranslateTrigger' }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseTranslation' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    get:
+      tags: [MessageTranslations]
+      summary: Get translation info for a message
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseTranslation' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    patch:
+      tags: [MessageTranslations]
+      summary: Update translation info for a message
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/TranslateUpdate' }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseTranslation' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    delete:
+      tags: [MessageTranslations]
+      summary: Delete translation info for a message
+      responses:
+        '200':
+          {
+            description: Deleted,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /models:
+    get:
+      tags: [Models]
+      summary: List models
+      parameters:
+        - in: query
+          name: keyword
+          schema: { type: string, maxLength: 100 }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 100 }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseModelList' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    post:
+      tags: [Models]
+      summary: Create model
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateModelRequest' }
+      responses:
+        '200':
+          {
+            description: Created,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseModel' } },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /models/{providerId}/{modelId}:
+    parameters:
+      - name: providerId
+        x-stainless-param-name: pathProviderId
+        in: path
+        required: true
+        schema: { type: string }
+      - name: modelId
+        x-stainless-param-name: pathModelId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Models]
+      summary: Get model detail
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseModel' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    patch:
+      tags: [Models]
+      summary: Update model (partial)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateModelRequest' }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseModel' } },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /permissions:
+    get:
+      tags: [Permissions]
+      summary: List permissions
+      parameters:
+        - in: query
+          name: keyword
+          schema: { type: string, maxLength: 100 }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 100 }
+        - in: query
+          name: active
+          schema: { type: boolean }
+        - in: query
+          name: category
+          schema: { type: string }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: '#/components/schemas/ApiResponsePermissionList',
+                      },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    post:
+      tags: [Permissions]
+      summary: Create permission
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreatePermissionRequest' }
+      responses:
+        '200':
+          {
+            description: Created,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponsePermission' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /permissions/{id}:
+    parameters:
+      - name: id
+        x-stainless-param-name: permissionId
+        in: path
+        required: true
+        schema: { type: integer, minimum: 1 }
+    get:
+      tags: [Permissions]
+      summary: Get permission by ID
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponsePermission' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    patch:
+      tags: [Permissions]
+      summary: Update permission (partial)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdatePermissionRequest' }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponsePermission' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    delete:
+      tags: [Permissions]
+      summary: Delete permission
+      responses:
+        '200':
+          {
+            description: Deleted,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /providers:
+    get:
+      tags: [Providers]
+      summary: List AI providers
+      parameters:
+        - in: query
+          name: keyword
+          schema: { type: string, maxLength: 100 }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 100 }
+        - in: query
+          name: enabled
+          schema: { type: boolean }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseProviderList' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    post:
+      tags: [Providers]
+      summary: Create provider
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateProviderRequest' }
+      responses:
+        '200':
+          {
+            description: Created,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseProvider' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /providers/{id}:
+    parameters:
+      - name: id
+        x-stainless-param-name: providerId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Providers]
+      summary: Get provider detail
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseProvider' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    patch:
+      tags: [Providers]
+      summary: Update provider (partial)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateProviderRequest' }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseProvider' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    delete:
+      tags: [Providers]
+      summary: Delete provider
+      responses:
+        '200':
+          {
+            description: Deleted,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /roles:
+    get:
+      tags: [Roles]
+      summary: List roles
+      parameters:
+        - in: query
+          name: keyword
+          schema: { type: string, maxLength: 100 }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 100 }
+        - in: query
+          name: active
+          schema: { type: boolean }
+        - in: query
+          name: system
+          schema: { type: boolean }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseRoleList' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    post:
+      tags: [Roles]
+      summary: Create role
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateRoleRequest' }
+      responses:
+        '200':
+          {
+            description: Created,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseRole' } },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /roles/{id}:
+    parameters:
+      - name: id
+        x-stainless-param-name: roleId
+        in: path
+        required: true
+        schema: { type: integer, minimum: 1 }
+    get:
+      tags: [Roles]
+      summary: Get role by ID
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseRole' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    patch:
+      tags: [Roles]
+      summary: Update role (partial)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateRoleRequest' }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseRole' } },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    delete:
+      tags: [Roles]
+      summary: Delete role
+      responses:
+        '200':
+          {
+            description: Deleted,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /roles/{id}/permissions:
+    parameters:
+      - name: id
+        x-stainless-param-name: roleId
+        in: path
+        required: true
+        schema: { type: integer, minimum: 1 }
+    get:
+      tags: [Roles]
+      summary: List role permissions
+      parameters:
+        - in: query
+          name: keyword
+          schema: { type: string, maxLength: 100 }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 100 }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: '#/components/schemas/ApiResponseRolePermissions',
+                      },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    patch:
+      tags: [Roles]
+      summary: Update role permissions (grant/revoke)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              { $ref: '#/components/schemas/UpdateRolePermissionsRequest' }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: '#/components/schemas/ApiResponseRolePermissions',
+                      },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    delete:
+      tags: [Roles]
+      summary: Clear all permissions for role
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /session-groups:
+    get:
+      tags: [SessionGroups]
+      summary: List session groups
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: '#/components/schemas/ApiResponseSessionGroupList',
+                      },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    post:
+      tags: [SessionGroups]
+      summary: Create session group
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateSessionGroupRequest' }
+      responses:
+        '200':
+          {
+            description: Created,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseSessionGroup' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /session-groups/{id}:
+    parameters:
+      - name: id
+        x-stainless-param-name: sessionGroupId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [SessionGroups]
+      summary: Get session group by ID
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseSessionGroup' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    patch:
+      tags: [SessionGroups]
+      summary: Update session group (partial)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateSessionGroupRequest' }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseSessionGroup' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    delete:
+      tags: [SessionGroups]
+      summary: Delete session group
+      responses:
+        '200':
+          {
+            description: Deleted,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /sessions:
+    get:
+      tags: [Sessions]
+      summary: List sessions
+      parameters:
+        - in: query
+          name: keyword
+          schema: { type: string, maxLength: 100 }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 100 }
+        - in: query
+          name: agentId
+          schema: { type: string }
+        - in: query
+          name: ids
+          schema: { type: string }
+          description: Comma-separated session IDs
+        - in: query
+          name: userId
+          schema: { type: string }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseSessionList' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    post:
+      tags: [Sessions]
+      summary: Create session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateSessionRequest' }
+      responses:
+        '200':
+          {
+            description: Created,
+            content:
+              {
+                application/json:
+                  {
+                    schema: { $ref: '#/components/schemas/ApiResponseSession' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    patch:
+      tags: [Sessions]
+      summary: Batch update sessions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/BatchUpdateSessionsRequest' }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseSessionList' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /sessions/groups:
+    get:
+      tags: [Sessions]
+      summary: List sessions grouped by agent
+      parameters:
+        - in: query
+          name: groupBy
+          schema: { type: string, enum: ['agent'] }
+          required: true
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: '#/components/schemas/ApiResponseSessionsGroups',
+                      },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /sessions/{id}:
+    parameters:
+      - name: id
+        x-stainless-param-name: sessionId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Sessions]
+      summary: Get session by ID
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema: { $ref: '#/components/schemas/ApiResponseSession' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    patch:
+      tags: [Sessions]
+      summary: Update session (partial)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateSessionRequest' }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema: { $ref: '#/components/schemas/ApiResponseSession' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    delete:
+      tags: [Sessions]
+      summary: Delete session
+      responses:
+        '200':
+          {
+            description: Deleted,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+  /topics:
+    get:
+      tags: [Topics]
+      summary: List topics
+      parameters:
+        - in: query
+          name: keyword
+          schema: { type: string, maxLength: 100 }
+        - in: query
+          name: page
+          schema: { type: integer, minimum: 1 }
+        - in: query
+          name: pageSize
+          schema: { type: integer, minimum: 1, maximum: 100 }
+        - in: query
+          name: sessionId
+          schema: { type: string }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseTopicList' },
+                  },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+    post:
+      tags: [Topics]
+      summary: Create topic
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateTopicRequest' }
+      responses:
+        '200':
+          {
+            description: Created,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseTopic' } },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+
+  /topics/{id}:
+    parameters:
+      - name: id
+        x-stainless-param-name: topicId
+        in: path
+        required: true
+        schema: { type: string }
+    get:
+      tags: [Topics]
+      summary: Get topic by ID
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseTopic' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    patch:
+      tags: [Topics]
+      summary: Update topic (partial)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateTopicRequest' }
+      responses:
+        '200':
+          {
+            description: OK,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseTopic' } },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+    delete:
+      tags: [Topics]
+      summary: Delete topic
+      responses:
+        '200':
+          {
+            description: Deleted,
+            content:
+              {
+                application/json:
+                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+              },
+          }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    BadRequestError: { description: Bad Request }
+    UnauthorizedError: { description: Unauthorized }
+    ForbiddenError: { description: Forbidden }
+    NotFoundError: { description: Not Found }
+  schemas:
+    # ---------- Common wrappers ----------
+    ApiResponseBase:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string, nullable: true }
+        timestamp: { type: string, format: date-time }
+      required: [success, timestamp]
+    ApiResponseVoid:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            # Explicit empty object for Stainless + allow null
+            data:
+              {
+                type: object,
+                nullable: true,
+                x-stainless-empty-object: true,
+                description: Empty response payload,
+              }
+
+    # ---------- Users ----------
+    ApiResponseUser:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/UserWithRoles' }
+    ApiResponseUserList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                users:
+                  type: array
+                  items: { $ref: '#/components/schemas/UserWithRoles' }
+              required: [total, users]
+    ApiResponseUserRoles:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items: { $ref: '#/components/schemas/UserRoleEntry' }
+    ApiResponseUserRolesCleared:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                removed: { type: integer }
+                userId: { type: string }
+              required: [removed, userId]
+    User:
+      type: object
+      properties:
+        id: { type: string }
+        username: { type: string, nullable: true }
+        email: { type: string, nullable: true }
+        avatar: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+        firstName: { type: string, nullable: true }
+        lastName: { type: string, nullable: true }
+        fullName: { type: string, nullable: true }
+        isOnboarded: { type: boolean }
+        clerkCreatedAt: { type: string, format: date-time, nullable: true }
+        emailVerifiedAt: { type: string, format: date-time, nullable: true }
+        preference: { type: object, additionalProperties: true, nullable: true }
+        accessedAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, isOnboarded, createdAt, updatedAt, accessedAt]
+    Role:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        displayName: { type: string }
+        description: { type: string, nullable: true }
+        isSystem: { type: boolean }
+        isActive: { type: boolean }
+        metadata: { type: object, additionalProperties: true, nullable: true }
+        accessedAt: { type: string, format: date-time, nullable: true }
+        createdAt: { type: string, format: date-time, nullable: true }
+        updatedAt: { type: string, format: date-time, nullable: true }
+    UserWithRoles:
+      allOf:
+        - $ref: '#/components/schemas/User'
+        - type: object
+          properties:
+            messageCount: { type: integer }
+            roles:
+              type: array
+              items: { $ref: '#/components/schemas/Role' }
+    UserRoleEntry:
+      type: object
+      properties:
+        roleId: { type: integer }
+        roleName: { type: string }
+        roleDisplayName: { type: string }
+        expiresAt: { type: string, format: date-time, nullable: true }
+      required: [roleId, roleName, roleDisplayName]
+    CreateUserRequest:
+      type: object
+      properties:
+        id: { type: string, nullable: true }
+        username: { type: string, nullable: true, minLength: 1 }
+        email: { type: string, format: email, nullable: true }
+        avatar: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+        firstName: { type: string, nullable: true }
+        lastName: { type: string, nullable: true }
+        fullName: { type: string, nullable: true }
+        roleIds:
+          type: array
+          items: { type: integer, minimum: 1 }
+          nullable: true
+      additionalProperties: false
+    UpdateUserRequest:
+      type: object
+      properties:
+        username: { type: string, nullable: true, minLength: 1 }
+        email: { type: string, format: email, nullable: true }
+        avatar: { type: string, nullable: true }
+        phone: { type: string, nullable: true }
+        firstName: { type: string, nullable: true }
+        lastName: { type: string, nullable: true }
+        fullName: { type: string, nullable: true }
+        isOnboarded: { type: boolean, nullable: true }
+        preference: { type: object, additionalProperties: true, nullable: true }
+        roleIds:
+          type: array
+          items: { type: integer, minimum: 1 }
+          nullable: true
+      additionalProperties: false
+    AddRoleRequest:
+      type: object
+      properties:
+        roleId: { type: integer, minimum: 1 }
+        expiresAt: { type: string, format: date-time, nullable: true }
+      required: [roleId]
+    UpdateUserRolesRequest:
+      type: object
+      description: At least one of addRoles or removeRoles must be provided.
+      properties:
+        addRoles:
+          type: array
+          items: { $ref: '#/components/schemas/AddRoleRequest' }
+        removeRoles:
+          type: array
+          items: { type: integer, minimum: 1 }
+      anyOf:
+        - required: [addRoles]
+        - required: [removeRoles]
+
+    # ---------- Agents ----------
+    ApiResponseAgent:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/Agent' }
+    ApiResponseAgentList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                agents:
+                  type: array
+                  items: { $ref: '#/components/schemas/Agent' }
+              required: [total, agents]
+    Agent:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        avatar: { type: string, nullable: true }
+        model: { type: string, nullable: true }
+        provider: { type: string, nullable: true }
+        systemRole: { type: string, nullable: true }
+        chatConfig: { type: object, additionalProperties: true, nullable: true }
+        params: { type: object, additionalProperties: true, nullable: true }
+        createdAt: { type: string, format: date-time, nullable: true }
+        updatedAt: { type: string, format: date-time, nullable: true }
+        accessedAt: { type: string, format: date-time, nullable: true }
+      required: [id]
+    CreateAgentRequest:
+      type: object
+      properties:
+        title: { type: string }
+        description: { type: string, nullable: true }
+        avatar: { type: string, nullable: true }
+        model: { type: string, nullable: true }
+        provider: { type: string, nullable: true }
+        systemRole: { type: string, nullable: true }
+        chatConfig: { type: object, additionalProperties: true, nullable: true }
+        params: { type: object, additionalProperties: true, nullable: true }
+      required: [title]
+    UpdateAgentRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateAgentRequest'
+
+    # ---------- Files ----------
+    ApiResponseFileList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                files:
+                  type: array
+                  items: { $ref: '#/components/schemas/File' }
+              required: [total, files]
+    ApiResponseFileDetail:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/FileDetail' }
+    ApiResponseFileUrl:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/FileUrl' }
+    ApiResponseFileParse:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/FileParse' }
+    ApiResponseFileChunkStatus:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/FileChunkStatus' }
+    ApiResponseFileChunkTask:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/FileChunkTask' }
+    ApiResponseBatchFileUpload:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/BatchFileUpload' }
+    ApiResponseBatchGetFiles:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/BatchGetFiles' }
+    File:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string, nullable: true }
+        size: { type: integer, nullable: true }
+        fileType: { type: string, nullable: true }
+        url: { type: string, nullable: true }
+        fileHash: { type: string, nullable: true }
+        knowledgeBaseId: { type: string, nullable: true }
+        metadata:
+          type: object
+          additionalProperties: true
+          nullable: true
+        userId: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time, nullable: true }
+        updatedAt: { type: string, format: date-time, nullable: true }
+        chunkCount: { type: integer, nullable: true }
+        chunkingStatus:
+          type: string
+          nullable: true
+          enum: ['pending', 'processing', 'success', 'error']
+        chunkingError:
+          $ref: '#/components/schemas/FileChunkError'
+          nullable: true
+        embeddingStatus:
+          type: string
+          nullable: true
+          enum: ['pending', 'processing', 'success', 'error']
+        embeddingError:
+          $ref: '#/components/schemas/FileChunkError'
+          nullable: true
+        finishEmbedding: { type: boolean, nullable: true }
+        knowledgeBases:
+          type: array
+          nullable: true
+          items:
+            type: object
+            properties:
+              id: { type: string }
+              name: { type: string }
+              avatar: { type: string, nullable: true }
+              description: { type: string, nullable: true }
+            required: [id, name]
+    FileDetail:
+      type: object
+      properties:
+        file: { $ref: '#/components/schemas/File' }
+        parsed: { $ref: '#/components/schemas/FileParse', nullable: true }
+      required: [file]
+    FileUrl:
+      type: object
+      properties:
+        fileId: { type: string }
+        name: { type: string }
+        url: { type: string }
+        expiresIn: { type: integer }
+        expiresAt: { type: string, format: date-time }
+      required: [fileId, name, url, expiresIn, expiresAt]
+    FileParse:
+      type: object
+      properties:
+        fileId: { type: string }
+        name: { type: string }
+        fileType: { type: string }
+        parseStatus: { type: string, enum: ['completed', 'failed'] }
+        parsedAt: { type: string, format: date-time, nullable: true }
+        content: { type: string, nullable: true }
+        error: { type: string, nullable: true }
+        metadata:
+          type: object
+          properties:
+            pages: { type: integer, nullable: true }
+            title: { type: string, nullable: true }
+            totalCharCount: { type: integer, nullable: true }
+            totalLineCount: { type: integer, nullable: true }
+    FileChunkTask:
+      type: object
+      properties:
+        fileId: { type: string }
+        chunkTaskId: { type: string, nullable: true }
+        embeddingTaskId: { type: string, nullable: true }
+        success: { type: boolean }
+        message: { type: string, nullable: true }
+      required: [fileId, success]
+    FileChunkError:
+      type: object
+      properties:
+        name: { type: string }
+        body:
+          type: object
+          properties:
+            detail: { type: string }
+          required: [detail]
+      required: [name, body]
+    FileChunkStatus:
+      type: object
+      properties:
+        chunkCount: { type: integer, nullable: true }
+        chunkingStatus:
+          type: string
+          nullable: true
+          enum: ['pending', 'processing', 'success', 'error']
+        chunkingError:
+          $ref: '#/components/schemas/FileChunkError'
+          nullable: true
+        embeddingStatus:
+          type: string
+          nullable: true
+          enum: ['pending', 'processing', 'success', 'error']
+        embeddingError:
+          $ref: '#/components/schemas/FileChunkError'
+          nullable: true
+        finishEmbedding: { type: boolean, nullable: true }
+    BatchFileUpload:
+      type: object
+      properties:
+        summary:
+          type: object
+          properties:
+            total: { type: integer }
+            successful: { type: integer }
+            failed: { type: integer }
+          required: [total, successful, failed]
+        successful:
+          type: array
+          items: { $ref: '#/components/schemas/FileDetail' }
+        failed:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              error: { type: string }
+            required: [name, error]
+    BatchGetFiles:
+      type: object
+      properties:
+        total: { type: integer }
+        success: { type: integer }
+        files:
+          type: array
+          items: { $ref: '#/components/schemas/FileDetail' }
+        failed:
+          type: array
+          items:
+            type: object
+            properties:
+              fileId: { type: string }
+              error: { type: string }
+            required: [fileId, error]
+      required: [total, success, files, failed]
+
+    # ---------- Knowledge Bases ----------
+    ApiResponseKnowledgeBaseList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                knowledgeBases:
+                  type: array
+                  items: { $ref: '#/components/schemas/KnowledgeBaseListItem' }
+              required: [total, knowledgeBases]
+    ApiResponseKnowledgeBase:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                knowledgeBase: { $ref: '#/components/schemas/KnowledgeBase' }
+              required: [knowledgeBase]
+    ApiResponseKnowledgeBaseDelete:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                success: { type: boolean }
+                message: { type: string, nullable: true }
+              required: [success]
+    KnowledgeBase:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        avatar: { type: string, nullable: true }
+        type:
+          {
+            type: string,
+            enum: [personal, shared],
+            nullable: true,
+          }
+        userId: { type: string }
+        clientId: { type: string, nullable: true }
+        isPublic: { type: boolean, nullable: true }
+        enabled: { type: boolean }
+        settings: { type: object, additionalProperties: true, nullable: true }
+        accessedAt: { type: string, format: date-time }
+        createdAt: { type: string, format: date-time }
+        updatedAt: { type: string, format: date-time }
+      required: [id, name, userId, enabled, accessedAt, createdAt, updatedAt]
+    KnowledgeBaseListItem:
+      allOf:
+        - $ref: '#/components/schemas/KnowledgeBase'
+        - type: object
+          properties:
+            accessType:
+              type: string
+              enum: [owner, userGrant, roleGrant, public]
+              description: Access type/source of the current user for this knowledge base
+    CreateKnowledgeBaseRequest:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 255 }
+        description: { type: string, maxLength: 1000, nullable: true }
+        avatar: { type: string, format: uri, nullable: true }
+        type:
+          {
+            type: string,
+            enum: [personal, shared],
+            nullable: true,
+          }
+        isPublic: { type: boolean, nullable: true }
+        settings: { type: object, additionalProperties: true, nullable: true }
+      required: [name]
+    UpdateKnowledgeBaseRequest:
+      type: object
+      properties:
+        name: { type: string, minLength: 1, maxLength: 255, nullable: true }
+        description: { type: string, maxLength: 1000, nullable: true }
+        avatar: { type: string, format: uri, nullable: true }
+        type:
+          {
+            type: string,
+            enum: [personal, shared],
+            nullable: true,
+          }
+        isPublic: { type: boolean, nullable: true }
+        enabled: { type: boolean, nullable: true }
+        settings: { type: object, additionalProperties: true, nullable: true }
+
+    # ---------- Messages ----------
+    ApiResponseCount:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              additionalProperties: true
+    ApiResponseMessage:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/Message' }
+    ApiResponseMessageList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                messages:
+                  type: array
+                  items: { $ref: '#/components/schemas/Message' }
+              required: [total, messages]
+    ApiResponseBatchDeleteResult:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              additionalProperties: true
+    Message:
+      type: object
+      properties:
+        id: { type: string }
+        content: { type: string, nullable: true }
+        role:
+          {
+            type: string,
+            enum: ['user', 'system', 'assistant', 'tool'],
+            nullable: true,
+          }
+        sessionId: { type: string, nullable: true }
+        topicId: { type: string, nullable: true }
+        parentId: { type: string, nullable: true }
+        clientId: { type: string, nullable: true }
+        metadata: { type: object, additionalProperties: true, nullable: true }
+        reasoning: { type: object, additionalProperties: true, nullable: true }
+        search: { type: object, additionalProperties: true, nullable: true }
+        tools: { type: object, additionalProperties: true, nullable: true }
+        files:
+          type: array
+          items: { type: string }
+          nullable: true
+        favorite: { type: boolean, nullable: true }
+        createdAt: { type: string, format: date-time, nullable: true }
+        updatedAt: { type: string, format: date-time, nullable: true }
+    CreateMessageRequest:
+      type: object
+      properties:
+        content: { type: string }
+        role: { type: string, enum: ['user', 'system', 'assistant', 'tool'] }
+        model: { type: string, nullable: true }
+        provider: { type: string, nullable: true }
+        sessionId: { type: string, nullable: true }
+        topicId: { type: string, nullable: true }
+        threadId: { type: string, nullable: true }
+        parentId: { type: string, nullable: true }
+        quotaId: { type: string, nullable: true }
+        agentId: { type: string, nullable: true }
+        clientId: { type: string, nullable: true }
+        metadata: { type: object, additionalProperties: true, nullable: true }
+        reasoning: { type: object, additionalProperties: true, nullable: true }
+        search: { type: object, additionalProperties: true, nullable: true }
+        tools: { type: object, additionalProperties: true, nullable: true }
+        traceId: { type: string, nullable: true }
+        observationId: { type: string, nullable: true }
+        files:
+          type: array
+          items: { type: string }
+        favorite: { type: boolean, nullable: true }
+      required: [content, role]
+
+    # ---------- Message Translations ----------
+    ApiResponseTranslation:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/MessageTranslation' }
+    TranslateTrigger:
+      type: object
+      properties:
+        from: { type: string }
+        to: { type: string }
+        provider: { type: string, nullable: true }
+        model: { type: string, nullable: true }
+      required: [from, to]
+    TranslateUpdate:
+      allOf:
+        - $ref: '#/components/schemas/TranslateTrigger'
+        - type: object
+          properties:
+            translatedContent: { type: string }
+          required: [translatedContent]
+    MessageTranslation:
+      type: object
+      properties:
+        id: { type: string }
+        userId: { type: string }
+        clientId: { type: string, nullable: true }
+        content: { type: string, nullable: true }
+        from: { type: string, nullable: true }
+        to: { type: string, nullable: true }
+      required: [id, userId]
+
+    # ---------- Models ----------
+    ApiResponseModel:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/Model' }
+    ApiResponseModelList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                models:
+                  type: array
+                  items: { $ref: '#/components/schemas/Model' }
+              required: [total, models]
+    Model:
+      type: object
+      properties:
+        id: { type: string }
+        providerId: { type: string }
+        displayName: { type: string }
+        type:
+          {
+            type: string,
+            enum:
+              [
+                'chat',
+                'embedding',
+                'tts',
+                'stt',
+                'image',
+                'text2video',
+                'text2music',
+                'realtime',
+              ],
+            nullable: true,
+          }
+        enabled: { type: boolean, nullable: true }
+        description: { type: string, nullable: true }
+        abilities: { type: object, additionalProperties: true, nullable: true }
+        parameters: { type: object, additionalProperties: true, nullable: true }
+        pricing: { type: object, additionalProperties: true, nullable: true }
+        contextWindowTokens: { type: integer, nullable: true }
+        releasedAt: { type: string, nullable: true }
+        sort: { type: integer, nullable: true }
+        source:
+          {
+            type: string,
+            enum: ['remote', 'custom', 'builtin'],
+            nullable: true,
+          }
+        organization: { type: string, nullable: true }
+        createdAt: { type: string, format: date-time, nullable: true }
+        updatedAt: { type: string, format: date-time, nullable: true }
+    CreateModelRequest:
+      type: object
+      properties:
+        id: { type: string }
+        providerId: { type: string }
+        displayName: { type: string }
+        type:
+          {
+            type: string,
+            enum:
+              [
+                'chat',
+                'embedding',
+                'tts',
+                'stt',
+                'image',
+                'text2video',
+                'text2music',
+                'realtime',
+              ],
+            nullable: true,
+          }
+        enabled: { type: boolean, nullable: true }
+        description: { type: string, nullable: true }
+        abilities: { type: object, additionalProperties: true, nullable: true }
+        parameters: { type: object, additionalProperties: true, nullable: true }
+        pricing: { type: object, additionalProperties: true, nullable: true }
+        contextWindowTokens: { type: integer, nullable: true }
+        releasedAt: { type: string, nullable: true }
+        sort: { type: integer, nullable: true }
+        source:
+          {
+            type: string,
+            enum: ['remote', 'custom', 'builtin'],
+            nullable: true,
+          }
+        organization: { type: string, nullable: true }
+      required: [id, providerId, displayName]
+    UpdateModelRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateModelRequest'
+
+    # ---------- Permissions ----------
+    ApiResponsePermission:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/Permission' }
+    ApiResponsePermissionList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                permissions:
+                  type: array
+                  items: { $ref: '#/components/schemas/Permission' }
+              required: [total, permissions]
+    Permission:
+      type: object
+      properties:
+        id: { type: integer }
+        code: { type: string }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        category: { type: string }
+        isActive: { type: boolean }
+        createdAt: { type: string, format: date-time, nullable: true }
+        updatedAt: { type: string, format: date-time, nullable: true }
+    CreatePermissionRequest:
+      type: object
+      properties:
+        code: { type: string }
+        name: { type: string }
+        description: { type: string, nullable: true }
+        category: { type: string }
+        isActive: { type: boolean, nullable: true }
+      required: [code, name, category]
+    UpdatePermissionRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreatePermissionRequest'
+
+    # ---------- Providers ----------
+    ApiResponseProvider:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/Provider' }
+    ApiResponseProviderList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                providers:
+                  type: array
+                  items: { $ref: '#/components/schemas/Provider' }
+              required: [total, providers]
+    Provider:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        enabled: { type: boolean, nullable: true }
+        logo: { type: string, nullable: true }
+        source: { type: string, enum: ['builtin', 'custom'], nullable: true }
+        sort: { type: integer, nullable: true }
+        checkModel: { type: string, nullable: true }
+        fetchOnClient: { type: boolean, nullable: true }
+        keyVaults:
+          type: object
+          additionalProperties: { type: string }
+          nullable: true
+        config: { type: object, additionalProperties: true, nullable: true }
+        settings: { type: object, additionalProperties: true, nullable: true }
+        createdAt: { type: string, format: date-time, nullable: true }
+        updatedAt: { type: string, format: date-time, nullable: true }
+    CreateProviderRequest:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        enabled: { type: boolean, nullable: true }
+        logo: { type: string, nullable: true }
+        source: { type: string, enum: ['builtin', 'custom'], nullable: true }
+        sort: { type: integer, nullable: true }
+        checkModel: { type: string, nullable: true }
+        fetchOnClient: { type: boolean, nullable: true }
+        keyVaults:
+          type: object
+          additionalProperties: { type: string }
+          nullable: true
+        config: { type: object, additionalProperties: true, nullable: true }
+        settings: { type: object, additionalProperties: true, nullable: true }
+      required: [id]
+    UpdateProviderRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateProviderRequest'
+
+    # ---------- Roles ----------
+    ApiResponseRole:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/Role' }
+    ApiResponseRoleList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                roles:
+                  type: array
+                  items: { $ref: '#/components/schemas/Role' }
+              required: [total, roles]
+    ApiResponseRolePermissions:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                permissions:
+                  type: array
+                  items: { $ref: '#/components/schemas/Permission' }
+                total: { type: integer }
+              required: [permissions, total]
+    CreateRoleRequest:
+      type: object
+      properties:
+        name: { type: string }
+        displayName: { type: string }
+        description: { type: string, nullable: true }
+        isSystem: { type: boolean, nullable: true }
+        isActive: { type: boolean, nullable: true }
+      required: [name, displayName]
+    UpdateRoleRequest:
+      allOf:
+        - $ref: '#/components/schemas/CreateRoleRequest'
+    UpdateRolePermissionsRequest:
+      type: object
+      properties:
+        grant:
+          type: array
+          items: { type: integer, minimum: 1 }
+        revoke:
+          type: array
+          items: { type: integer, minimum: 1 }
+
+    # ---------- Session Groups ----------
+    ApiResponseSessionGroup:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/SessionGroup' }
+    ApiResponseSessionGroupList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items: { $ref: '#/components/schemas/SessionGroup' }
+    SessionGroup:
+      type: object
+      properties:
+        id: { type: string }
+        name: { type: string }
+        sort: { type: integer, nullable: true }
+        createdAt: { type: string, format: date-time, nullable: true }
+        updatedAt: { type: string, format: date-time, nullable: true }
+    CreateSessionGroupRequest:
+      type: object
+      properties:
+        name: { type: string }
+        sort: { type: integer, nullable: true }
+      required: [name]
+    UpdateSessionGroupRequest:
+      type: object
+      properties:
+        name: { type: string, nullable: true }
+        sort: { type: integer, nullable: true }
+
+    # ---------- Sessions ----------
+    ApiResponseSession:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/Session' }
+    ApiResponseSessionList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                sessions:
+                  type: array
+                  items: { $ref: '#/components/schemas/Session' }
+              required: [total, sessions]
+    ApiResponseSessionsGroups:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                type: object
+                properties:
+                  agent: { $ref: '#/components/schemas/Agent' }
+                  sessions:
+                    type: array
+                    items: { $ref: '#/components/schemas/Session' }
+                  total: { type: integer }
+                required: [sessions, total]
+    Session:
+      type: object
+      properties:
+        id: { type: string }
+        title: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        avatar: { type: string, nullable: true }
+        backgroundColor: { type: string, nullable: true }
+        agentId: { type: string, nullable: true }
+        groupId: { type: string, nullable: true }
+        pinned: { type: boolean, nullable: true }
+        createdAt: { type: string, format: date-time, nullable: true }
+        updatedAt: { type: string, format: date-time, nullable: true }
+    CreateSessionRequest:
+      type: object
+      properties:
+        agentId: { type: string, nullable: true }
+        avatar: { type: string, nullable: true }
+        backgroundColor: { type: string, nullable: true }
+        config: { type: object, additionalProperties: true, nullable: true }
+        description: { type: string, nullable: true }
+        groupId: { type: string, nullable: true }
+        meta: { type: object, additionalProperties: true, nullable: true }
+        pinned: { type: boolean, nullable: true }
+        title: { type: string, nullable: true }
+        type: { type: string, enum: ['agent', 'group'], nullable: true }
+    UpdateSessionRequest:
+      type: object
+      properties:
+        agentId: { type: string, nullable: true }
+        avatar: { type: string, nullable: true }
+        backgroundColor: { type: string, nullable: true }
+        description: { type: string, nullable: true }
+        groupId: { type: string, nullable: true }
+        pinned: { type: boolean, nullable: true }
+        title: { type: string, nullable: true }
+        userId: { type: string, nullable: true }
+    BatchUpdateSessionsRequest:
+      type: array
+      items:
+        type: object
+        properties:
+          id: { type: string }
+          data: { $ref: '#/components/schemas/UpdateSessionRequest' }
+        required: [id, data]
+
+    # ---------- Topics ----------
+    ApiResponseTopic:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data: { $ref: '#/components/schemas/Topic' }
+    ApiResponseTopicList:
+      allOf:
+        - $ref: '#/components/schemas/ApiResponseBase'
+        - type: object
+          properties:
+            data:
+              type: object
+              properties:
+                total: { type: integer }
+                topics:
+                  type: array
+                  items: { $ref: '#/components/schemas/Topic' }
+              required: [total, topics]
+    Topic:
+      type: object
+      properties:
+        id: { type: string }
+        sessionId: { type: string }
+        title: { type: string }
+        messageCount: { type: integer, nullable: true }
+        createdAt: { type: string, format: date-time, nullable: true }
+        updatedAt: { type: string, format: date-time, nullable: true }
+    CreateTopicRequest:
+      type: object
+      properties:
+        sessionId: { type: string }
+        title: { type: string }
+      required: [sessionId, title]
+    UpdateTopicRequest:
+      type: object
+      properties:
+        title: { type: string }
+        favorite: { type: boolean }

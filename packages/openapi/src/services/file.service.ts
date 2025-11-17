@@ -1,10 +1,13 @@
-import { FileMetadata } from '@lobechat/types';
+import { AsyncTaskStatus, AsyncTaskType, FileMetadata } from '@lobechat/types';
 import { and, count, desc, eq, ilike } from 'drizzle-orm';
 import { sha256 } from 'js-sha256';
 
+import { AsyncTaskModel } from '@/database/models/asyncTask';
+import { ChunkModel } from '@/database/models/chunk';
 import { DocumentModel } from '@/database/models/document';
 import { FileModel } from '@/database/models/file';
-import { FileItem, files, filesToSessions } from '@/database/schemas';
+import { KnowledgeBaseModel } from '@/database/models/knowledgeBase';
+import { FileItem, files, filesToSessions, knowledgeBaseFiles } from '@/database/schemas';
 import { LobeChatDatabase } from '@/database/type';
 import { S3 } from '@/server/modules/S3';
 import { DocumentService } from '@/server/services/document';
@@ -19,6 +22,8 @@ import {
   BatchFileUploadResponse,
   BatchGetFilesRequest,
   BatchGetFilesResponse,
+  FileChunkRequest,
+  FileChunkResponse,
   FileDetailResponse,
   FileListQuery,
   FileListResponse,
@@ -28,6 +33,7 @@ import {
   FileUrlResponse,
   PublicFileUploadRequest,
 } from '../types/file.type';
+import { KnowledgeBaseFileListQuery } from '../types/knowledgeBase.type';
 
 /**
  * 文件上传服务类
@@ -39,6 +45,11 @@ export class FileUploadService extends BaseService {
   private coreFileService: CoreFileService;
   private documentService: DocumentService;
   private s3Service: S3;
+  private chunkModel: ChunkModel;
+  private asyncTaskModel: AsyncTaskModel;
+  private knowledgeBaseModel: KnowledgeBaseModel;
+  // 延迟引入 ChunkService，避免循环依赖开销
+  // 注意：ChunkService 仅在服务端环境可用
 
   constructor(db: LobeChatDatabase, userId: string) {
     super(db, userId);
@@ -47,6 +58,9 @@ export class FileUploadService extends BaseService {
     this.coreFileService = new CoreFileService(db, userId!);
     this.documentService = new DocumentService(db, userId);
     this.s3Service = new S3();
+    this.chunkModel = new ChunkModel(db, userId);
+    this.asyncTaskModel = new AsyncTaskModel(db, userId);
+    this.knowledgeBaseModel = new KnowledgeBaseModel(db, userId);
   }
 
   /**
@@ -156,7 +170,7 @@ export class FileUploadService extends BaseService {
       const { limit, offset } = processPaginationConditions(request);
 
       // 构建查询条件
-      const { search, fileType } = request;
+      const { keyword, fileType } = request;
 
       const whereConditions = [];
 
@@ -166,8 +180,8 @@ export class FileUploadService extends BaseService {
       }
 
       // 添加模糊查询条件
-      if (search) {
-        whereConditions.push(ilike(files.name, `%${search}%`));
+      if (keyword) {
+        whereConditions.push(ilike(files.name, `%${keyword}%`));
       }
 
       // 添加文件类型过滤
@@ -177,20 +191,49 @@ export class FileUploadService extends BaseService {
 
       const whereClause = and(...whereConditions);
 
-      // 执行分页查询
+      // 使用 Drizzle 关系查询获取文件及其关联的知识库列表
+      const queryOptions: any = {
+        orderBy: desc(files.createdAt),
+        where: whereClause,
+        with: {
+          knowledgeBases: {
+            columns: {},
+            with: {
+              knowledgeBase: {
+                columns: {
+                  avatar: true,
+                  description: true,
+                  id: true,
+                  name: true,
+                },
+              },
+            },
+          },
+        },
+      };
+
+      // 动态添加分页参数
+      if (limit !== undefined) {
+        queryOptions.limit = limit;
+      }
+      if (offset !== undefined) {
+        queryOptions.offset = offset;
+      }
+
       const [filesResult, totalResult] = await Promise.all([
-        this.db.query.files.findMany({
-          limit: limit,
-          offset: offset,
-          orderBy: desc(files.createdAt),
-          where: whereClause,
-        }),
+        this.db.query.files.findMany(queryOptions),
         this.db.select({ count: count() }).from(files).where(whereClause),
       ]);
 
       // 转换为响应格式
       const responseFiles = await Promise.all(
-        filesResult.map((file) => this.convertToResponse(file)),
+        filesResult.map(async (file: any) => {
+          const base = await this.convertToResponse(file);
+          return {
+            ...base,
+            knowledgeBases: file.knowledgeBases?.map((kb: any) => kb.knowledgeBase) || [],
+          };
+        }),
       );
 
       this.log('info', 'File list retrieved successfully', {
@@ -204,6 +247,127 @@ export class FileUploadService extends BaseService {
       };
     } catch (error) {
       this.handleServiceError(error, '获取文件列表');
+    }
+  }
+
+  /**
+   * 获取指定知识库下的文件列表
+   */
+  async getKnowledgeBaseFileList(
+    knowledgeBaseId: string,
+    request: KnowledgeBaseFileListQuery,
+  ): Promise<FileListResponse> {
+    try {
+      // 权限校验（知识库读取权限）
+      const permissionResult = await this.resolveOperationPermission('KNOWLEDGE_BASE_READ');
+
+      if (!permissionResult.isPermitted) {
+        throw this.createAuthorizationError(permissionResult.message || '无权访问知识库文件列表');
+      }
+
+      // 校验知识库访问权限与存在性
+      const knowledgeBase = await this.knowledgeBaseModel.findById(knowledgeBaseId);
+      if (!knowledgeBase) {
+        throw this.createNotFoundError('Knowledge base not found or access denied');
+      }
+
+      this.log('info', 'Getting knowledge base file list', {
+        knowledgeBaseId,
+        request,
+      });
+
+      const { limit, offset } = processPaginationConditions(request);
+      const { keyword, fileType } = request;
+
+      const whereConditions = [eq(knowledgeBaseFiles.knowledgeBaseId, knowledgeBaseId)];
+
+      if (keyword) {
+        whereConditions.push(ilike(files.name, `%${keyword}%`));
+      }
+
+      if (fileType) {
+        whereConditions.push(ilike(files.fileType, `${fileType}%`));
+      }
+
+      const whereClause = and(...whereConditions);
+
+      const baseQuery = this.db
+        .select({
+          file: files,
+        })
+        .from(knowledgeBaseFiles)
+        .innerJoin(files, eq(knowledgeBaseFiles.fileId, files.id))
+        .where(whereClause)
+        .orderBy(desc(files.createdAt));
+
+      const listQuery =
+        limit !== undefined && offset !== undefined
+          ? baseQuery.limit(limit).offset(offset)
+          : baseQuery;
+
+      const [records, totalResult] = await Promise.all([
+        listQuery,
+        this.db
+          .select({ count: count() })
+          .from(knowledgeBaseFiles)
+          .innerJoin(files, eq(knowledgeBaseFiles.fileId, files.id))
+          .where(whereClause),
+      ]);
+
+      const filesResult: FileItem[] = records.map((row) => row.file);
+
+      const fileIds = filesResult.map((file) => file.id);
+
+      const [chunkCounts, chunkTasks, embeddingTasks] = await Promise.all([
+        this.chunkModel.countByFileIds(fileIds),
+        this.asyncTaskModel.findByIds(
+          filesResult.map((file) => file.chunkTaskId).filter(Boolean) as string[],
+          AsyncTaskType.Chunking,
+        ),
+        this.asyncTaskModel.findByIds(
+          filesResult.map((file) => file.embeddingTaskId).filter(Boolean) as string[],
+          AsyncTaskType.Embedding,
+        ),
+      ]);
+
+      const responseFiles = await Promise.all(
+        filesResult.map(async (file) => {
+          const base = await this.convertToResponse(file);
+
+          const chunkCountItem = chunkCounts.find((c) => c.id === file.id);
+          const chunkTask = file.chunkTaskId
+            ? chunkTasks.find((task) => task.id === file.chunkTaskId)
+            : null;
+          const embeddingTask = file.embeddingTaskId
+            ? embeddingTasks.find((task) => task.id === file.embeddingTaskId)
+            : null;
+
+          return {
+            ...base,
+            chunkCount: chunkCountItem?.count ?? null,
+            chunkingError: (chunkTask?.error as any) || null,
+            chunkingStatus: (chunkTask?.status as AsyncTaskStatus | null | undefined) || null,
+            embeddingError: (embeddingTask?.error as any) || null,
+            embeddingStatus: (embeddingTask?.status as AsyncTaskStatus | null | undefined) || null,
+            finishEmbedding: embeddingTask?.status === AsyncTaskStatus.Success,
+          } as any;
+        }),
+      );
+
+      const total = totalResult[0]?.count || 0;
+
+      this.log('info', 'Knowledge base file list retrieved successfully', {
+        count: filesResult.length,
+        knowledgeBaseId,
+        total,
+      });
+
+      return {
+        files: responseFiles,
+        total,
+      };
+    } catch (error) {
+      this.handleServiceError(error, '获取知识库文件列表');
     }
   }
 
@@ -561,6 +725,103 @@ export class FileUploadService extends BaseService {
       }
     } catch (error) {
       this.handleServiceError(error, '解析文件');
+    }
+  }
+
+  /**
+   * 创建分块任务（可选自动触发嵌入）
+   */
+  async createChunkTask(
+    fileId: string,
+    req: Partial<FileChunkRequest> = {},
+  ): Promise<FileChunkResponse> {
+    try {
+      // 权限：更新文件即可
+      const permissionResult = await this.resolveOperationPermission('FILE_UPDATE', {
+        targetFileId: fileId,
+      });
+      if (!permissionResult.isPermitted) {
+        throw this.createAuthorizationError(permissionResult.message || '无权操作该文件');
+      }
+
+      const file = await this.fileModel.findById(fileId);
+      if (!file) throw this.createCommonError('File not found');
+
+      if (isChunkingUnsupported(file.fileType)) {
+        throw this.createBusinessError(`File type '${file.fileType}' does not support chunking`);
+      }
+
+      // 触发分块异步任务
+      const { ChunkService } = await import('@/server/services/chunk');
+      const chunkService = new ChunkService(this.db, this.userId);
+
+      // 注意：asyncParseFileToChunks 需要 jwtPayload，但分块阶段不依赖外部模型，传空对象即可
+      // 如果需要 OIDC/KeyVaults 透传，可在此构造 payload
+      const payload: any = {};
+
+      const chunkTaskId = await chunkService.asyncParseFileToChunks(fileId, payload, req.skipExist);
+
+      let embeddingTaskId: string | null | undefined = null;
+      if (req.autoEmbedding) {
+        embeddingTaskId = await chunkService.asyncEmbeddingFileChunks(fileId, payload);
+      }
+
+      this.log('info', 'Chunk task created', {
+        autoEmbedding: !!req.autoEmbedding,
+        chunkTaskId,
+        embeddingTaskId,
+        fileId,
+      });
+
+      return {
+        chunkTaskId: chunkTaskId || null,
+        embeddingTaskId: embeddingTaskId || null,
+        fileId,
+        message: 'Task created',
+        success: true,
+      };
+    } catch (error) {
+      this.handleServiceError(error, '创建分块任务');
+    }
+  }
+
+  /**
+   * 查询文件分块与嵌入任务状态
+   */
+  async getFileChunkStatus(fileId: string) {
+    try {
+      // 权限：读取文件即可
+      const permissionResult = await this.resolveOperationPermission('FILE_READ', {
+        targetFileId: fileId,
+      });
+
+      if (!permissionResult.isPermitted) {
+        throw this.createAuthorizationError(permissionResult.message || '无权访问此文件');
+      }
+
+      const file = await this.fileModel.findById(fileId);
+      if (!file) {
+        throw this.createCommonError('File not found');
+      }
+
+      const [chunkCount, chunkTask, embeddingTask] = await Promise.all([
+        this.chunkModel.countByFileId(fileId),
+        file.chunkTaskId ? this.asyncTaskModel.findById(file.chunkTaskId) : Promise.resolve(null),
+        file.embeddingTaskId
+          ? this.asyncTaskModel.findById(file.embeddingTaskId)
+          : Promise.resolve(null),
+      ]);
+
+      return {
+        chunkCount,
+        chunkingError: (chunkTask?.error as any) || null,
+        chunkingStatus: (chunkTask?.status as AsyncTaskStatus | null | undefined) || null,
+        embeddingError: (embeddingTask?.error as any) || null,
+        embeddingStatus: (embeddingTask?.status as AsyncTaskStatus | null | undefined) || null,
+        finishEmbedding: embeddingTask?.status === AsyncTaskStatus.Success,
+      };
+    } catch (error) {
+      this.handleServiceError(error, '查询文件分块状态');
     }
   }
 

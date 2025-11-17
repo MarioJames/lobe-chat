@@ -8,6 +8,7 @@ import { requireAnyPermission } from '../middleware';
 import { requireAuth } from '../middleware/auth';
 import {
   BatchGetFilesRequestSchema,
+  FileChunkRequestSchema,
   FileIdParamSchema,
   FileListQuerySchema,
   FileParseRequestSchema,
@@ -144,6 +145,52 @@ app.post(
   async (c) => {
     const fileController = new FileController();
     return await fileController.parseFile(c);
+  },
+);
+
+/**
+ * 触发文件分块任务（可选：自动触发嵌入）
+ * POST /files/:id/chunks
+ *
+ * Path parameters:
+ * - id: string (required) - 文件ID
+ *
+ * Request body (JSON):
+ * - skipExist?: boolean - 是否跳过已存在的分块任务/结果
+ * - autoEmbedding?: boolean - 分块成功后是否自动触发嵌入
+ */
+app.post(
+  '/:id/chunks',
+  requireAuth,
+  requireAnyPermission(getAllScopePermissions('FILE_UPDATE'), '您没有权限创建分块任务'),
+  zValidator('param', FileIdParamSchema),
+  zValidator('json', FileChunkRequestSchema),
+  async (c) => {
+    const fileController = new FileController();
+    return await fileController.createChunkTask(c);
+  },
+);
+
+/**
+ * 查询文件分块结果和状态
+ * GET /files/:id/chunks
+ *
+ * Path parameters:
+ * - id: string (required) - 文件ID
+ *
+ * 功能：
+ * - 查询文件分块任务状态（进行中/成功/失败）
+ * - 返回当前分块数量
+ * - 同时返回嵌入任务状态等相关信息
+ */
+app.get(
+  '/:id/chunks',
+  requireAuth,
+  requireAnyPermission(getAllScopePermissions('FILE_READ'), '您没有权限查看文件分块状态'),
+  zValidator('param', FileIdParamSchema),
+  async (c) => {
+    const fileController = new FileController();
+    return await fileController.getFileChunkStatus(c);
   },
 );
 

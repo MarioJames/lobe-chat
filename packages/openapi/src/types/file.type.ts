@@ -1,8 +1,8 @@
 import { z } from 'zod';
 
-import { FileItem } from '@/database/schemas';
+import { FileItem, KnowledgeBaseItem } from '@/database/schemas';
 
-import { PaginationQueryResponse } from './common.type';
+import { IPaginationQuery, PaginationQueryResponse, PaginationQuerySchema } from './common.type';
 
 // ==================== File Upload Types ====================
 
@@ -30,7 +30,7 @@ export interface FileUploadRequest {
  * 文件详情类型
  */
 export interface FileDetailResponse {
-  file: Partial<FileItem>;
+  file: FileListItem;
   parsed?: FileParseResponse;
 }
 
@@ -55,33 +55,16 @@ export interface PublicFileUploadRequest {
 /**
  * 文件列表查询参数
  */
-export interface FileListQuery {
+export interface FileListQuery extends IPaginationQuery {
   /** 文件类型过滤 */
   fileType?: string;
-  /** 页码（从1开始） */
-  page?: number;
-  /** 每页数量 */
-  pageSize?: number;
-  /** 搜索关键词 */
-  search?: string;
   /** 用户ID */
   userId?: string;
 }
 
-export const FileListQuerySchema = z.object({
-  fileType: z.string().nullish(),
-  page: z
-    .string()
-    .transform((val) => parseInt(val, 10))
-    .pipe(z.number().min(1))
-    .nullish(),
-  pageSize: z
-    .string()
-    .transform((val) => parseInt(val, 10))
-    .pipe(z.number().min(1).max(100))
-    .nullish(),
-  search: z.string().nullish(),
-  userId: z.string().nullish(),
+export const FileListQuerySchema = PaginationQuerySchema.extend({
+  fileType: z.string().optional(),
+  userId: z.string().optional(),
 });
 
 /**
@@ -241,6 +224,75 @@ export interface FileParseResponse {
   parseStatus: 'completed' | 'failed';
   /** 解析时间 */
   parsedAt?: string;
+}
+
+// ==================== File Chunking Types ====================
+
+/**
+ * 文件分块任务请求
+ */
+export interface FileChunkRequest {
+  /** 是否在分块成功后自动触发嵌入任务（可覆盖服务端默认开关） */
+  autoEmbedding?: boolean;
+  /** 是否跳过已存在分块任务（或已存在的分块结果） */
+  skipExist?: boolean;
+}
+
+export const FileChunkRequestSchema = z.object({
+  autoEmbedding: z.boolean().optional(),
+  skipExist: z.boolean().optional(),
+});
+
+/**
+ * 文件分块任务响应
+ */
+export interface FileChunkResponse {
+  /** 分块异步任务ID */
+  chunkTaskId?: string | null;
+  /** 嵌入异步任务ID（仅当 autoEmbedding=true 时存在） */
+  embeddingTaskId?: string | null;
+  fileId: string;
+  message?: string;
+  /** 是否已触发 */
+  success: boolean;
+}
+
+/**
+ * 文件列表项（包含可选的分块状态信息）
+ */
+export interface FileListItem extends Partial<FileItem>, Partial<FileChunkStatusResponse> {
+  /** 关联的知识库列表 */
+  knowledgeBases?: Array<KnowledgeBaseItem>;
+}
+
+/**
+ * 异步任务错误信息
+ */
+export interface AsyncTaskErrorResponse {
+  /** 错误详情 */
+  body: {
+    detail: string;
+  };
+  /** 错误名称 */
+  name: string;
+}
+
+/**
+ * 文件分块状态响应
+ */
+export interface FileChunkStatusResponse {
+  /** 分块数量 */
+  chunkCount: number | null;
+  /** 分块任务错误信息 */
+  chunkingError?: AsyncTaskErrorResponse | null;
+  /** 分块任务状态 */
+  chunkingStatus?: 'pending' | 'processing' | 'success' | 'error' | null;
+  /** 嵌入任务错误信息 */
+  embeddingError?: AsyncTaskErrorResponse | null;
+  /** 嵌入任务状态 */
+  embeddingStatus?: 'pending' | 'processing' | 'success' | 'error' | null;
+  /** 嵌入任务是否已完成 */
+  finishEmbedding?: boolean;
 }
 
 // ==================== Common Schemas ====================

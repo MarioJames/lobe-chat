@@ -1,0 +1,286 @@
+# yaml-language-server: $schema=https://app.stainless.com/config.schema.json
+
+organization:
+  # Name of your organization or company, used to determine the name of the client
+  # and headings.
+  name: lobehub-sit
+  # Link to your API documentation.
+  docs: ""
+  # Contact email for bug reports, questions, and support requests.
+  contact: ""
+
+# `targets` define the output targets and their customization options, such as
+# whether to emit the Node SDK and what it's package name should be.
+targets:
+  typescript:
+    package_name: lobehub-sit
+    production_repo: null
+    publish:
+      npm: false
+
+# `environments` are a map of the name of the environment (e.g. "sandbox",
+# "production") to the corresponding url to use.
+environments:
+  production: /api/v1
+
+# openapi config，https://www.stainless.com/docs/reference/config#open-api-config
+openapi:
+  code_samples:
+    bump.sh: true
+
+# `resources` define the structure and organization for your API, such as how
+# methods and models are grouped together and accessed. See the [configuration
+# guide] for more information.
+#
+# [configuration guide]: https://www.stainless.com/docs/guides/configure#resources
+resources:
+  users:
+    # Configure the methods defined in this resource. Each key in the object is the
+    # name of the method and the value is either an endpoint (for example, `get /foo`)
+    # or an object with more detail.
+    #
+    # [reference]: https://www.stainless.com/docs/reference/config#method
+    models:
+      api_response_base: "#/components/schemas/ApiResponseBase"
+      api_response_void: "#/components/schemas/ApiResponseVoid"
+      api_response_user: "#/components/schemas/ApiResponseUser"
+      user_with_roles: "#/components/schemas/UserWithRoles"
+    methods:
+      retrieve_current: get /users/me
+      list: get /users
+      create: post /users
+      retrieve: get /users/{id}
+      update: patch /users/{id}
+      delete: delete /users/{id}
+    # Subresources define resources that are nested within another for more powerful
+    # logical groupings, e.g. `cards.payments`.
+    subresources:
+      roles:
+        # Configure the models--named types--defined in the resource. Each key in the
+        # object is the name of the model and the value is either the name of a schema in
+        # `#/components/schemas` or an object with more detail.
+        #
+        # [reference]: https://www.stainless.com/docs/reference/config#model
+        models:
+          api_response_user_roles: "#/components/schemas/ApiResponseUserRoles"
+        methods:
+          list: get /users/{id}/roles
+          update: patch /users/{id}/roles
+          clear: delete /users/{id}/roles
+
+  agents:
+    models:
+      api_response_agent: "#/components/schemas/ApiResponseAgent"
+      agent: "#/components/schemas/Agent"
+      create_agent: "#/components/schemas/CreateAgentRequest"
+    methods:
+      list: get /agents
+      create: post /agents
+      retrieve: get /agents/{id}
+      update: patch /agents/{id}
+      delete: delete /agents/{id}
+
+  files:
+    models:
+      api_response_file_list: "#/components/schemas/ApiResponseFileList"
+      api_response_file_detail: "#/components/schemas/ApiResponseFileDetail"
+      api_response_file_url: "#/components/schemas/ApiResponseFileUrl"
+      api_response_file_parse: "#/components/schemas/ApiResponseFileParse"
+      api_response_file_chunk_status: "#/components/schemas/ApiResponseFileChunkStatus"
+      api_response_file_chunk_task: "#/components/schemas/ApiResponseFileChunkTask"
+      api_response_batch_file_upload: "#/components/schemas/ApiResponseBatchFileUpload"
+      api_response_batch_get_files: "#/components/schemas/ApiResponseBatchGetFiles"
+      file: "#/components/schemas/File"
+      file_detail: "#/components/schemas/FileDetail"
+      file_url: "#/components/schemas/FileUrl"
+      file_parse: "#/components/schemas/FileParse"
+      file_chunk_task: "#/components/schemas/FileChunkTask"
+      file_chunk_status: "#/components/schemas/FileChunkStatus"
+      batch_file_upload: "#/components/schemas/BatchFileUpload"
+      batch_get_files: "#/components/schemas/BatchGetFiles"
+    methods:
+      list: get /files
+      upload: post /files
+      retrieve: get /files/{id}
+      delete: delete /files/{id}
+      get_presigned_url: get /files/{id}/url
+      parse_content: post /files/{id}/parses
+      create_chunk_task: post /files/{id}/chunks
+      chunk_status: get /files/{id}/chunks
+      batch_upload: post /files/batches
+      batch_get: post /files/queries
+
+  messages:
+    models:
+      api_response_message: "#/components/schemas/ApiResponseMessage"
+      message: "#/components/schemas/Message"
+      create_message_request: "#/components/schemas/CreateMessageRequest"
+    methods:
+      count: get /messages/count
+      list: get /messages
+      delete_batch: delete /messages
+      create: post /messages
+      retrieve: get /messages/{id}
+      delete: delete /messages/{id}
+      repies: post /messages/repies
+
+  message_translations:
+    models:
+      api_response_translation: "#/components/schemas/ApiResponseTranslation"
+      translate_trigger: "#/components/schemas/TranslateTrigger"
+    methods:
+      translate: post /message-translations/{messageId}
+      retrieve: get /message-translations/{messageId}
+      update: patch /message-translations/{messageId}
+      delete: delete /message-translations/{messageId}
+
+  models:
+    models:
+      api_response: "#/components/schemas/ApiResponseModel"
+      model: "#/components/schemas/Model"
+      create_model: "#/components/schemas/CreateModelRequest"
+    methods:
+      list: get /models
+      create: post /models
+      retrieve: get /models/{providerId}/{modelId}
+      update: patch /models/{providerId}/{modelId}
+
+  permissions:
+    models:
+      api_response_permission: "#/components/schemas/ApiResponsePermission"
+      permission: "#/components/schemas/Permission"
+      create_permission: "#/components/schemas/CreatePermissionRequest"
+    methods:
+      list: get /permissions
+      create: post /permissions
+      retrieve: get /permissions/{id}
+      update: patch /permissions/{id}
+      delete: delete /permissions/{id}
+
+  providers:
+    models:
+      api_response_provider: "#/components/schemas/ApiResponseProvider"
+      provider: "#/components/schemas/Provider"
+      create_provider_request: "#/components/schemas/CreateProviderRequest"
+    methods:
+      list: get /providers
+      create: post /providers
+      retrieve: get /providers/{id}
+      update: patch /providers/{id}
+      delete: delete /providers/{id}
+
+  roles:
+    models:
+      role: "#/components/schemas/Role"
+      api_response_role: "#/components/schemas/ApiResponseRole"
+      create_role_request: "#/components/schemas/CreateRoleRequest"
+    methods:
+      list: get /roles
+      create: post /roles
+      retrieve: get /roles/{id}
+      update: patch /roles/{id}
+      delete: delete /roles/{id}
+    subresources:
+      permissions:
+        models:
+          api_response_role_permissions: "#/components/schemas/ApiResponseRolePermissions"
+        methods:
+          list: get /roles/{id}/permissions
+          update: patch /roles/{id}/permissions
+          clear: delete /roles/{id}/permissions
+
+  session_groups:
+    models:
+      api_response_session_group: "#/components/schemas/ApiResponseSessionGroup"
+      session_group: "#/components/schemas/SessionGroup"
+    methods:
+      list: get /session-groups
+      create: post /session-groups
+      retrieve: get /session-groups/{id}
+      update: patch /session-groups/{id}
+      delete: delete /session-groups/{id}
+
+  sessions:
+    models:
+      api_response_session: "#/components/schemas/ApiResponseSession"
+      api_response_session_list: "#/components/schemas/ApiResponseSessionList"
+      session: "#/components/schemas/Session"
+      update_session_request: "#/components/schemas/UpdateSessionRequest"
+    methods:
+      list: get /sessions
+      create: post /sessions
+      batch_update: patch /sessions
+      list_grouped_by_agent: get /sessions/groups
+      retrieve: get /sessions/{id}
+      update: patch /sessions/{id}
+      delete: delete /sessions/{id}
+
+  topics:
+    models:
+      api_response_topic: "#/components/schemas/ApiResponseTopic"
+      topic: "#/components/schemas/Topic"
+    methods:
+      list: get /topics
+      create: post /topics
+      retrieve: get /topics/{id}
+      update: patch /topics/{id}
+      delete: delete /topics/{id}
+
+  knowledge_bases:
+    models:
+      api_response_knowledge_base_list: "#/components/schemas/ApiResponseKnowledgeBaseList"
+      api_response_knowledge_base: "#/components/schemas/ApiResponseKnowledgeBase"
+      api_response_knowledge_base_delete: "#/components/schemas/ApiResponseKnowledgeBaseDelete"
+      knowledge_base: "#/components/schemas/KnowledgeBase"
+      knowledge_base_list_item: "#/components/schemas/KnowledgeBaseListItem"
+      create_knowledge_base_request: "#/components/schemas/CreateKnowledgeBaseRequest"
+      update_knowledge_base_request: "#/components/schemas/UpdateKnowledgeBaseRequest"
+      kb_api_response_file_list: "#/components/schemas/ApiResponseFileList"
+      kb_file: "#/components/schemas/File"
+    methods:
+      list: get /knowledge-bases
+      create: post /knowledge-bases
+      retrieve: get /knowledge-bases/{id}
+      update: patch /knowledge-bases/{id}
+      delete: delete /knowledge-bases/{id}
+    subresources:
+      files:
+        models:
+          kb_api_response_file_list: "#/components/schemas/ApiResponseFileList"
+          kb_file: "#/components/schemas/File"
+        methods:
+          list: get /knowledge-bases/{id}/files
+
+settings:
+  # All generated integration tests that hit the prism mock http server are marked
+  # as skipped. Removing this setting or setting it to false enables tests, but
+  # doing so may result in test failures due to bugs in the test server.
+  #
+  # [prism mock http server]: https://stoplight.io/open-source/prism
+  disable_mock_tests: true
+  license: Apache-2.0
+
+# `client_settings` define settings for the API client, such as extra constructor
+# arguments (used for authentication), retry behavior, idempotency, etc.
+client_settings:
+  opts:
+    api_key:
+      type: string
+      nullable: false
+      auth:
+        security_scheme: BearerAuth
+      read_env: LOBEHUB_API_KEY
+
+# `readme` is used to configure the code snippets that will be rendered in the
+# README.md of various SDKs. In particular, you can change the `headline`
+# snippet's endpoint and the arguments to call it with.
+readme:
+  example_requests:
+    default:
+      type: request
+      endpoint: get /users/me
+      params: {}
+    headline:
+      type: request
+      endpoint: get /users/me
+      params: {}
