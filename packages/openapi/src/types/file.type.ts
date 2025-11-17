@@ -58,12 +58,18 @@ export interface PublicFileUploadRequest {
 export interface FileListQuery extends IPaginationQuery {
   /** 文件类型过滤 */
   fileType?: string;
+  /** 更新时间结束 */
+  updatedAtEnd?: string;
+  /** 更新时间起始 */
+  updatedAtStart?: string;
   /** 用户ID */
   userId?: string;
 }
 
 export const FileListQuerySchema = PaginationQuerySchema.extend({
   fileType: z.string().optional(),
+  updatedAtEnd: z.string().datetime().optional(),
+  updatedAtStart: z.string().datetime().optional(),
   userId: z.string().optional(),
 });
 

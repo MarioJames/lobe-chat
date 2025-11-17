@@ -1,5 +1,5 @@
 import { AsyncTaskStatus, AsyncTaskType, FileMetadata } from '@lobechat/types';
-import { and, count, desc, eq, ilike } from 'drizzle-orm';
+import { and, count, desc, eq, gte, ilike, lte } from 'drizzle-orm';
 import { sha256 } from 'js-sha256';
 
 import { AsyncTaskModel } from '@/database/models/asyncTask';
@@ -170,7 +170,7 @@ export class FileUploadService extends BaseService {
       const { limit, offset } = processPaginationConditions(request);
 
       // 构建查询条件
-      const { keyword, fileType } = request;
+      const { keyword, fileType, updatedAtStart, updatedAtEnd } = request;
 
       const whereConditions = [];
 
@@ -187,6 +187,14 @@ export class FileUploadService extends BaseService {
       // 添加文件类型过滤
       if (fileType) {
         whereConditions.push(ilike(files.fileType, `${fileType}%`));
+      }
+
+      // 添加更新时间区间过滤
+      if (updatedAtStart) {
+        whereConditions.push(gte(files.updatedAt, new Date(updatedAtStart)));
+      }
+      if (updatedAtEnd) {
+        whereConditions.push(lte(files.updatedAt, new Date(updatedAtEnd)));
       }
 
       const whereClause = and(...whereConditions);
