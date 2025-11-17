@@ -40,9 +40,11 @@ export const KnowledgeBaseFileListQuerySchema = PaginationQuerySchema.extend({
 /**
  * 知识库列表响应类型
  */
+export type KnowledgeBaseAccessType = 'owner' | 'userGrant' | 'roleGrant' | 'public';
+
 export interface KnowledgeBaseListItem extends KnowledgeBaseItem {
-  /** 当前用户是否被授权 */
-  isAuthorized: boolean;
+  /** 当前用户对该知识库的访问来源类型 */
+  accessType?: KnowledgeBaseAccessType;
 }
 
 export type KnowledgeBaseListResponse = PaginationQueryResponse<{

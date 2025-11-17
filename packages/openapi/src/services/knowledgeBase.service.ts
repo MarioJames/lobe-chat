@@ -1,4 +1,4 @@
-import { and, count, desc, eq, ilike, inArray, or, sql } from 'drizzle-orm';
+import { and, eq, inArray, or, sql } from 'drizzle-orm';
 
 import { KnowledgeBaseModel } from '@/database/models/knowledgeBase';
 import {
@@ -16,7 +16,9 @@ import {
   CreateKnowledgeBaseRequest,
   CreateKnowledgeBaseResponse,
   DeleteKnowledgeBaseResponse,
+  KnowledgeBaseAccessType,
   KnowledgeBaseDetailResponse,
+  KnowledgeBaseListItem,
   KnowledgeBaseListQuery,
   KnowledgeBaseListResponse,
   UpdateKnowledgeBaseRequest,
@@ -48,54 +50,23 @@ export class KnowledgeBaseService extends BaseService {
 
       this.log('info', 'Getting knowledge base list', request);
 
-      // 计算分页参数
+      // 计算分页参数与查询条件
       const { limit, offset } = processPaginationConditions(request);
-
-      // 构建查询条件
       const { keyword, type, enabled } = request;
 
-      const whereConditions = [];
+      // 使用模型层统一封装的可见性规则 + 分页查询
+      const { items, total } = await this.knowledgeBaseModel.queryForList({
+        enabled,
+        keyword,
+        limit,
+        offset,
+        type,
+      });
 
-      // 添加权限相关的查询条件（如果需要过滤到特定用户）
-      if (permissionResult?.condition?.userId) {
-        whereConditions.push(eq(knowledgeBases.userId, permissionResult.condition.userId));
-      }
+      const knowledgeBaseIds = items.map((item) => item.id);
 
-      // 添加模糊查询条件
-      if (keyword) {
-        whereConditions.push(
-          or(
-            ilike(knowledgeBases.name, `%${keyword}%`),
-            ilike(knowledgeBases.description, `%${keyword}%`),
-          ),
-        );
-      }
-
-      // 添加类型过滤
-      if (type) {
-        whereConditions.push(eq(knowledgeBases.type, type));
-      }
-
-      // 添加启用状态过滤
-      if (enabled !== undefined) {
-        whereConditions.push(eq(knowledgeBases.enabled, enabled));
-      }
-
-      const whereClause = whereConditions.length > 0 ? and(...whereConditions) : undefined;
-
-      const [kbResult, totalResult] = await Promise.all([
-        this.db.query.knowledgeBases.findMany({
-          limit: limit,
-          offset: offset,
-          orderBy: desc(knowledgeBases.updatedAt),
-          where: whereClause,
-        }),
-        this.db.select({ count: count() }).from(knowledgeBases).where(whereClause),
-      ]);
-
-      const knowledgeBaseIds = kbResult.map((item) => item.id);
-
-      const authorizedKnowledgeBaseIdSet = new Set<string>();
+      const userAuthorizedKnowledgeBaseIdSet = new Set<string>();
+      const roleAuthorizedKnowledgeBaseIdSet = new Set<string>();
 
       // 根据知识库的 id 查询被授权的情况（个人授权和角色授权）
       if (knowledgeBaseIds.length > 0) {
@@ -130,33 +101,43 @@ export class KnowledgeBaseService extends BaseService {
         ]);
 
         for (const grant of userGrants) {
-          authorizedKnowledgeBaseIdSet.add(grant.knowledgeBaseId);
+          userAuthorizedKnowledgeBaseIdSet.add(grant.knowledgeBaseId);
         }
 
         for (const grant of roleGrants) {
-          authorizedKnowledgeBaseIdSet.add(grant.knowledgeBaseId);
+          roleAuthorizedKnowledgeBaseIdSet.add(grant.knowledgeBaseId);
         }
       }
 
-      const knowledgeBasesWithAuthorization = kbResult.map((item) => {
+      // 添加访问类型
+      const knowledgeBasesWithAuthorization = items.map((item) => {
         const isPersonalOwned = item.type === 'personal' && item.userId === this.userId;
+        const isUserGranted = userAuthorizedKnowledgeBaseIdSet.has(item.id);
+        const isRoleGranted = roleAuthorizedKnowledgeBaseIdSet.has(item.id);
         const isPublic = item.isPublic === true;
-        const isAuthorizedByGrant = authorizedKnowledgeBaseIdSet.has(item.id);
+
+        let accessType: KnowledgeBaseAccessType;
+
+        if (isPersonalOwned) accessType = 'owner';
+        else if (isUserGranted) accessType = 'userGrant';
+        else if (isRoleGranted) accessType = 'roleGrant';
+        else if (isPublic) accessType = 'public';
+        else accessType = 'public';
 
         return {
           ...item,
-          isAuthorized: isPersonalOwned || isPublic || isAuthorizedByGrant,
-        };
+          accessType,
+        } as KnowledgeBaseListItem;
       });
 
       this.log('info', 'Knowledge base list retrieved successfully', {
         count: knowledgeBasesWithAuthorization.length,
-        total: totalResult[0]?.count || 0,
+        total,
       });
 
       return {
         knowledgeBases: knowledgeBasesWithAuthorization,
-        total: totalResult[0]?.count || 0,
+        total,
       };
     } catch (error) {
       this.handleServiceError(error, '获取知识库列表');

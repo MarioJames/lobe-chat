@@ -2764,9 +2764,10 @@ components:
         - $ref: '#/components/schemas/KnowledgeBase'
         - type: object
           properties:
-            isAuthorized:
-              type: boolean
-              description: Whether current user is authorized to access this knowledge base
+            accessType:
+              type: string
+              enum: [owner, userGrant, roleGrant, public]
+              description: Access type/source of the current user for this knowledge base
     CreateKnowledgeBaseRequest:
       type: object
       properties:
