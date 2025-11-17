@@ -225,12 +225,41 @@ export class FileUploadService extends BaseService {
         this.db.select({ count: count() }).from(files).where(whereClause),
       ]);
 
+      // 获取分块和任务状态信息
+      const fileIds = filesResult.map((file) => file.id);
+
+      const [chunkCounts, chunkTasks, embeddingTasks] = await Promise.all([
+        this.chunkModel.countByFileIds(fileIds),
+        this.asyncTaskModel.findByIds(
+          filesResult.map((file) => file.chunkTaskId).filter(Boolean) as string[],
+          AsyncTaskType.Chunking,
+        ),
+        this.asyncTaskModel.findByIds(
+          filesResult.map((file) => file.embeddingTaskId).filter(Boolean) as string[],
+          AsyncTaskType.Embedding,
+        ),
+      ]);
+
       // 转换为响应格式
       const responseFiles = await Promise.all(
         filesResult.map(async (file: any) => {
           const base = await this.convertToResponse(file);
+
+          const chunkCountItem = chunkCounts.find((c) => c.id === file.id);
+          const chunkTask = file.chunkTaskId
+            ? chunkTasks.find((task) => task.id === file.chunkTaskId)
+            : null;
+          const embeddingTask = file.embeddingTaskId
+            ? embeddingTasks.find((task) => task.id === file.embeddingTaskId)
+            : null;
+
           return {
             ...base,
+            chunking: {
+              ...chunkTask,
+              count: chunkCountItem?.count ?? null,
+            },
+            embedding: embeddingTask,
             knowledgeBases: file.knowledgeBases?.map((kb: any) => kb.knowledgeBase) || [],
           };
         }),
