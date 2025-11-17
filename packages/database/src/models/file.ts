@@ -44,7 +44,7 @@ export class FileModel {
 
       const result = await tx
         .insert(files)
-        .values({ ...params, userId: this.userId })
+        .values({ userId: this.userId, ...params })
         .returning();
 
       const item = result[0];
