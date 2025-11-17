@@ -2,10 +2,12 @@ import type { IconType } from '@lobehub/icons';
 import type { LobeChatProps } from '@lobehub/ui/brand';
 import { createStyles, useTheme } from 'antd-style';
 import Image, { ImageProps } from 'next/image';
-import { ReactNode, forwardRef, memo } from 'react';
+import { ReactNode, forwardRef, memo, useMemo } from 'react';
 import { Flexbox, FlexboxProps } from 'react-layout-kit';
 
 import { BRANDING_LOGO_URL, BRANDING_NAME } from '@/const/branding';
+import { useServerConfigStore } from '@/store/serverConfig';
+import { customizationSelectors } from '@/store/serverConfig/selectors';
 
 const useStyles = createStyles(({ css }) => {
   return {
@@ -17,6 +19,9 @@ const useStyles = createStyles(({ css }) => {
 });
 
 const CustomTextLogo = memo<FlexboxProps & { size: number }>(({ size, style, ...rest }) => {
+  const baseConfig = useServerConfigStore(customizationSelectors.base);
+  const brandName = baseConfig?.brandName || BRANDING_NAME;
+
   return (
     <Flexbox
       height={size}
@@ -28,18 +33,36 @@ const CustomTextLogo = memo<FlexboxProps & { size: number }>(({ size, style, ...
       }}
       {...rest}
     >
-      {BRANDING_NAME}
+      {brandName}
     </Flexbox>
   );
 });
 
 const CustomImageLogo = memo<Omit<ImageProps, 'alt' | 'src'> & { size: number }>(
   ({ size, ...rest }) => {
+    const baseConfig = useServerConfigStore(customizationSelectors.base);
+    const theme = useTheme();
+    const logoUrl = useMemo(() => {
+      if (baseConfig?.logo) {
+        // Use theme-aware logo (light/dark)
+        const url = theme.appearance === 'dark' ? baseConfig.logo.dark : baseConfig.logo.light;
+        // If custom logo URL is empty, fallback to default
+        return url || BRANDING_LOGO_URL;
+      }
+      return BRANDING_LOGO_URL;
+    }, [baseConfig?.logo, theme.appearance]);
+    const brandName = baseConfig?.brandName || BRANDING_NAME;
+
+    // If logoUrl is empty, render text logo instead
+    if (!logoUrl) {
+      return <CustomTextLogo size={size} {...rest} />;
+    }
+
     return (
       <Image
-        alt={BRANDING_NAME}
+        alt={brandName}
         height={size}
-        src={BRANDING_LOGO_URL}
+        src={logoUrl}
         unoptimized={true}
         width={size}
         {...rest}

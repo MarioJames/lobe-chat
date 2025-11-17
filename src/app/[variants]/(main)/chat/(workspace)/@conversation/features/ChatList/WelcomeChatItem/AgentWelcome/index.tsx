@@ -15,6 +15,7 @@ import { agentSelectors } from '@/store/agent/selectors';
 import { useChatStore } from '@/store/chat';
 import { chatSelectors } from '@/store/chat/selectors';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
+import { customizationSelectors } from '@/store/serverConfig/selectors';
 import { useSessionStore } from '@/store/session';
 import { sessionMetaSelectors } from '@/store/session/selectors';
 
@@ -64,10 +65,47 @@ const InboxWelcome = memo(() => {
 
   const showInboxWelcome = useChatStore(chatSelectors.showInboxWelcome);
 
+  // Get customization welcome config
+  const welcomeConfig = useServerConfigStore(customizationSelectors.welcome);
+
   const message = useMemo(() => {
     if (openingMessage) return openingMessage;
     return agentSystemRoleMsg;
   }, [openingMessage, agentSystemRoleMsg, meta.description]);
+
+  // Get questions from customization config or default
+  const questions = useMemo(() => {
+    if (welcomeConfig?.type === 'recommended') {
+      const config = welcomeConfig.config;
+      // Merge defaultQuestions and newUserQuestions
+      return [...(config.defaultQuestions || []), ...(config.newUserQuestions || [])];
+    }
+    return openingQuestions;
+  }, [welcomeConfig?.type, welcomeConfig?.config, openingQuestions]);
+
+  // Get welcome content from customization config
+  const welcomeContent = useMemo(() => {
+    if (welcomeConfig?.type === 'recommended' && welcomeConfig.config.welcomeContent) {
+      return welcomeConfig.config.welcomeContent;
+    }
+    if (welcomeConfig?.type === 'custom' && welcomeConfig.config.render) {
+      return welcomeConfig.config.render;
+    }
+    return null;
+  }, [welcomeConfig?.type, welcomeConfig?.config]);
+
+  // If custom type, render custom content directly
+  if (welcomeConfig?.type === 'custom' && welcomeContent) {
+    return (
+      <Center gap={12} padding={16} width={'100%'}>
+        <Flexbox className={styles.container} gap={16} style={{ maxWidth: 800 }} width={'100%'}>
+          <Markdown allowHtml className={styles.desc} variant={'chat'}>
+            {welcomeContent}
+          </Markdown>
+        </Flexbox>
+      </Center>
+    );
+  }
 
   return (
     <Center gap={12} padding={16} width={'100%'}>
@@ -77,6 +115,7 @@ const InboxWelcome = memo(() => {
           <h1 className={styles.title}>{greeting}</h1>
         </Flexbox>
         <Markdown
+          allowHtml
           className={styles.desc}
           customRender={(dom, context) => {
             if (context.text.includes('<plus />')) {
@@ -96,15 +135,17 @@ const InboxWelcome = memo(() => {
           }}
           variant={'chat'}
         >
-          {showInboxWelcome
-            ? t(showCreateSession ? 'guide.defaultMessage' : 'guide.defaultMessageWithoutCreate', {
-                appName: BRANDING_NAME,
-              })
-            : message}
+          {welcomeContent ||
+            (showInboxWelcome
+              ? t(
+                  showCreateSession ? 'guide.defaultMessage' : 'guide.defaultMessageWithoutCreate',
+                  {
+                    appName: BRANDING_NAME,
+                  },
+                )
+              : message)}
         </Markdown>
-        {openingQuestions.length > 0 && (
-          <OpeningQuestions mobile={mobile} questions={openingQuestions} />
-        )}
+        {questions.length > 0 && <OpeningQuestions mobile={mobile} questions={questions} />}
       </Flexbox>
     </Center>
   );

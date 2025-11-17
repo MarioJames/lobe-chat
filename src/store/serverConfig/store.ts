@@ -1,4 +1,5 @@
 import { StoreApiWithSelector } from '@lobechat/types';
+import type { CustomizationConfig } from '@lobechat/types';
 import { StoreApi } from 'zustand';
 import { createContext } from 'zustand-utils';
 import { shallow } from 'zustand/shallow';
@@ -17,6 +18,7 @@ import { merge } from '@/utils/merge';
 import { ServerConfigAction, createServerConfigSlice } from './action';
 
 interface ServerConfigState {
+  customizationConfig: CustomizationConfig | null;
   featureFlags: IFeatureFlagsState;
   isMobile?: boolean;
   segmentVariants?: string;
@@ -24,6 +26,7 @@ interface ServerConfigState {
 }
 
 const initialState: ServerConfigState = {
+  customizationConfig: null,
   featureFlags: mapFeatureFlagsEnvToState(DEFAULT_FEATURE_FLAGS),
   segmentVariants: '',
   serverConfig: { aiProvider: {}, telemetry: {} },

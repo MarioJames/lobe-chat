@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { memo } from 'react';
+import { memo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { createStoreUpdater } from 'zustand-utils';
 
@@ -12,7 +12,7 @@ import { useAiInfraStore } from '@/store/aiInfra';
 import { useGlobalStore } from '@/store/global';
 import { systemStatusSelectors } from '@/store/global/selectors';
 import { useServerConfigStore } from '@/store/serverConfig';
-import { serverConfigSelectors } from '@/store/serverConfig/selectors';
+import { customizationSelectors, serverConfigSelectors } from '@/store/serverConfig/selectors';
 import { useUserStore } from '@/store/user';
 import { authSelectors } from '@/store/user/selectors';
 
@@ -41,6 +41,10 @@ const StoreInitialization = memo(() => {
   const useFetchServerConfig = useServerConfigStore((s) => s.useInitServerConfig);
   useFetchServerConfig();
 
+  // fetch customization config
+  const useFetchCustomizationConfig = useServerConfigStore((s) => s.useInitCustomizationConfig);
+  useFetchCustomizationConfig();
+
   // Update NextAuth status
   const useUserStoreUpdater = createStoreUpdater(useUserStore);
   const oAuthSSOProviders = useServerConfigStore(serverConfigSelectors.oAuthSSOProviders);
@@ -57,8 +61,43 @@ const StoreInitialization = memo(() => {
   const isDBInited = useGlobalStore(systemStatusSelectors.isDBInited);
   const isLoginOnInit = isDBInited ? Boolean(enableNextAuth ? isSignedIn : isLogin) : false;
 
+  // Get customization defaultAgent config, merge with serverConfig defaultAgent
+  const customizationDefaultAgent = useServerConfigStore(customizationSelectors.defaultAgent);
+  const defaultAgentConfig = customizationDefaultAgent
+    ? {
+        model: customizationDefaultAgent.modelId,
+        params: {
+          max_tokens: customizationDefaultAgent.params.maxTokens,
+          temperature: customizationDefaultAgent.params.temperature,
+          top_p: customizationDefaultAgent.params.topP,
+        },
+        plugins: customizationDefaultAgent.plugins,
+        systemRole: customizationDefaultAgent.systemRole || '',
+      }
+    : serverConfig.defaultAgent?.config;
+
+  // Update default agent meta if customization config exists
+  const updateDefaultAgent = useUserStore((s) => s.updateDefaultAgent);
+  useEffect(() => {
+    if (customizationDefaultAgent) {
+      updateDefaultAgent({
+        meta: {
+          avatar: customizationDefaultAgent.avatar,
+          description: customizationDefaultAgent.description,
+          title: customizationDefaultAgent.title,
+        },
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    customizationDefaultAgent?.avatar,
+    customizationDefaultAgent?.description,
+    customizationDefaultAgent?.title,
+    updateDefaultAgent,
+  ]);
+
   // init inbox agent and default agent config
-  useInitAgentStore(isLoginOnInit, serverConfig.defaultAgent?.config);
+  useInitAgentStore(isLoginOnInit, defaultAgentConfig);
 
   // init user provider key vaults
   useInitAiProviderKeyVaults(isLoginOnInit);
