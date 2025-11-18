@@ -455,6 +455,42 @@ paths:
         '401': { $ref: '#/components/responses/UnauthorizedError' }
         '403': { $ref: '#/components/responses/ForbiddenError' }
         '404': { $ref: '#/components/responses/NotFoundError' }
+    patch:
+      tags: [Files]
+      summary: Update file (partial)
+      description: |
+        Update file properties, such as associated knowledge base.
+        - Requires FILE_UPDATE permission
+        - Only the file owner can update the file
+        - Can associate/disassociate file with knowledge base
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                knowledgeBaseId:
+                  type: string
+                  nullable: true
+                  description: Knowledge base ID to associate with (null to disassociate)
+      responses:
+        '200':
+          {
+            description: File updated successfully,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      { $ref: '#/components/schemas/ApiResponseFileDetail' },
+                  },
+              },
+          }
+        '400': { $ref: '#/components/responses/BadRequestError' }
+        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        '403': { $ref: '#/components/responses/ForbiddenError' }
+        '404': { $ref: '#/components/responses/NotFoundError' }
     delete:
       tags: [Files]
       summary: Delete a file

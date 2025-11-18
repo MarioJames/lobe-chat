@@ -102,6 +102,7 @@ resources:
       list: get /files
       upload: post /files
       retrieve: get /files/{id}
+      update: patch /files/{id}
       delete: delete /files/{id}
       get_presigned_url: get /files/{id}/url
       parse_content: post /files/{id}/parses

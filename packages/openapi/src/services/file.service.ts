@@ -1230,4 +1230,69 @@ export class FileUploadService extends BaseService {
       }),
     );
   }
+
+  /**
+   * 更新文件
+   * PATCH /files/:id
+   */
+  async updateFile(
+    fileId: string,
+    updateData: { knowledgeBaseId?: string | null },
+  ): Promise<FileDetailResponse> {
+    try {
+      const isPermitted = await this.resolveOperationPermission('FILE_UPDATE');
+      if (!isPermitted.isPermitted) {
+        throw this.createAuthorizationError(isPermitted.message || '无权更新文件');
+      }
+
+      // 1. 验证文件是否存在且属于当前用户
+      const file = await this.db.query.files.findFirst({
+        where: and(eq(files.id, fileId), eq(files.userId, this.userId)),
+      });
+
+      if (!file) {
+        throw this.createNotFoundError('文件不存在或无权访问');
+      }
+
+      // 2. 处理知识库关联
+      if ('knowledgeBaseId' in updateData) {
+        await this.db.transaction(async (trx) => {
+          // 删除现有的知识库关联
+          await trx
+            .delete(knowledgeBaseFiles)
+            .where(
+              and(
+                eq(knowledgeBaseFiles.fileId, fileId),
+                eq(knowledgeBaseFiles.userId, this.userId),
+              ),
+            );
+
+          // 如果提供了新的知识库ID，创建新的关联
+          if (updateData.knowledgeBaseId) {
+            // 验证知识库是否存在且用户有权访问
+            const knowledgeBase = await this.knowledgeBaseModel.findById(
+              updateData.knowledgeBaseId,
+            );
+
+            if (!knowledgeBase) {
+              throw this.createNotFoundError('知识库不存在或无权访问');
+            }
+
+            await trx.insert(knowledgeBaseFiles).values({
+              fileId,
+              knowledgeBaseId: updateData.knowledgeBaseId,
+              userId: this.userId,
+            });
+          }
+        });
+      }
+
+      // 3. 获取更新后的文件详情
+      const updatedFile = await this.getFileDetail(fileId);
+
+      return updatedFile;
+    } catch (error) {
+      this.handleServiceError(error, '更新文件');
+    }
+  }
 }
