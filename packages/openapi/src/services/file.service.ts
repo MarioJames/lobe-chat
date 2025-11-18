@@ -7,7 +7,7 @@ import { ChunkModel } from '@/database/models/chunk';
 import { DocumentModel } from '@/database/models/document';
 import { FileModel } from '@/database/models/file';
 import { KnowledgeBaseModel } from '@/database/models/knowledgeBase';
-import { FileItem, files, filesToSessions, knowledgeBaseFiles } from '@/database/schemas';
+import { FileItem, files, filesToSessions, knowledgeBaseFiles, users } from '@/database/schemas';
 import { LobeChatDatabase } from '@/database/type';
 import { S3 } from '@/server/modules/S3';
 import { DocumentService } from '@/server/services/document';
@@ -228,7 +228,9 @@ export class FileUploadService extends BaseService {
         const filesResult: FileItem[] = records.map((row) => row.file);
         const fileIds = filesResult.map((file) => file.id);
 
-        const [chunkCounts, chunkTasks, embeddingTasks] = await Promise.all([
+        const userIds = [...new Set(filesResult.map((file) => file.userId))];
+
+        const [chunkCounts, chunkTasks, embeddingTasks, usersData] = await Promise.all([
           this.chunkModel.countByFileIds(fileIds),
           this.asyncTaskModel.findByIds(
             filesResult.map((file) => file.chunkTaskId).filter(Boolean) as string[],
@@ -238,6 +240,18 @@ export class FileUploadService extends BaseService {
             filesResult.map((file) => file.embeddingTaskId).filter(Boolean) as string[],
             AsyncTaskType.Embedding,
           ),
+          userIds.length > 0
+            ? this.db.query.users.findMany({
+                columns: {
+                  avatar: true,
+                  email: true,
+                  fullName: true,
+                  id: true,
+                  username: true,
+                },
+                where: inArray(users.id, userIds),
+              })
+            : Promise.resolve([]),
         ]);
 
         // 获取这些文件关联的所有知识库信息
@@ -275,6 +289,9 @@ export class FileUploadService extends BaseService {
               .filter((kb) => kb.fileId === file.id)
               .map((kb) => kb.knowledgeBase);
 
+            // 获取该文件的用户信息
+            const user = usersData.find((u) => u.id === file.userId) || null;
+
             return {
               ...base,
               chunking: {
@@ -283,6 +300,7 @@ export class FileUploadService extends BaseService {
               },
               embedding: embeddingTask,
               knowledgeBases: relatedKbs,
+              user,
             };
           }),
         );
@@ -329,7 +347,7 @@ export class FileUploadService extends BaseService {
 
       const whereClause = and(...whereConditions);
 
-      // 使用 Drizzle 关系查询获取文件及其关联的知识库列表
+      // 使用 Drizzle 关系查询获取文件及其关联的知识库列表和用户信息
       const queryOptions: any = {
         orderBy: desc(files.createdAt),
         where: whereClause,
@@ -345,6 +363,15 @@ export class FileUploadService extends BaseService {
                   name: true,
                 },
               },
+            },
+          },
+          user: {
+            columns: {
+              avatar: true,
+              email: true,
+              fullName: true,
+              id: true,
+              username: true,
             },
           },
         },
@@ -399,6 +426,7 @@ export class FileUploadService extends BaseService {
             },
             embedding: embeddingTask,
             knowledgeBases: file.knowledgeBases?.map((kb: any) => kb.knowledgeBase) || [],
+            user: file.user || null,
           };
         }),
       );
