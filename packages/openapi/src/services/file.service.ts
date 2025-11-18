@@ -1221,7 +1221,7 @@ export class FileUploadService extends BaseService {
           ...base,
           chunking: {
             ...chunkTask,
-            count: chunkCountItem?.count ?? null,
+            ...(chunkCountItem?.count && { count: chunkCountItem.count }),
           },
           embedding: embeddingTask,
           knowledgeBases,
