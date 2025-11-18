@@ -25,8 +25,11 @@ const app = new Hono();
  * - page: number (optional) - 页码，默认1
  * - pageSize: number (optional) - 每页数量，默认20，最大100
  * - fileType: string (optional) - 文件类型过滤
- * - search: string (optional) - 搜索关键词
+ * - keyword: string (optional) - 搜索关键词
  * - userId: string (optional) - 用户ID，如果提供则获取指定用户文件
+ * - knowledgeBaseId: string (optional) - 知识库ID，筛选属于指定知识库的文件
+ * - updatedAtStart: string (optional) - 更新时间起始（ISO 8601格式，如：2024-01-01T00:00:00Z）
+ * - updatedAtEnd: string (optional) - 更新时间结束（ISO 8601格式，如：2024-12-31T23:59:59Z）
  */
 app.get(
   '/',
