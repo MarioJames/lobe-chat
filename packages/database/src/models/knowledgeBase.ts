@@ -257,12 +257,8 @@ export class KnowledgeBaseModel {
       return undefined;
     }
 
-    if (kb.isPublic) {
+    if (kb.isPublic || kb.userId === this.userId) {
       return kb;
-    }
-
-    if (kb.type === 'personal') {
-      return kb.userId === this.userId ? kb : undefined;
     }
 
     if (kb.type === 'shared') {

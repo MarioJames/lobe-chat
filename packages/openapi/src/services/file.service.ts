@@ -7,7 +7,7 @@ import { ChunkModel } from '@/database/models/chunk';
 import { DocumentModel } from '@/database/models/document';
 import { FileModel } from '@/database/models/file';
 import { KnowledgeBaseModel } from '@/database/models/knowledgeBase';
-import { FileItem, files, filesToSessions, knowledgeBaseFiles } from '@/database/schemas';
+import { FileItem, files, filesToSessions, knowledgeBaseFiles, users } from '@/database/schemas';
 import { LobeChatDatabase } from '@/database/type';
 import { S3 } from '@/server/modules/S3';
 import { DocumentService } from '@/server/services/document';
@@ -170,42 +170,21 @@ export class FileUploadService extends BaseService {
       const { limit, offset } = processPaginationConditions(request);
 
       // 构建查询条件
-      const { keyword, fileType, updatedAtStart, updatedAtEnd, knowledgeBaseId } = request;
+      const { knowledgeBaseId } = request;
 
-      // 如果指定了知识库ID，使用类似 getKnowledgeBaseFileList 的逻辑
+      // 如果指定了知识库ID，使用 JOIN 查询
       if (knowledgeBaseId) {
-        const whereConditions = [eq(knowledgeBaseFiles.knowledgeBaseId, knowledgeBaseId)];
-
-        // 添加关键词搜索
-        if (keyword) {
-          whereConditions.push(ilike(files.name, `%${keyword}%`));
-        }
-
-        // 添加文件类型过滤
-        if (fileType) {
-          whereConditions.push(ilike(files.fileType, `${fileType}%`));
-        }
-
-        // 添加更新时间区间过滤
-        if (updatedAtStart) {
-          whereConditions.push(gte(files.updatedAt, new Date(updatedAtStart)));
-        }
-        if (updatedAtEnd) {
-          whereConditions.push(lte(files.updatedAt, new Date(updatedAtEnd)));
-        }
-
-        // 添加权限相关的查询条件
-        if (permissionResult?.condition?.userId) {
-          whereConditions.push(eq(files.userId, permissionResult.condition.userId));
-        }
+        // 构建查询条件
+        const whereConditions = [
+          eq(knowledgeBaseFiles.knowledgeBaseId, knowledgeBaseId),
+          ...this.buildFileWhereConditions(request, permissionResult),
+        ];
 
         const whereClause = and(...whereConditions);
 
         // 使用 JOIN 查询知识库关联的文件
         const baseQuery = this.db
-          .select({
-            file: files,
-          })
+          .select({ file: files })
           .from(knowledgeBaseFiles)
           .innerJoin(files, eq(knowledgeBaseFiles.fileId, files.id))
           .where(whereClause)
@@ -226,68 +205,10 @@ export class FileUploadService extends BaseService {
         ]);
 
         const filesResult: FileItem[] = records.map((row) => row.file);
-        const fileIds = filesResult.map((file) => file.id);
-
-        const [chunkCounts, chunkTasks, embeddingTasks] = await Promise.all([
-          this.chunkModel.countByFileIds(fileIds),
-          this.asyncTaskModel.findByIds(
-            filesResult.map((file) => file.chunkTaskId).filter(Boolean) as string[],
-            AsyncTaskType.Chunking,
-          ),
-          this.asyncTaskModel.findByIds(
-            filesResult.map((file) => file.embeddingTaskId).filter(Boolean) as string[],
-            AsyncTaskType.Embedding,
-          ),
-        ]);
-
-        // 获取这些文件关联的所有知识库信息
-        const fileKnowledgeBases =
-          fileIds.length > 0
-            ? await this.db.query.knowledgeBaseFiles.findMany({
-                where: inArray(knowledgeBaseFiles.fileId, fileIds),
-                with: {
-                  knowledgeBase: {
-                    columns: {
-                      avatar: true,
-                      description: true,
-                      id: true,
-                      name: true,
-                    },
-                  },
-                },
-              })
-            : [];
-
-        const responseFiles = await Promise.all(
-          filesResult.map(async (file) => {
-            const base = await this.convertToResponse(file);
-
-            const chunkCountItem = chunkCounts.find((c) => c.id === file.id);
-            const chunkTask = file.chunkTaskId
-              ? chunkTasks.find((task) => task.id === file.chunkTaskId)
-              : null;
-            const embeddingTask = file.embeddingTaskId
-              ? embeddingTasks.find((task) => task.id === file.embeddingTaskId)
-              : null;
-
-            // 获取该文件关联的知识库部分字段
-            const relatedKbs: any = fileKnowledgeBases
-              .filter((kb) => kb.fileId === file.id)
-              .map((kb) => kb.knowledgeBase);
-
-            return {
-              ...base,
-              chunking: {
-                ...chunkTask,
-                count: chunkCountItem?.count ?? null,
-              },
-              embedding: embeddingTask,
-              knowledgeBases: relatedKbs,
-            };
-          }),
-        );
-
         const total = totalResult[0]?.count || 0;
+
+        // 构建响应 (JOIN查询需要手动获取关联数据)
+        const responseFiles = await this.buildFileListResponse(filesResult, true);
 
         this.log('info', 'File list retrieved successfully (by knowledgeBase)', {
           count: filesResult.length,
@@ -301,36 +222,14 @@ export class FileUploadService extends BaseService {
         };
       }
 
-      // 未指定知识库ID，使用普通查询逻辑
-      const whereConditions = [];
-
-      // 添加权限相关的查询条件
-      if (permissionResult?.condition?.userId) {
-        whereConditions.push(eq(files.userId, permissionResult.condition.userId));
-      }
-
-      // 添加模糊查询条件
-      if (keyword) {
-        whereConditions.push(ilike(files.name, `%${keyword}%`));
-      }
-
-      // 添加文件类型过滤
-      if (fileType) {
-        whereConditions.push(ilike(files.fileType, `${fileType}%`));
-      }
-
-      // 添加更新时间区间过滤
-      if (updatedAtStart) {
-        whereConditions.push(gte(files.updatedAt, new Date(updatedAtStart)));
-      }
-      if (updatedAtEnd) {
-        whereConditions.push(lte(files.updatedAt, new Date(updatedAtEnd)));
-      }
-
+      // 未指定知识库ID，使用关系查询(自动 join user 和 knowledgeBases)
+      const whereConditions = this.buildFileWhereConditions(request, permissionResult);
       const whereClause = and(...whereConditions);
 
-      // 使用 Drizzle 关系查询获取文件及其关联的知识库列表
-      const queryOptions: any = {
+      // 使用 Drizzle 关系查询
+      const queryOptions = {
+        limit,
+        offset,
         orderBy: desc(files.createdAt),
         where: whereClause,
         with: {
@@ -347,70 +246,36 @@ export class FileUploadService extends BaseService {
               },
             },
           },
+          user: {
+            columns: {
+              avatar: true,
+              email: true,
+              fullName: true,
+              id: true,
+              username: true,
+            },
+          },
         },
       };
-
-      // 动态添加分页参数
-      if (limit !== undefined) {
-        queryOptions.limit = limit;
-      }
-      if (offset !== undefined) {
-        queryOptions.offset = offset;
-      }
 
       const [filesResult, totalResult] = await Promise.all([
         this.db.query.files.findMany(queryOptions),
         this.db.select({ count: count() }).from(files).where(whereClause),
       ]);
 
-      // 获取分块和任务状态信息
-      const fileIds = filesResult.map((file) => file.id);
+      const total = totalResult[0]?.count || 0;
 
-      const [chunkCounts, chunkTasks, embeddingTasks] = await Promise.all([
-        this.chunkModel.countByFileIds(fileIds),
-        this.asyncTaskModel.findByIds(
-          filesResult.map((file) => file.chunkTaskId).filter(Boolean) as string[],
-          AsyncTaskType.Chunking,
-        ),
-        this.asyncTaskModel.findByIds(
-          filesResult.map((file) => file.embeddingTaskId).filter(Boolean) as string[],
-          AsyncTaskType.Embedding,
-        ),
-      ]);
-
-      // 转换为响应格式
-      const responseFiles = await Promise.all(
-        filesResult.map(async (file: any) => {
-          const base = await this.convertToResponse(file);
-
-          const chunkCountItem = chunkCounts.find((c) => c.id === file.id);
-          const chunkTask = file.chunkTaskId
-            ? chunkTasks.find((task) => task.id === file.chunkTaskId)
-            : null;
-          const embeddingTask = file.embeddingTaskId
-            ? embeddingTasks.find((task) => task.id === file.embeddingTaskId)
-            : null;
-
-          return {
-            ...base,
-            chunking: {
-              ...chunkTask,
-              count: chunkCountItem?.count ?? null,
-            },
-            embedding: embeddingTask,
-            knowledgeBases: file.knowledgeBases?.map((kb: any) => kb.knowledgeBase) || [],
-          };
-        }),
-      );
+      // 构建响应 (关系查询已包含 user 和 knowledgeBases)
+      const responseFiles = await this.buildFileListResponse(filesResult, false);
 
       this.log('info', 'File list retrieved successfully', {
         count: filesResult.length,
-        total: totalResult[0]?.count || 0,
+        total,
       });
 
       return {
         files: responseFiles,
-        total: totalResult[0]?.count || 0,
+        total,
       };
     } catch (error) {
       this.handleServiceError(error, '获取文件列表');
@@ -1221,6 +1086,213 @@ export class FileUploadService extends BaseService {
       return existingFile || null;
     } catch (error) {
       this.handleServiceError(error, '查找用户是否已有指定哈希的文件记录');
+    }
+  }
+
+  /**
+   * 构建文件查询的 WHERE 条件
+   */
+  private buildFileWhereConditions(
+    request: FileListQuery,
+    permissionResult: {
+      condition?: { userId?: string };
+      isPermitted: boolean;
+      message?: string;
+    },
+  ) {
+    const { keyword, fileType, updatedAtStart, updatedAtEnd } = request;
+    const conditions = [];
+
+    // 权限条件
+    if (permissionResult?.condition?.userId) {
+      conditions.push(eq(files.userId, permissionResult.condition.userId));
+    }
+
+    // 关键词搜索
+    if (keyword) {
+      conditions.push(ilike(files.name, `%${keyword}%`));
+    }
+
+    // 文件类型过滤
+    if (fileType) {
+      conditions.push(ilike(files.fileType, `${fileType}%`));
+    }
+
+    // 更新时间区间
+    if (updatedAtStart) {
+      conditions.push(gte(files.updatedAt, new Date(updatedAtStart)));
+    }
+    if (updatedAtEnd) {
+      conditions.push(lte(files.updatedAt, new Date(updatedAtEnd)));
+    }
+
+    return conditions;
+  }
+
+  /**
+   * 批量获取文件关联数据并构建响应
+   * @param filesResult 文件列表(FileItem 或带关系的文件对象)
+   * @param needsManualRelationFetch 是否需要手动获取关联数据(JOIN查询时需要)
+   */
+  private async buildFileListResponse(
+    filesResult: (FileItem & {
+      knowledgeBases?: any[];
+      user?: any;
+    })[],
+    needsManualRelationFetch = false,
+  ) {
+    if (filesResult.length === 0) return [];
+
+    const fileIds = filesResult.map((file) => file.id);
+
+    // 批量查询分块、任务状态
+    const [chunkCounts, chunkTasks, embeddingTasks] = await Promise.all([
+      this.chunkModel.countByFileIds(fileIds),
+      this.asyncTaskModel.findByIds(
+        filesResult.map((file) => file.chunkTaskId).filter(Boolean) as string[],
+        AsyncTaskType.Chunking,
+      ),
+      this.asyncTaskModel.findByIds(
+        filesResult.map((file) => file.embeddingTaskId).filter(Boolean) as string[],
+        AsyncTaskType.Embedding,
+      ),
+    ]);
+
+    // 如果是 JOIN 查询,需要单独查询知识库和用户信息
+    let fileKnowledgeBases: any[] = [];
+    let usersData: any[] = [];
+
+    if (needsManualRelationFetch) {
+      const userIds = [...new Set(filesResult.map((file) => file.userId))];
+
+      [fileKnowledgeBases, usersData] = await Promise.all([
+        this.db.query.knowledgeBaseFiles.findMany({
+          where: inArray(knowledgeBaseFiles.fileId, fileIds),
+          with: {
+            knowledgeBase: {
+              columns: {
+                avatar: true,
+                description: true,
+                id: true,
+                name: true,
+              },
+            },
+          },
+        }),
+        userIds.length > 0
+          ? this.db.query.users.findMany({
+              columns: {
+                avatar: true,
+                email: true,
+                fullName: true,
+                id: true,
+                username: true,
+              },
+              where: inArray(users.id, userIds),
+            })
+          : [],
+      ]);
+    }
+
+    // 构建响应数据
+    return Promise.all(
+      filesResult.map(async (file) => {
+        const base = await this.convertToResponse(file);
+
+        const chunkCountItem = chunkCounts.find((c) => c.id === file.id);
+        const chunkTask = file.chunkTaskId
+          ? chunkTasks.find((task) => task.id === file.chunkTaskId)
+          : null;
+        const embeddingTask = file.embeddingTaskId
+          ? embeddingTasks.find((task) => task.id === file.embeddingTaskId)
+          : null;
+
+        // 获取知识库信息
+        const knowledgeBases = needsManualRelationFetch
+          ? fileKnowledgeBases.filter((kb) => kb.fileId === file.id).map((kb) => kb.knowledgeBase)
+          : file.knowledgeBases?.map((kb) => kb.knowledgeBase) || [];
+
+        // 获取用户信息
+        const user = needsManualRelationFetch
+          ? usersData.find((u) => u.id === file.userId) || null
+          : file.user || null;
+
+        return {
+          ...base,
+          chunking: {
+            ...chunkTask,
+            ...(chunkCountItem?.count && { count: chunkCountItem.count }),
+          },
+          embedding: embeddingTask,
+          knowledgeBases,
+          user,
+        };
+      }),
+    );
+  }
+
+  /**
+   * 更新文件
+   * PATCH /files/:id
+   */
+  async updateFile(
+    fileId: string,
+    updateData: { knowledgeBaseId?: string | null },
+  ): Promise<FileDetailResponse> {
+    try {
+      const isPermitted = await this.resolveOperationPermission('FILE_UPDATE');
+      if (!isPermitted.isPermitted) {
+        throw this.createAuthorizationError(isPermitted.message || '无权更新文件');
+      }
+
+      // 1. 验证文件是否存在且属于当前用户
+      const file = await this.db.query.files.findFirst({
+        where: and(eq(files.id, fileId), eq(files.userId, this.userId)),
+      });
+
+      if (!file) {
+        throw this.createNotFoundError('文件不存在或无权访问');
+      }
+
+      // 2. 处理知识库关联
+      if ('knowledgeBaseId' in updateData) {
+        await this.db.transaction(async (trx) => {
+          // 删除现有的知识库关联
+          await trx
+            .delete(knowledgeBaseFiles)
+            .where(
+              and(
+                eq(knowledgeBaseFiles.fileId, fileId),
+                eq(knowledgeBaseFiles.userId, this.userId),
+              ),
+            );
+
+          // 如果提供了新的知识库ID，创建新的关联
+          if (updateData.knowledgeBaseId) {
+            // 验证知识库是否存在且用户有权访问
+            const knowledgeBase = await this.knowledgeBaseModel.findById(
+              updateData.knowledgeBaseId,
+            );
+
+            if (!knowledgeBase) {
+              throw this.createNotFoundError('知识库不存在或无权访问');
+            }
+
+            await trx.insert(knowledgeBaseFiles).values({
+              fileId,
+              knowledgeBaseId: updateData.knowledgeBaseId,
+              userId: this.userId,
+            });
+          }
+        });
+      }
+
+      // 3. 获取更新后的文件详情
+      const updatedFile = await this.getFileDetail(fileId);
+
+      return updatedFile;
+    } catch (error) {
+      this.handleServiceError(error, '更新文件');
     }
   }
 }

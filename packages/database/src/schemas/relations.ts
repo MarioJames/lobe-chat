@@ -225,6 +225,10 @@ export const filesRelations = relations(files, ({ many, one }) => ({
   agents: many(agentsFiles),
   documents: many(documents, { relationName: 'fileDocuments' }),
   knowledgeBases: many(knowledgeBaseFiles),
+  user: one(users, {
+    fields: [files.userId],
+    references: [users.id],
+  }),
   generation: one(generations, {
     fields: [files.id],
     references: [generations.fileId],

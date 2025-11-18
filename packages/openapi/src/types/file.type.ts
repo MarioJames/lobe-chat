@@ -309,3 +309,17 @@ export interface FileChunkStatusResponse {
 export const FileIdParamSchema = z.object({
   id: z.string().min(1, '文件 ID 不能为空'),
 });
+
+// ==================== File Update Types ====================
+
+/**
+ * 文件更新请求类型
+ */
+export interface UpdateFileRequest {
+  /** 知识库ID（可选） */
+  knowledgeBaseId?: string | null;
+}
+
+export const UpdateFileSchema = z.object({
+  knowledgeBaseId: z.string().nullable().optional(),
+});
