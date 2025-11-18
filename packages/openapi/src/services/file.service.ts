@@ -1,5 +1,5 @@
 import { AsyncTaskStatus, AsyncTaskType, FileMetadata } from '@lobechat/types';
-import { and, count, desc, eq, gte, ilike, inArray, lte } from 'drizzle-orm';
+import { and, count, desc, eq, gte, ilike, inArray, lte, sum } from 'drizzle-orm';
 import { sha256 } from 'js-sha256';
 
 import { AsyncTaskModel } from '@/database/models/asyncTask';
@@ -198,7 +198,7 @@ export class FileUploadService extends BaseService {
         const [records, totalResult] = await Promise.all([
           listQuery,
           this.db
-            .select({ count: count() })
+            .select({ count: count(), totalSize: sum(files.size) })
             .from(knowledgeBaseFiles)
             .innerJoin(files, eq(knowledgeBaseFiles.fileId, files.id))
             .where(whereClause),
@@ -219,6 +219,7 @@ export class FileUploadService extends BaseService {
         return {
           files: responseFiles,
           total,
+          totalSize: totalResult[0]?.totalSize || '0',
         };
       }
 
@@ -260,7 +261,10 @@ export class FileUploadService extends BaseService {
 
       const [filesResult, totalResult] = await Promise.all([
         this.db.query.files.findMany(queryOptions),
-        this.db.select({ count: count() }).from(files).where(whereClause),
+        this.db
+          .select({ count: count(), totalSize: sum(files.size) })
+          .from(files)
+          .where(whereClause),
       ]);
 
       const total = totalResult[0]?.count || 0;
@@ -276,6 +280,7 @@ export class FileUploadService extends BaseService {
       return {
         files: responseFiles,
         total,
+        totalSize: totalResult[0]?.totalSize || '0',
       };
     } catch (error) {
       this.handleServiceError(error, '获取文件列表');
@@ -284,6 +289,7 @@ export class FileUploadService extends BaseService {
 
   /**
    * 获取指定知识库下的文件列表
+   * 复用 getFileList 的查询逻辑，但使用 KNOWLEDGE_BASE_READ 权限
    */
   async getKnowledgeBaseFileList(
     knowledgeBaseId: string,
@@ -308,96 +314,21 @@ export class FileUploadService extends BaseService {
         request,
       });
 
-      const { limit, offset } = processPaginationConditions(request);
-      const { keyword, fileType } = request;
+      // 复用 getFileList 的查询逻辑
+      const fileListQuery: FileListQuery = {
+        ...request,
+        knowledgeBaseId,
+      };
 
-      const whereConditions = [eq(knowledgeBaseFiles.knowledgeBaseId, knowledgeBaseId)];
-
-      if (keyword) {
-        whereConditions.push(ilike(files.name, `%${keyword}%`));
-      }
-
-      if (fileType) {
-        whereConditions.push(ilike(files.fileType, `${fileType}%`));
-      }
-
-      const whereClause = and(...whereConditions);
-
-      const baseQuery = this.db
-        .select({
-          file: files,
-        })
-        .from(knowledgeBaseFiles)
-        .innerJoin(files, eq(knowledgeBaseFiles.fileId, files.id))
-        .where(whereClause)
-        .orderBy(desc(files.createdAt));
-
-      const listQuery =
-        limit !== undefined && offset !== undefined
-          ? baseQuery.limit(limit).offset(offset)
-          : baseQuery;
-
-      const [records, totalResult] = await Promise.all([
-        listQuery,
-        this.db
-          .select({ count: count() })
-          .from(knowledgeBaseFiles)
-          .innerJoin(files, eq(knowledgeBaseFiles.fileId, files.id))
-          .where(whereClause),
-      ]);
-
-      const filesResult: FileItem[] = records.map((row) => row.file);
-
-      const fileIds = filesResult.map((file) => file.id);
-
-      const [chunkCounts, chunkTasks, embeddingTasks] = await Promise.all([
-        this.chunkModel.countByFileIds(fileIds),
-        this.asyncTaskModel.findByIds(
-          filesResult.map((file) => file.chunkTaskId).filter(Boolean) as string[],
-          AsyncTaskType.Chunking,
-        ),
-        this.asyncTaskModel.findByIds(
-          filesResult.map((file) => file.embeddingTaskId).filter(Boolean) as string[],
-          AsyncTaskType.Embedding,
-        ),
-      ]);
-
-      const responseFiles = await Promise.all(
-        filesResult.map(async (file) => {
-          const base = await this.convertToResponse(file);
-
-          const chunkCountItem = chunkCounts.find((c) => c.id === file.id);
-          const chunkTask = file.chunkTaskId
-            ? chunkTasks.find((task) => task.id === file.chunkTaskId)
-            : null;
-          const embeddingTask = file.embeddingTaskId
-            ? embeddingTasks.find((task) => task.id === file.embeddingTaskId)
-            : null;
-
-          return {
-            ...base,
-            chunkCount: chunkCountItem?.count ?? null,
-            chunkingError: (chunkTask?.error as any) || null,
-            chunkingStatus: (chunkTask?.status as AsyncTaskStatus | null | undefined) || null,
-            embeddingError: (embeddingTask?.error as any) || null,
-            embeddingStatus: (embeddingTask?.status as AsyncTaskStatus | null | undefined) || null,
-            finishEmbedding: embeddingTask?.status === AsyncTaskStatus.Success,
-          } as any;
-        }),
-      );
-
-      const total = totalResult[0]?.count || 0;
+      const result = await this.getFileList(fileListQuery);
 
       this.log('info', 'Knowledge base file list retrieved successfully', {
-        count: filesResult.length,
+        count: result.files.length,
         knowledgeBaseId,
-        total,
+        total: result.total,
       });
 
-      return {
-        files: responseFiles,
-        total,
-      };
+      return result;
     } catch (error) {
       this.handleServiceError(error, '获取知识库文件列表');
     }

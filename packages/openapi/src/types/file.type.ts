@@ -82,6 +82,8 @@ export const FileListQuerySchema = PaginationQuerySchema.extend({
 export type FileListResponse = PaginationQueryResponse<{
   /** 文件列表 */
   files: FileDetailResponse['file'][];
+  /** 文件总大小 */
+  totalSize?: string;
 }>;
 
 // ==================== File URL Types ====================
