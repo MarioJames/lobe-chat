@@ -13,6 +13,7 @@ import {
   FileListQuerySchema,
   FileParseRequestSchema,
   FileUrlRequestSchema,
+  UpdateFileSchema,
 } from '../types/file.type';
 
 const app = new Hono();
@@ -103,6 +104,30 @@ app.get(
   async (c) => {
     const fileController = new FileController();
     return await fileController.getFileUrl(c);
+  },
+);
+
+/**
+ * 更新文件
+ * PATCH /files/:id
+ *
+ * Path parameters:
+ * - id: string (required) - 文件ID
+ *
+ * Request body (JSON):
+ * {
+ *   "knowledgeBaseId": "kb-id" | null (optional) - 知识库ID，传 null 表示取消关联
+ * }
+ */
+app.patch(
+  '/:id',
+  requireAuth,
+  requireAnyPermission(getAllScopePermissions('FILE_UPDATE'), '您没有权限更新文件'),
+  zValidator('param', FileIdParamSchema),
+  zValidator('json', UpdateFileSchema),
+  async (c) => {
+    const fileController = new FileController();
+    return await fileController.updateFile(c);
   },
 );
 

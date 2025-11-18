@@ -10,6 +10,7 @@ import {
   FileParseRequest,
   FileUrlRequest,
   PublicFileUploadRequest,
+  UpdateFileRequest,
 } from '../types/file.type';
 
 /**
@@ -162,12 +163,14 @@ export class FileController extends BaseController {
       const skipCheckFileType = formData.get('skipCheckFileType') === 'true';
       const directory = (formData.get('directory') as string | null) || null;
       const sessionId = (formData.get('sessionId') as string | null) || null;
+      const skipDeduplication = formData.get('skipDeduplication') === 'true';
 
       const options: PublicFileUploadRequest = {
         directory: directory || undefined,
         knowledgeBaseId: knowledgeBaseId || undefined,
         sessionId: sessionId || undefined,
         skipCheckFileType,
+        skipDeduplication,
       };
 
       const result = await fileService.uploadFile(file, options);
@@ -286,6 +289,27 @@ export class FileController extends BaseController {
       const result = await fileService.handleQueries(body);
 
       return this.success(c, result, 'Files retrieved successfully');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  /**
+   * 更新文件
+   * PATCH /files/:id
+   */
+  async updateFile(c: Context) {
+    try {
+      const userId = this.getUserId(c)!; // requireAuth 中间件已确保 userId 存在
+      const { id } = this.getParams(c);
+      const body = await this.getBody<UpdateFileRequest>(c);
+
+      const db = await this.getDatabase();
+      const fileService = new FileUploadService(db, userId);
+
+      const result = await fileService.updateFile(id, body);
+
+      return this.success(c, result, 'File updated successfully');
     } catch (error) {
       return this.handleError(c, error);
     }
