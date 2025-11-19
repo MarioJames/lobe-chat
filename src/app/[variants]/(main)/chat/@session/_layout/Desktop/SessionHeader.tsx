@@ -12,6 +12,7 @@ import { ChatGroupWizard } from '@/components/ChatGroupWizard';
 import { useGroupTemplates } from '@/components/ChatGroupWizard/templates';
 import { DESKTOP_HEADER_ICON_SIZE } from '@/const/layoutTokens';
 import { DEFAULT_CHAT_GROUP_CHAT_CONFIG } from '@/const/settings';
+import { useAgentPermissions } from '@/hooks/useRbacPermissions';
 import { useActionSWR } from '@/libs/swr';
 import { useChatGroupStore } from '@/store/chatGroup';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
@@ -42,6 +43,7 @@ const Header = memo(() => {
     s.createSession,
     s.refreshSessions,
   ]);
+  const { canCreate: canCreateAgent } = useAgentPermissions();
   const [createGroup] = useChatGroupStore((s) => [s.createGroup]);
   const { showCreateSession, enableGroupChat } = useServerConfigStore(featureFlagsSelectors);
   const [isGroupWizardOpen, setIsGroupWizardOpen] = useState(false);
@@ -223,14 +225,16 @@ const Header = memo(() => {
               <Dropdown
                 menu={{
                   items: [
-                    {
-                      icon: <Icon icon={Bot} />,
-                      key: 'newAgent',
-                      label: t('newAgent'),
-                      onClick: () => {
-                        mutateAgent();
-                      },
-                    },
+                    canCreateAgent
+                      ? {
+                          icon: <Icon icon={Bot} />,
+                          key: 'newAgent',
+                          label: t('newAgent'),
+                          onClick: () => {
+                            mutateAgent();
+                          },
+                        }
+                      : undefined,
                     {
                       icon: <Icon icon={Users} />,
                       key: 'newGroup',
@@ -239,7 +243,7 @@ const Header = memo(() => {
                         setIsGroupWizardOpen(true);
                       },
                     },
-                  ],
+                  ].filter(Boolean) as any,
                 }}
                 trigger={['hover']}
               >
@@ -251,17 +255,19 @@ const Header = memo(() => {
                 />
               </Dropdown>
             ) : (
-              <ActionIcon
-                icon={MessageSquarePlus}
-                loading={isValidatingAgent}
-                onClick={() => mutateAgent()}
-                size={DESKTOP_HEADER_ICON_SIZE}
-                style={{ flex: 'none' }}
-                title={t('newAgent')}
-                tooltipProps={{
-                  placement: 'bottom',
-                }}
-              />
+              canCreateAgent && (
+                <ActionIcon
+                  icon={MessageSquarePlus}
+                  loading={isValidatingAgent}
+                  onClick={() => mutateAgent()}
+                  size={DESKTOP_HEADER_ICON_SIZE}
+                  style={{ flex: 'none' }}
+                  title={t('newAgent')}
+                  tooltipProps={{
+                    placement: 'bottom',
+                  }}
+                />
+              )
             ))}
         </Flexbox>
       </Flexbox>

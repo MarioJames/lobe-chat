@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 
 import { MemberSelectionModal } from '@/components/MemberSelectionModal';
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useAgentPermissions } from '@/hooks/useRbacPermissions';
 import { useChatGroupStore } from '@/store/chatGroup';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 import { useSessionStore } from '@/store/session';
@@ -34,6 +35,7 @@ const Actions = memo<ActionsProps>(
     const { modal, message } = App.useApp();
 
     const isMobile = useIsMobile();
+    const { canCreate: canCreateAgent } = useAgentPermissions();
     const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
     const [isCreatingGroup, setIsCreatingGroup] = useState(false);
 
@@ -170,7 +172,7 @@ const Actions = memo<ActionsProps>(
     const menuItems = useMemo(() => {
       const items: MenuProps['items'] = [];
 
-      if (showCreateSession) {
+      if (showCreateSession && canCreateAgent) {
         items.push(newAgentPublicItem);
 
         if (enableGroupChat) {
@@ -183,7 +185,14 @@ const Actions = memo<ActionsProps>(
       items.push(...tailItems);
 
       return items;
-    }, [showCreateSession, enableGroupChat, newAgentPublicItem, newGroupChatItem, tailItems]);
+    }, [
+      showCreateSession,
+      enableGroupChat,
+      canCreateAgent,
+      newAgentPublicItem,
+      newGroupChatItem,
+      tailItems,
+    ]);
 
     return (
       <>

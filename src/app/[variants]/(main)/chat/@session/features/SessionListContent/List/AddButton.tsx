@@ -4,6 +4,7 @@ import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
+import { useAgentPermissions } from '@/hooks/useRbacPermissions';
 import { useActionSWR } from '@/libs/swr';
 import { useServerConfigStore } from '@/store/serverConfig';
 import { useSessionStore } from '@/store/session';
@@ -12,9 +13,12 @@ const AddButton = memo<{ groupId?: string }>(({ groupId }) => {
   const { t } = useTranslation('chat');
   const createSession = useSessionStore((s) => s.createSession);
   const mobile = useServerConfigStore((s) => s.isMobile);
+  const { canCreate: canCreateAgent } = useAgentPermissions();
   const { mutate, isValidating } = useActionSWR(['session.createSession', groupId], () => {
     return createSession({ group: groupId });
   });
+
+  if (!canCreateAgent) return null;
 
   return (
     <Flexbox flex={1} padding={mobile ? 16 : 0}>

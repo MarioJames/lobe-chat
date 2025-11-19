@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Center, Flexbox } from 'react-layout-kit';
 
 import { useCreateNewModal } from '@/features/KnowledgeBaseModal';
+import { useKnowledgeBasePermissions } from '@/hooks/useRbacPermissions';
 import { useFileStore } from '@/store/file';
 
 const ICON_SIZE = 80;
@@ -72,6 +73,7 @@ const EmptyStatus = ({ showKnowledgeBase, knowledgeBaseId }: EmptyStatusProps) =
   const pushDockFileList = useFileStore((s) => s.pushDockFileList);
 
   const { open } = useCreateNewModal();
+  const { canCreate: canCreateKnowledgeBase } = useKnowledgeBasePermissions();
 
   return (
     <Center gap={24} height={'100%'} style={{ paddingBottom: 100 }} width={'100%'}>
@@ -80,7 +82,7 @@ const EmptyStatus = ({ showKnowledgeBase, knowledgeBaseId }: EmptyStatusProps) =
         <Text type={'secondary'}>{t('FileManager.emptyStatus.or')}</Text>
       </Flexbox>
       <Flexbox gap={12} horizontal>
-        {showKnowledgeBase && (
+        {showKnowledgeBase && canCreateKnowledgeBase && (
           <Flexbox
             className={styles.card}
             onClick={() => {

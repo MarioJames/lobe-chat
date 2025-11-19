@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import { useCreateNewModal } from '@/features/KnowledgeBaseModal';
+import { useKnowledgeBasePermissions } from '@/hooks/useRbacPermissions';
 
 import KnowledgeBaseList from './KnowledgeBaseList';
 
@@ -23,6 +24,7 @@ const KnowledgeBase = () => {
   const [showList, setShowList] = useState(true);
 
   const { open } = useCreateNewModal();
+  const { canCreate: canCreateKnowledgeBase } = useKnowledgeBasePermissions();
 
   return (
     <Flexbox flex={1} gap={8}>
@@ -43,7 +45,14 @@ const KnowledgeBase = () => {
           />
           <div style={{ lineHeight: '14px' }}>{t('knowledgeBase.title')}</div>
         </Flexbox>
-        <ActionIcon icon={PlusIcon} onClick={open} size={'small'} title={t('knowledgeBase.new')} />
+        {canCreateKnowledgeBase && (
+          <ActionIcon
+            icon={PlusIcon}
+            onClick={open}
+            size={'small'}
+            title={t('knowledgeBase.new')}
+          />
+        )}
       </Flexbox>
 
       {showList && <KnowledgeBaseList />}
