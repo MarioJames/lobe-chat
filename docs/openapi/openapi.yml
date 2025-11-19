@@ -14,16 +14,16 @@ paths:
       tags: [Users]
       summary: Get current authenticated user
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseUser' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseUser" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
 
   /users:
     get:
@@ -40,7 +40,7 @@ paths:
           name: pageSize
           schema: { type: integer, minimum: 1, maximum: 100 }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -48,12 +48,12 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseUserList' },
+                      { $ref: "#/components/schemas/ApiResponseUserList" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     post:
       tags: [Users]
       summary: Create user
@@ -61,20 +61,20 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateUserRequest' }
+            schema: { $ref: "#/components/schemas/CreateUserRequest" }
       responses:
-        '200':
+        "200":
           {
             description: Created,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseUser' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseUser" } },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /users/{id}:
     parameters:
@@ -87,18 +87,18 @@ paths:
       tags: [Users]
       summary: Get user by ID
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseUser' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseUser" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     patch:
       tags: [Users]
       summary: Update user (partial)
@@ -106,37 +106,37 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/UpdateUserRequest' }
+            schema: { $ref: "#/components/schemas/UpdateUserRequest" }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseUser' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseUser" } },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     delete:
       tags: [Users]
       summary: Delete user
       responses:
-        '200':
+        "200":
           {
             description: Deleted,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseVoid" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
   /users/{id}/roles:
     parameters:
@@ -149,7 +149,7 @@ paths:
       tags: [Users]
       summary: Get user roles
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -157,13 +157,13 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseUserRoles' },
+                      { $ref: "#/components/schemas/ApiResponseUserRoles" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     patch:
       tags: [Users]
       summary: Update user roles (add/remove)
@@ -171,9 +171,9 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/UpdateUserRolesRequest' }
+            schema: { $ref: "#/components/schemas/UpdateUserRolesRequest" }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -181,19 +181,19 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseUserRoles' },
+                      { $ref: "#/components/schemas/ApiResponseUserRoles" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     delete:
       tags: [Users]
       summary: Clear all roles of user
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -202,14 +202,14 @@ paths:
                   {
                     schema:
                       {
-                        $ref: '#/components/schemas/ApiResponseUserRolesCleared',
+                        $ref: "#/components/schemas/ApiResponseUserRolesCleared",
                       },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
   /agents:
     get:
@@ -226,7 +226,7 @@ paths:
           name: pageSize
           schema: { type: integer, minimum: 1, maximum: 100 }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -234,12 +234,12 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseAgentList' },
+                      { $ref: "#/components/schemas/ApiResponseAgentList" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     post:
       tags: [Agents]
       summary: Create agent
@@ -247,20 +247,20 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateAgentRequest' }
+            schema: { $ref: "#/components/schemas/CreateAgentRequest" }
       responses:
-        '200':
+        "200":
           {
             description: Created,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseAgent' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseAgent" } },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /agents/{id}:
     parameters:
@@ -273,18 +273,18 @@ paths:
       tags: [Agents]
       summary: Get agent by ID
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseAgent' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseAgent" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     patch:
       tags: [Agents]
       summary: Update agent (partial)
@@ -292,37 +292,37 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/UpdateAgentRequest' }
+            schema: { $ref: "#/components/schemas/UpdateAgentRequest" }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseAgent' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseAgent" } },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     delete:
       tags: [Agents]
       summary: Delete agent
       responses:
-        '200':
+        "200":
           {
             description: Deleted,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseVoid" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
   /files:
     get:
@@ -348,13 +348,13 @@ paths:
         - in: query
           name: fileType
           schema: { type: string }
-          description: Filter by file type (e.g., "image/", "application/pdf")
+          description: Filter by file type (e.g., 'image/', 'application/pdf')
         - in: query
           name: userId
           schema: { type: string }
           description: Filter by user ID (requires appropriate permission)
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -362,12 +362,12 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseFileList' },
+                      { $ref: "#/components/schemas/ApiResponseFileList" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     post:
       tags: [Files]
       summary: Upload a single file
@@ -403,10 +403,10 @@ paths:
                 directory:
                   type: string
                   nullable: true
-                  description: Custom upload directory (default "uploads")
+                  description: Custom upload directory (default 'uploads')
               required: [file]
       responses:
-        '200':
+        "200":
           {
             description: File uploaded successfully,
             content:
@@ -414,13 +414,13 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseFileDetail' },
+                      { $ref: "#/components/schemas/ApiResponseFileDetail" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /files/{id}:
     parameters:
@@ -440,7 +440,7 @@ paths:
         - For documents: returns file metadata + parsed content (if available)
         - Automatically parses document content on first access
       responses:
-        '200':
+        "200":
           {
             description: File detail retrieved successfully,
             content:
@@ -448,13 +448,13 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseFileDetail' },
+                      { $ref: "#/components/schemas/ApiResponseFileDetail" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     patch:
       tags: [Files]
       summary: Update file (partial)
@@ -475,7 +475,7 @@ paths:
                   nullable: true
                   description: Knowledge base ID to associate with (null to disassociate)
       responses:
-        '200':
+        "200":
           {
             description: File updated successfully,
             content:
@@ -483,14 +483,14 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseFileDetail' },
+                      { $ref: "#/components/schemas/ApiResponseFileDetail" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     delete:
       tags: [Files]
       summary: Delete a file
@@ -500,18 +500,18 @@ paths:
         - Deletes both the file record and the actual file from storage (S3)
         - Cannot be undone
       responses:
-        '200':
+        "200":
           {
             description: File deleted successfully,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseVoid" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
   /files/{id}/url:
     parameters:
@@ -535,20 +535,20 @@ paths:
         - Useful for downloading or previewing files
         - Default expiration: 1 hour (3600 seconds)
       responses:
-        '200':
+        "200":
           {
             description: Presigned URL generated successfully,
             content:
               {
                 application/json:
                   {
-                    schema: { $ref: '#/components/schemas/ApiResponseFileUrl' },
+                    schema: { $ref: "#/components/schemas/ApiResponseFileUrl" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
   /files/{id}/parses:
     parameters:
@@ -573,7 +573,7 @@ paths:
         - Includes metadata like page count, character count, etc.
         - Parse results are stored for future retrieval
       responses:
-        '200':
+        "200":
           {
             description: File parsed successfully,
             content:
@@ -581,14 +581,14 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseFileParse' },
+                      { $ref: "#/components/schemas/ApiResponseFileParse" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
   /files/{id}/chunks:
     parameters:
@@ -622,7 +622,7 @@ paths:
                   nullable: true
                   description: Automatically trigger an embedding task after chunking
       responses:
-        '200':
+        "200":
           {
             description: Chunking task created,
             content:
@@ -630,16 +630,14 @@ paths:
                 application/json:
                   {
                     schema:
-                      {
-                        $ref: '#/components/schemas/ApiResponseFileChunkTask',
-                      },
+                      { $ref: "#/components/schemas/ApiResponseFileChunkTask" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     get:
       tags: [Files]
       summary: Get file chunking status and details
@@ -650,7 +648,7 @@ paths:
         - Includes chunking task status and error
         - Includes embedding task status, error and completion flag
       responses:
-        '200':
+        "200":
           {
             description: File chunk status retrieved successfully,
             content:
@@ -659,14 +657,14 @@ paths:
                   {
                     schema:
                       {
-                        $ref: '#/components/schemas/ApiResponseFileChunkStatus',
+                        $ref: "#/components/schemas/ApiResponseFileChunkStatus",
                       },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
   /files/batches:
     post:
@@ -707,10 +705,10 @@ paths:
                 directory:
                   type: string
                   nullable: true
-                  description: Custom upload directory for all files (default "uploads")
+                  description: Custom upload directory for all files (default 'uploads')
               required: [files]
       responses:
-        '200':
+        "200":
           {
             description: Batch upload completed (may include partial failures),
             content:
@@ -719,14 +717,14 @@ paths:
                   {
                     schema:
                       {
-                        $ref: '#/components/schemas/ApiResponseBatchFileUpload',
+                        $ref: "#/components/schemas/ApiResponseBatchFileUpload",
                       },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /files/queries:
     post:
@@ -753,7 +751,7 @@ paths:
                   description: Array of file IDs to retrieve (required, at least 1)
               required: [fileIds]
       responses:
-        '200':
+        "200":
           {
             description: Batch retrieval completed (may include partial failures),
             content:
@@ -761,13 +759,13 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseBatchGetFiles' },
+                      { $ref: "#/components/schemas/ApiResponseBatchGetFiles" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /knowledge-bases:
     get:
@@ -800,7 +798,7 @@ paths:
           schema: { type: boolean }
           description: Filter by enabled status
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -809,13 +807,13 @@ paths:
                   {
                     schema:
                       {
-                        $ref: '#/components/schemas/ApiResponseKnowledgeBaseList',
+                        $ref: "#/components/schemas/ApiResponseKnowledgeBaseList",
                       },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     post:
       tags: [KnowledgeBases]
       summary: Create a new knowledge base
@@ -861,7 +859,7 @@ paths:
                   description: Knowledge base settings
               required: [name]
       responses:
-        '200':
+        "200":
           {
             description: Knowledge base created successfully,
             content:
@@ -869,15 +867,13 @@ paths:
                 application/json:
                   {
                     schema:
-                      {
-                        $ref: '#/components/schemas/ApiResponseKnowledgeBase',
-                      },
+                      { $ref: "#/components/schemas/ApiResponseKnowledgeBase" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /knowledge-bases/{id}:
     parameters:
@@ -896,7 +892,7 @@ paths:
         - Checks access permissions and enabled status
         - Returns complete knowledge base metadata
       responses:
-        '200':
+        "200":
           {
             description: Knowledge base retrieved successfully,
             content:
@@ -904,15 +900,13 @@ paths:
                 application/json:
                   {
                     schema:
-                      {
-                        $ref: '#/components/schemas/ApiResponseKnowledgeBase',
-                      },
+                      { $ref: "#/components/schemas/ApiResponseKnowledgeBase" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     patch:
       tags: [KnowledgeBases]
       summary: Update knowledge base (partial)
@@ -963,7 +957,7 @@ paths:
                   nullable: true
                   description: Knowledge base settings
       responses:
-        '200':
+        "200":
           {
             description: Knowledge base updated successfully,
             content:
@@ -971,16 +965,14 @@ paths:
                 application/json:
                   {
                     schema:
-                      {
-                        $ref: '#/components/schemas/ApiResponseKnowledgeBase',
-                      },
+                      { $ref: "#/components/schemas/ApiResponseKnowledgeBase" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     delete:
       tags: [KnowledgeBases]
       summary: Delete a knowledge base
@@ -991,7 +983,7 @@ paths:
         - Cascades delete to related files and grants
         - Cannot be undone
       responses:
-        '200':
+        "200":
           {
             description: Knowledge base deleted successfully,
             content:
@@ -1000,14 +992,14 @@ paths:
                   {
                     schema:
                       {
-                        $ref: '#/components/schemas/ApiResponseKnowledgeBaseDelete',
+                        $ref: "#/components/schemas/ApiResponseKnowledgeBaseDelete",
                       },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
   /knowledge-bases/{id}/files:
     parameters:
@@ -1032,7 +1024,7 @@ paths:
       - in: query
         name: fileType
         schema: { type: string }
-        description: Filter by file type (e.g., "image/", "application/pdf")
+        description: Filter by file type (e.g., 'image/', 'application/pdf')
     get:
       tags: [KnowledgeBases]
       summary: List files in a knowledge base
@@ -1042,20 +1034,21 @@ paths:
         - Returns the same file structure as the global file list
         - Supports pagination and basic filtering by file type and search keyword
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
                   {
-                    schema: { $ref: '#/components/schemas/ApiResponseFileList' },
+                    schema:
+                      { $ref: "#/components/schemas/ApiResponseFileList" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
   /messages/count:
     get:
@@ -1070,17 +1063,17 @@ paths:
           name: userId
           schema: { type: string }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseCount' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseCount" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /messages:
     get:
@@ -1108,9 +1101,9 @@ paths:
         - in: query
           name: role
           schema:
-            { type: string, enum: ['user', 'system', 'assistant', 'tool'] }
+            { type: string, enum: ["user", "system", "assistant", "tool"] }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1118,12 +1111,12 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseMessageList' },
+                      { $ref: "#/components/schemas/ApiResponseMessageList" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     delete:
       tags: [Messages]
       summary: Delete messages (batch)
@@ -1139,7 +1132,7 @@ paths:
                   items: { type: string }
               required: [messageIds]
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1148,13 +1141,13 @@ paths:
                   {
                     schema:
                       {
-                        $ref: '#/components/schemas/ApiResponseBatchDeleteResult',
+                        $ref: "#/components/schemas/ApiResponseBatchDeleteResult",
                       },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     post:
       tags: [Messages]
       summary: Create message
@@ -1162,22 +1155,22 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateMessageRequest' }
+            schema: { $ref: "#/components/schemas/CreateMessageRequest" }
       responses:
-        '200':
+        "200":
           {
             description: Created,
             content:
               {
                 application/json:
                   {
-                    schema: { $ref: '#/components/schemas/ApiResponseMessage' },
+                    schema: { $ref: "#/components/schemas/ApiResponseMessage" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /messages/{id}:
     parameters:
@@ -1190,36 +1183,36 @@ paths:
       tags: [Messages]
       summary: Get message by ID
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
                   {
-                    schema: { $ref: '#/components/schemas/ApiResponseMessage' },
+                    schema: { $ref: "#/components/schemas/ApiResponseMessage" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     delete:
       tags: [Messages]
       summary: Delete message by ID
       responses:
-        '200':
+        "200":
           {
             description: Deleted,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseVoid" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
   /messages/repies:
     post:
@@ -1229,22 +1222,22 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateMessageRequest' }
+            schema: { $ref: "#/components/schemas/CreateMessageRequest" }
       responses:
-        '200':
+        "200":
           {
             description: Created,
             content:
               {
                 application/json:
                   {
-                    schema: { $ref: '#/components/schemas/ApiResponseMessage' },
+                    schema: { $ref: "#/components/schemas/ApiResponseMessage" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /message-translations/{messageId}:
     parameters:
@@ -1259,9 +1252,9 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/TranslateTrigger' }
+            schema: { $ref: "#/components/schemas/TranslateTrigger" }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1269,18 +1262,18 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseTranslation' },
+                      { $ref: "#/components/schemas/ApiResponseTranslation" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     get:
       tags: [MessageTranslations]
       summary: Get translation info for a message
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1288,13 +1281,13 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseTranslation' },
+                      { $ref: "#/components/schemas/ApiResponseTranslation" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     patch:
       tags: [MessageTranslations]
       summary: Update translation info for a message
@@ -1302,9 +1295,9 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/TranslateUpdate' }
+            schema: { $ref: "#/components/schemas/TranslateUpdate" }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1312,29 +1305,29 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseTranslation' },
+                      { $ref: "#/components/schemas/ApiResponseTranslation" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     delete:
       tags: [MessageTranslations]
       summary: Delete translation info for a message
       responses:
-        '200':
+        "200":
           {
             description: Deleted,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseVoid" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
   /models:
     get:
@@ -1351,7 +1344,7 @@ paths:
           name: pageSize
           schema: { type: integer, minimum: 1, maximum: 100 }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1359,12 +1352,12 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseModelList' },
+                      { $ref: "#/components/schemas/ApiResponseModelList" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     post:
       tags: [Models]
       summary: Create model
@@ -1372,20 +1365,20 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateModelRequest' }
+            schema: { $ref: "#/components/schemas/CreateModelRequest" }
       responses:
-        '200':
+        "200":
           {
             description: Created,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseModel' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseModel" } },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /models/{providerId}/{modelId}:
     parameters:
@@ -1403,18 +1396,18 @@ paths:
       tags: [Models]
       summary: Get model detail
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseModel' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseModel" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     patch:
       tags: [Models]
       summary: Update model (partial)
@@ -1422,21 +1415,21 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/UpdateModelRequest' }
+            schema: { $ref: "#/components/schemas/UpdateModelRequest" }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseModel' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseModel" } },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
   /permissions:
     get:
@@ -1459,7 +1452,7 @@ paths:
           name: category
           schema: { type: string }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1468,13 +1461,13 @@ paths:
                   {
                     schema:
                       {
-                        $ref: '#/components/schemas/ApiResponsePermissionList',
+                        $ref: "#/components/schemas/ApiResponsePermissionList",
                       },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     post:
       tags: [Permissions]
       summary: Create permission
@@ -1482,9 +1475,9 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreatePermissionRequest' }
+            schema: { $ref: "#/components/schemas/CreatePermissionRequest" }
       responses:
-        '200':
+        "200":
           {
             description: Created,
             content:
@@ -1492,13 +1485,13 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponsePermission' },
+                      { $ref: "#/components/schemas/ApiResponsePermission" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /permissions/{id}:
     parameters:
@@ -1511,7 +1504,7 @@ paths:
       tags: [Permissions]
       summary: Get permission by ID
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1519,13 +1512,13 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponsePermission' },
+                      { $ref: "#/components/schemas/ApiResponsePermission" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     patch:
       tags: [Permissions]
       summary: Update permission (partial)
@@ -1533,9 +1526,9 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/UpdatePermissionRequest' }
+            schema: { $ref: "#/components/schemas/UpdatePermissionRequest" }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1543,30 +1536,30 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponsePermission' },
+                      { $ref: "#/components/schemas/ApiResponsePermission" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     delete:
       tags: [Permissions]
       summary: Delete permission
       responses:
-        '200':
+        "200":
           {
             description: Deleted,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseVoid" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
   /providers:
     get:
@@ -1586,7 +1579,7 @@ paths:
           name: enabled
           schema: { type: boolean }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1594,12 +1587,12 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseProviderList' },
+                      { $ref: "#/components/schemas/ApiResponseProviderList" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     post:
       tags: [Providers]
       summary: Create provider
@@ -1607,9 +1600,9 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateProviderRequest' }
+            schema: { $ref: "#/components/schemas/CreateProviderRequest" }
       responses:
-        '200':
+        "200":
           {
             description: Created,
             content:
@@ -1617,13 +1610,13 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseProvider' },
+                      { $ref: "#/components/schemas/ApiResponseProvider" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /providers/{id}:
     parameters:
@@ -1636,7 +1629,7 @@ paths:
       tags: [Providers]
       summary: Get provider detail
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1644,13 +1637,13 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseProvider' },
+                      { $ref: "#/components/schemas/ApiResponseProvider" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     patch:
       tags: [Providers]
       summary: Update provider (partial)
@@ -1658,9 +1651,9 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/UpdateProviderRequest' }
+            schema: { $ref: "#/components/schemas/UpdateProviderRequest" }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1668,30 +1661,30 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseProvider' },
+                      { $ref: "#/components/schemas/ApiResponseProvider" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     delete:
       tags: [Providers]
       summary: Delete provider
       responses:
-        '200':
+        "200":
           {
             description: Deleted,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseVoid" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
   /roles:
     get:
@@ -1714,7 +1707,7 @@ paths:
           name: system
           schema: { type: boolean }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1722,12 +1715,12 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseRoleList' },
+                      { $ref: "#/components/schemas/ApiResponseRoleList" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     post:
       tags: [Roles]
       summary: Create role
@@ -1735,20 +1728,20 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateRoleRequest' }
+            schema: { $ref: "#/components/schemas/CreateRoleRequest" }
       responses:
-        '200':
+        "200":
           {
             description: Created,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseRole' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseRole" } },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /roles/{id}:
     parameters:
@@ -1761,18 +1754,18 @@ paths:
       tags: [Roles]
       summary: Get role by ID
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseRole' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseRole" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     patch:
       tags: [Roles]
       summary: Update role (partial)
@@ -1780,37 +1773,37 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/UpdateRoleRequest' }
+            schema: { $ref: "#/components/schemas/UpdateRoleRequest" }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseRole' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseRole" } },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     delete:
       tags: [Roles]
       summary: Delete role
       responses:
-        '200':
+        "200":
           {
             description: Deleted,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseVoid" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
   /roles/{id}/permissions:
     parameters:
@@ -1833,7 +1826,7 @@ paths:
           name: pageSize
           schema: { type: integer, minimum: 1, maximum: 100 }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1842,13 +1835,13 @@ paths:
                   {
                     schema:
                       {
-                        $ref: '#/components/schemas/ApiResponseRolePermissions',
+                        $ref: "#/components/schemas/ApiResponseRolePermissions",
                       },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     patch:
       tags: [Roles]
       summary: Update role permissions (grant/revoke)
@@ -1857,9 +1850,9 @@ paths:
         content:
           application/json:
             schema:
-              { $ref: '#/components/schemas/UpdateRolePermissionsRequest' }
+              { $ref: "#/components/schemas/UpdateRolePermissionsRequest" }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1868,36 +1861,36 @@ paths:
                   {
                     schema:
                       {
-                        $ref: '#/components/schemas/ApiResponseRolePermissions',
+                        $ref: "#/components/schemas/ApiResponseRolePermissions",
                       },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     delete:
       tags: [Roles]
       summary: Clear all permissions for role
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseVoid" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /session-groups:
     get:
       tags: [SessionGroups]
       summary: List session groups
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1906,13 +1899,13 @@ paths:
                   {
                     schema:
                       {
-                        $ref: '#/components/schemas/ApiResponseSessionGroupList',
+                        $ref: "#/components/schemas/ApiResponseSessionGroupList",
                       },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     post:
       tags: [SessionGroups]
       summary: Create session group
@@ -1920,9 +1913,9 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateSessionGroupRequest' }
+            schema: { $ref: "#/components/schemas/CreateSessionGroupRequest" }
       responses:
-        '200':
+        "200":
           {
             description: Created,
             content:
@@ -1930,13 +1923,13 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseSessionGroup' },
+                      { $ref: "#/components/schemas/ApiResponseSessionGroup" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /session-groups/{id}:
     parameters:
@@ -1949,7 +1942,7 @@ paths:
       tags: [SessionGroups]
       summary: Get session group by ID
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1957,13 +1950,13 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseSessionGroup' },
+                      { $ref: "#/components/schemas/ApiResponseSessionGroup" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     patch:
       tags: [SessionGroups]
       summary: Update session group (partial)
@@ -1971,9 +1964,9 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/UpdateSessionGroupRequest' }
+            schema: { $ref: "#/components/schemas/UpdateSessionGroupRequest" }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -1981,30 +1974,30 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseSessionGroup' },
+                      { $ref: "#/components/schemas/ApiResponseSessionGroup" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     delete:
       tags: [SessionGroups]
       summary: Delete session group
       responses:
-        '200':
+        "200":
           {
             description: Deleted,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseVoid" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
   /sessions:
     get:
@@ -2031,7 +2024,7 @@ paths:
           name: userId
           schema: { type: string }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -2039,12 +2032,12 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseSessionList' },
+                      { $ref: "#/components/schemas/ApiResponseSessionList" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     post:
       tags: [Sessions]
       summary: Create session
@@ -2052,22 +2045,22 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateSessionRequest' }
+            schema: { $ref: "#/components/schemas/CreateSessionRequest" }
       responses:
-        '200':
+        "200":
           {
             description: Created,
             content:
               {
                 application/json:
                   {
-                    schema: { $ref: '#/components/schemas/ApiResponseSession' },
+                    schema: { $ref: "#/components/schemas/ApiResponseSession" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     patch:
       tags: [Sessions]
       summary: Batch update sessions
@@ -2075,9 +2068,9 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/BatchUpdateSessionsRequest' }
+            schema: { $ref: "#/components/schemas/BatchUpdateSessionsRequest" }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -2085,13 +2078,13 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseSessionList' },
+                      { $ref: "#/components/schemas/ApiResponseSessionList" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /sessions/groups:
     get:
@@ -2100,10 +2093,10 @@ paths:
       parameters:
         - in: query
           name: groupBy
-          schema: { type: string, enum: ['agent'] }
+          schema: { type: string, enum: ["agent"] }
           required: true
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -2112,13 +2105,13 @@ paths:
                   {
                     schema:
                       {
-                        $ref: '#/components/schemas/ApiResponseSessionsGroups',
+                        $ref: "#/components/schemas/ApiResponseSessionsGroups",
                       },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /sessions/{id}:
     parameters:
@@ -2131,20 +2124,20 @@ paths:
       tags: [Sessions]
       summary: Get session by ID
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
                   {
-                    schema: { $ref: '#/components/schemas/ApiResponseSession' },
+                    schema: { $ref: "#/components/schemas/ApiResponseSession" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     patch:
       tags: [Sessions]
       summary: Update session (partial)
@@ -2152,39 +2145,39 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/UpdateSessionRequest' }
+            schema: { $ref: "#/components/schemas/UpdateSessionRequest" }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
                   {
-                    schema: { $ref: '#/components/schemas/ApiResponseSession' },
+                    schema: { $ref: "#/components/schemas/ApiResponseSession" },
                   },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     delete:
       tags: [Sessions]
       summary: Delete session
       responses:
-        '200':
+        "200":
           {
             description: Deleted,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseVoid" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
   /topics:
     get:
@@ -2204,7 +2197,7 @@ paths:
           name: sessionId
           schema: { type: string }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
@@ -2212,12 +2205,12 @@ paths:
                 application/json:
                   {
                     schema:
-                      { $ref: '#/components/schemas/ApiResponseTopicList' },
+                      { $ref: "#/components/schemas/ApiResponseTopicList" },
                   },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
     post:
       tags: [Topics]
       summary: Create topic
@@ -2225,20 +2218,20 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/CreateTopicRequest' }
+            schema: { $ref: "#/components/schemas/CreateTopicRequest" }
       responses:
-        '200':
+        "200":
           {
             description: Created,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseTopic' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseTopic" } },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
 
   /topics/{id}:
     parameters:
@@ -2251,18 +2244,18 @@ paths:
       tags: [Topics]
       summary: Get topic by ID
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseTopic' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseTopic" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     patch:
       tags: [Topics]
       summary: Update topic (partial)
@@ -2270,37 +2263,37 @@ paths:
         required: true
         content:
           application/json:
-            schema: { $ref: '#/components/schemas/UpdateTopicRequest' }
+            schema: { $ref: "#/components/schemas/UpdateTopicRequest" }
       responses:
-        '200':
+        "200":
           {
             description: OK,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseTopic' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseTopic" } },
               },
           }
-        '400': { $ref: '#/components/responses/BadRequestError' }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
     delete:
       tags: [Topics]
       summary: Delete topic
       responses:
-        '200':
+        "200":
           {
             description: Deleted,
             content:
               {
                 application/json:
-                  { schema: { $ref: '#/components/schemas/ApiResponseVoid' } },
+                  { schema: { $ref: "#/components/schemas/ApiResponseVoid" } },
               },
           }
-        '401': { $ref: '#/components/responses/UnauthorizedError' }
-        '403': { $ref: '#/components/responses/ForbiddenError' }
-        '404': { $ref: '#/components/responses/NotFoundError' }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
 
 components:
   securitySchemes:
@@ -2324,7 +2317,7 @@ components:
       required: [success, timestamp]
     ApiResponseVoid:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             # Explicit empty object for Stainless + allow null
@@ -2339,13 +2332,13 @@ components:
     # ---------- Users ----------
     ApiResponseUser:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/UserWithRoles' }
+            data: { $ref: "#/components/schemas/UserWithRoles" }
     ApiResponseUserList:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
@@ -2354,19 +2347,19 @@ components:
                 total: { type: integer }
                 users:
                   type: array
-                  items: { $ref: '#/components/schemas/UserWithRoles' }
+                  items: { $ref: "#/components/schemas/UserWithRoles" }
               required: [total, users]
     ApiResponseUserRoles:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
               type: array
-              items: { $ref: '#/components/schemas/UserRoleEntry' }
+              items: { $ref: "#/components/schemas/UserRoleEntry" }
     ApiResponseUserRolesCleared:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
@@ -2409,13 +2402,13 @@ components:
         updatedAt: { type: string, format: date-time, nullable: true }
     UserWithRoles:
       allOf:
-        - $ref: '#/components/schemas/User'
+        - $ref: "#/components/schemas/User"
         - type: object
           properties:
             messageCount: { type: integer }
             roles:
               type: array
-              items: { $ref: '#/components/schemas/Role' }
+              items: { $ref: "#/components/schemas/Role" }
     UserRoleEntry:
       type: object
       properties:
@@ -2469,7 +2462,7 @@ components:
       properties:
         addRoles:
           type: array
-          items: { $ref: '#/components/schemas/AddRoleRequest' }
+          items: { $ref: "#/components/schemas/AddRoleRequest" }
         removeRoles:
           type: array
           items: { type: integer, minimum: 1 }
@@ -2480,13 +2473,13 @@ components:
     # ---------- Agents ----------
     ApiResponseAgent:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/Agent' }
+            data: { $ref: "#/components/schemas/Agent" }
     ApiResponseAgentList:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
@@ -2495,7 +2488,7 @@ components:
                 total: { type: integer }
                 agents:
                   type: array
-                  items: { $ref: '#/components/schemas/Agent' }
+                  items: { $ref: "#/components/schemas/Agent" }
               required: [total, agents]
     Agent:
       type: object
@@ -2527,64 +2520,67 @@ components:
       required: [title]
     UpdateAgentRequest:
       allOf:
-        - $ref: '#/components/schemas/CreateAgentRequest'
+        - $ref: "#/components/schemas/CreateAgentRequest"
 
     # ---------- Files ----------
     ApiResponseFileList:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
               type: object
               properties:
                 total: { type: integer }
+                totalSize:
+                  type: string
+                  description: Total size in bytes of all matched files
                 files:
                   type: array
-                  items: { $ref: '#/components/schemas/File' }
+                  items: { $ref: "#/components/schemas/File" }
               required: [total, files]
     ApiResponseFileDetail:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/FileDetail' }
+            data: { $ref: "#/components/schemas/FileDetail" }
     ApiResponseFileUrl:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/FileUrl' }
+            data: { $ref: "#/components/schemas/FileUrl" }
     ApiResponseFileParse:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/FileParse' }
+            data: { $ref: "#/components/schemas/FileParse" }
     ApiResponseFileChunkStatus:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/FileChunkStatus' }
+            data: { $ref: "#/components/schemas/FileChunkStatus" }
     ApiResponseFileChunkTask:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/FileChunkTask' }
+            data: { $ref: "#/components/schemas/FileChunkTask" }
     ApiResponseBatchFileUpload:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/BatchFileUpload' }
+            data: { $ref: "#/components/schemas/BatchFileUpload" }
     ApiResponseBatchGetFiles:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/BatchGetFiles' }
+            data: { $ref: "#/components/schemas/BatchGetFiles" }
     File:
       type: object
       properties:
@@ -2602,22 +2598,12 @@ components:
         userId: { type: string, nullable: true }
         createdAt: { type: string, format: date-time, nullable: true }
         updatedAt: { type: string, format: date-time, nullable: true }
-        chunkCount: { type: integer, nullable: true }
-        chunkingStatus:
-          type: string
+        chunking:
+          $ref: "#/components/schemas/FileAsyncTask"
           nullable: true
-          enum: ['pending', 'processing', 'success', 'error']
-        chunkingError:
-          $ref: '#/components/schemas/FileChunkError'
+        embedding:
+          $ref: "#/components/schemas/FileAsyncTask"
           nullable: true
-        embeddingStatus:
-          type: string
-          nullable: true
-          enum: ['pending', 'processing', 'success', 'error']
-        embeddingError:
-          $ref: '#/components/schemas/FileChunkError'
-          nullable: true
-        finishEmbedding: { type: boolean, nullable: true }
         knowledgeBases:
           type: array
           nullable: true
@@ -2632,8 +2618,8 @@ components:
     FileDetail:
       type: object
       properties:
-        file: { $ref: '#/components/schemas/File' }
-        parsed: { $ref: '#/components/schemas/FileParse', nullable: true }
+        file: { $ref: "#/components/schemas/File" }
+        parsed: { $ref: "#/components/schemas/FileParse", nullable: true }
       required: [file]
     FileUrl:
       type: object
@@ -2650,7 +2636,7 @@ components:
         fileId: { type: string }
         name: { type: string }
         fileType: { type: string }
-        parseStatus: { type: string, enum: ['completed', 'failed'] }
+        parseStatus: { type: string, enum: ["completed", "failed"] }
         parsedAt: { type: string, format: date-time, nullable: true }
         content: { type: string, nullable: true }
         error: { type: string, nullable: true }
@@ -2680,6 +2666,25 @@ components:
             detail: { type: string }
           required: [detail]
       required: [name, body]
+    FileAsyncTask:
+      type: object
+      properties:
+        id: { type: string, nullable: true }
+        type:
+          type: string
+          nullable: true
+          enum: ["chunk", "embedding", "image_generation"]
+        status:
+          type: string
+          nullable: true
+          enum: ["pending", "processing", "success", "error"]
+        error:
+          $ref: "#/components/schemas/FileChunkError"
+          nullable: true
+        count:
+          type: integer
+          nullable: true
+          description: Chunk count for the related file (only for chunking tasks)
     FileChunkStatus:
       type: object
       properties:
@@ -2687,16 +2692,16 @@ components:
         chunkingStatus:
           type: string
           nullable: true
-          enum: ['pending', 'processing', 'success', 'error']
+          enum: ["pending", "processing", "success", "error"]
         chunkingError:
-          $ref: '#/components/schemas/FileChunkError'
+          $ref: "#/components/schemas/FileChunkError"
           nullable: true
         embeddingStatus:
           type: string
           nullable: true
-          enum: ['pending', 'processing', 'success', 'error']
+          enum: ["pending", "processing", "success", "error"]
         embeddingError:
-          $ref: '#/components/schemas/FileChunkError'
+          $ref: "#/components/schemas/FileChunkError"
           nullable: true
         finishEmbedding: { type: boolean, nullable: true }
     BatchFileUpload:
@@ -2711,7 +2716,7 @@ components:
           required: [total, successful, failed]
         successful:
           type: array
-          items: { $ref: '#/components/schemas/FileDetail' }
+          items: { $ref: "#/components/schemas/FileDetail" }
         failed:
           type: array
           items:
@@ -2727,7 +2732,7 @@ components:
         success: { type: integer }
         files:
           type: array
-          items: { $ref: '#/components/schemas/FileDetail' }
+          items: { $ref: "#/components/schemas/FileDetail" }
         failed:
           type: array
           items:
@@ -2741,7 +2746,7 @@ components:
     # ---------- Knowledge Bases ----------
     ApiResponseKnowledgeBaseList:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
@@ -2750,21 +2755,21 @@ components:
                 total: { type: integer }
                 knowledgeBases:
                   type: array
-                  items: { $ref: '#/components/schemas/KnowledgeBaseListItem' }
+                  items: { $ref: "#/components/schemas/KnowledgeBaseListItem" }
               required: [total, knowledgeBases]
     ApiResponseKnowledgeBase:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
               type: object
               properties:
-                knowledgeBase: { $ref: '#/components/schemas/KnowledgeBase' }
+                knowledgeBase: { $ref: "#/components/schemas/KnowledgeBase" }
               required: [knowledgeBase]
     ApiResponseKnowledgeBaseDelete:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
@@ -2780,12 +2785,7 @@ components:
         name: { type: string }
         description: { type: string, nullable: true }
         avatar: { type: string, nullable: true }
-        type:
-          {
-            type: string,
-            enum: [personal, shared],
-            nullable: true,
-          }
+        type: { type: string, enum: [personal, shared], nullable: true }
         userId: { type: string }
         clientId: { type: string, nullable: true }
         isPublic: { type: boolean, nullable: true }
@@ -2797,7 +2797,7 @@ components:
       required: [id, name, userId, enabled, accessedAt, createdAt, updatedAt]
     KnowledgeBaseListItem:
       allOf:
-        - $ref: '#/components/schemas/KnowledgeBase'
+        - $ref: "#/components/schemas/KnowledgeBase"
         - type: object
           properties:
             accessType:
@@ -2810,12 +2810,7 @@ components:
         name: { type: string, minLength: 1, maxLength: 255 }
         description: { type: string, maxLength: 1000, nullable: true }
         avatar: { type: string, format: uri, nullable: true }
-        type:
-          {
-            type: string,
-            enum: [personal, shared],
-            nullable: true,
-          }
+        type: { type: string, enum: [personal, shared], nullable: true }
         isPublic: { type: boolean, nullable: true }
         settings: { type: object, additionalProperties: true, nullable: true }
       required: [name]
@@ -2825,12 +2820,7 @@ components:
         name: { type: string, minLength: 1, maxLength: 255, nullable: true }
         description: { type: string, maxLength: 1000, nullable: true }
         avatar: { type: string, format: uri, nullable: true }
-        type:
-          {
-            type: string,
-            enum: [personal, shared],
-            nullable: true,
-          }
+        type: { type: string, enum: [personal, shared], nullable: true }
         isPublic: { type: boolean, nullable: true }
         enabled: { type: boolean, nullable: true }
         settings: { type: object, additionalProperties: true, nullable: true }
@@ -2838,7 +2828,7 @@ components:
     # ---------- Messages ----------
     ApiResponseCount:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
@@ -2846,13 +2836,13 @@ components:
               additionalProperties: true
     ApiResponseMessage:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/Message' }
+            data: { $ref: "#/components/schemas/Message" }
     ApiResponseMessageList:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
@@ -2861,11 +2851,11 @@ components:
                 total: { type: integer }
                 messages:
                   type: array
-                  items: { $ref: '#/components/schemas/Message' }
+                  items: { $ref: "#/components/schemas/Message" }
               required: [total, messages]
     ApiResponseBatchDeleteResult:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
@@ -2879,7 +2869,7 @@ components:
         role:
           {
             type: string,
-            enum: ['user', 'system', 'assistant', 'tool'],
+            enum: ["user", "system", "assistant", "tool"],
             nullable: true,
           }
         sessionId: { type: string, nullable: true }
@@ -2901,7 +2891,7 @@ components:
       type: object
       properties:
         content: { type: string }
-        role: { type: string, enum: ['user', 'system', 'assistant', 'tool'] }
+        role: { type: string, enum: ["user", "system", "assistant", "tool"] }
         model: { type: string, nullable: true }
         provider: { type: string, nullable: true }
         sessionId: { type: string, nullable: true }
@@ -2926,10 +2916,10 @@ components:
     # ---------- Message Translations ----------
     ApiResponseTranslation:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/MessageTranslation' }
+            data: { $ref: "#/components/schemas/MessageTranslation" }
     TranslateTrigger:
       type: object
       properties:
@@ -2940,7 +2930,7 @@ components:
       required: [from, to]
     TranslateUpdate:
       allOf:
-        - $ref: '#/components/schemas/TranslateTrigger'
+        - $ref: "#/components/schemas/TranslateTrigger"
         - type: object
           properties:
             translatedContent: { type: string }
@@ -2959,13 +2949,13 @@ components:
     # ---------- Models ----------
     ApiResponseModel:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/Model' }
+            data: { $ref: "#/components/schemas/Model" }
     ApiResponseModelList:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
@@ -2974,7 +2964,7 @@ components:
                 total: { type: integer }
                 models:
                   type: array
-                  items: { $ref: '#/components/schemas/Model' }
+                  items: { $ref: "#/components/schemas/Model" }
               required: [total, models]
     Model:
       type: object
@@ -2987,14 +2977,14 @@ components:
             type: string,
             enum:
               [
-                'chat',
-                'embedding',
-                'tts',
-                'stt',
-                'image',
-                'text2video',
-                'text2music',
-                'realtime',
+                "chat",
+                "embedding",
+                "tts",
+                "stt",
+                "image",
+                "text2video",
+                "text2music",
+                "realtime",
               ],
             nullable: true,
           }
@@ -3009,7 +2999,7 @@ components:
         source:
           {
             type: string,
-            enum: ['remote', 'custom', 'builtin'],
+            enum: ["remote", "custom", "builtin"],
             nullable: true,
           }
         organization: { type: string, nullable: true }
@@ -3026,14 +3016,14 @@ components:
             type: string,
             enum:
               [
-                'chat',
-                'embedding',
-                'tts',
-                'stt',
-                'image',
-                'text2video',
-                'text2music',
-                'realtime',
+                "chat",
+                "embedding",
+                "tts",
+                "stt",
+                "image",
+                "text2video",
+                "text2music",
+                "realtime",
               ],
             nullable: true,
           }
@@ -3048,25 +3038,25 @@ components:
         source:
           {
             type: string,
-            enum: ['remote', 'custom', 'builtin'],
+            enum: ["remote", "custom", "builtin"],
             nullable: true,
           }
         organization: { type: string, nullable: true }
       required: [id, providerId, displayName]
     UpdateModelRequest:
       allOf:
-        - $ref: '#/components/schemas/CreateModelRequest'
+        - $ref: "#/components/schemas/CreateModelRequest"
 
     # ---------- Permissions ----------
     ApiResponsePermission:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/Permission' }
+            data: { $ref: "#/components/schemas/Permission" }
     ApiResponsePermissionList:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
@@ -3075,7 +3065,7 @@ components:
                 total: { type: integer }
                 permissions:
                   type: array
-                  items: { $ref: '#/components/schemas/Permission' }
+                  items: { $ref: "#/components/schemas/Permission" }
               required: [total, permissions]
     Permission:
       type: object
@@ -3099,18 +3089,18 @@ components:
       required: [code, name, category]
     UpdatePermissionRequest:
       allOf:
-        - $ref: '#/components/schemas/CreatePermissionRequest'
+        - $ref: "#/components/schemas/CreatePermissionRequest"
 
     # ---------- Providers ----------
     ApiResponseProvider:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/Provider' }
+            data: { $ref: "#/components/schemas/Provider" }
     ApiResponseProviderList:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
@@ -3119,7 +3109,7 @@ components:
                 total: { type: integer }
                 providers:
                   type: array
-                  items: { $ref: '#/components/schemas/Provider' }
+                  items: { $ref: "#/components/schemas/Provider" }
               required: [total, providers]
     Provider:
       type: object
@@ -3129,7 +3119,7 @@ components:
         description: { type: string, nullable: true }
         enabled: { type: boolean, nullable: true }
         logo: { type: string, nullable: true }
-        source: { type: string, enum: ['builtin', 'custom'], nullable: true }
+        source: { type: string, enum: ["builtin", "custom"], nullable: true }
         sort: { type: integer, nullable: true }
         checkModel: { type: string, nullable: true }
         fetchOnClient: { type: boolean, nullable: true }
@@ -3149,7 +3139,7 @@ components:
         description: { type: string, nullable: true }
         enabled: { type: boolean, nullable: true }
         logo: { type: string, nullable: true }
-        source: { type: string, enum: ['builtin', 'custom'], nullable: true }
+        source: { type: string, enum: ["builtin", "custom"], nullable: true }
         sort: { type: integer, nullable: true }
         checkModel: { type: string, nullable: true }
         fetchOnClient: { type: boolean, nullable: true }
@@ -3162,18 +3152,18 @@ components:
       required: [id]
     UpdateProviderRequest:
       allOf:
-        - $ref: '#/components/schemas/CreateProviderRequest'
+        - $ref: "#/components/schemas/CreateProviderRequest"
 
     # ---------- Roles ----------
     ApiResponseRole:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/Role' }
+            data: { $ref: "#/components/schemas/Role" }
     ApiResponseRoleList:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
@@ -3182,11 +3172,11 @@ components:
                 total: { type: integer }
                 roles:
                   type: array
-                  items: { $ref: '#/components/schemas/Role' }
+                  items: { $ref: "#/components/schemas/Role" }
               required: [total, roles]
     ApiResponseRolePermissions:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
@@ -3194,7 +3184,7 @@ components:
               properties:
                 permissions:
                   type: array
-                  items: { $ref: '#/components/schemas/Permission' }
+                  items: { $ref: "#/components/schemas/Permission" }
                 total: { type: integer }
               required: [permissions, total]
     CreateRoleRequest:
@@ -3208,7 +3198,7 @@ components:
       required: [name, displayName]
     UpdateRoleRequest:
       allOf:
-        - $ref: '#/components/schemas/CreateRoleRequest'
+        - $ref: "#/components/schemas/CreateRoleRequest"
     UpdateRolePermissionsRequest:
       type: object
       properties:
@@ -3222,18 +3212,18 @@ components:
     # ---------- Session Groups ----------
     ApiResponseSessionGroup:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/SessionGroup' }
+            data: { $ref: "#/components/schemas/SessionGroup" }
     ApiResponseSessionGroupList:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
               type: array
-              items: { $ref: '#/components/schemas/SessionGroup' }
+              items: { $ref: "#/components/schemas/SessionGroup" }
     SessionGroup:
       type: object
       properties:
@@ -3257,13 +3247,13 @@ components:
     # ---------- Sessions ----------
     ApiResponseSession:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/Session' }
+            data: { $ref: "#/components/schemas/Session" }
     ApiResponseSessionList:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
@@ -3272,11 +3262,11 @@ components:
                 total: { type: integer }
                 sessions:
                   type: array
-                  items: { $ref: '#/components/schemas/Session' }
+                  items: { $ref: "#/components/schemas/Session" }
               required: [total, sessions]
     ApiResponseSessionsGroups:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
@@ -3284,10 +3274,10 @@ components:
               items:
                 type: object
                 properties:
-                  agent: { $ref: '#/components/schemas/Agent' }
+                  agent: { $ref: "#/components/schemas/Agent" }
                   sessions:
                     type: array
-                    items: { $ref: '#/components/schemas/Session' }
+                    items: { $ref: "#/components/schemas/Session" }
                   total: { type: integer }
                 required: [sessions, total]
     Session:
@@ -3315,7 +3305,7 @@ components:
         meta: { type: object, additionalProperties: true, nullable: true }
         pinned: { type: boolean, nullable: true }
         title: { type: string, nullable: true }
-        type: { type: string, enum: ['agent', 'group'], nullable: true }
+        type: { type: string, enum: ["agent", "group"], nullable: true }
     UpdateSessionRequest:
       type: object
       properties:
@@ -3333,19 +3323,19 @@ components:
         type: object
         properties:
           id: { type: string }
-          data: { $ref: '#/components/schemas/UpdateSessionRequest' }
+          data: { $ref: "#/components/schemas/UpdateSessionRequest" }
         required: [id, data]
 
     # ---------- Topics ----------
     ApiResponseTopic:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
-            data: { $ref: '#/components/schemas/Topic' }
+            data: { $ref: "#/components/schemas/Topic" }
     ApiResponseTopicList:
       allOf:
-        - $ref: '#/components/schemas/ApiResponseBase'
+        - $ref: "#/components/schemas/ApiResponseBase"
         - type: object
           properties:
             data:
@@ -3354,7 +3344,7 @@ components:
                 total: { type: integer }
                 topics:
                   type: array
-                  items: { $ref: '#/components/schemas/Topic' }
+                  items: { $ref: "#/components/schemas/Topic" }
               required: [total, topics]
     Topic:
       type: object

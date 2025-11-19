@@ -271,7 +271,11 @@ export interface FileChunkResponse {
 /**
  * 文件列表项（包含可选的分块状态信息）
  */
-export interface FileListItem extends Partial<FileItem>, Partial<FileChunkStatusResponse> {
+export interface FileListItem extends Partial<FileItem> {
+  /** 分块任务信息（包含基础异步任务信息与分块数量） */
+  chunking?: FileAsyncTaskResponse | null;
+  /** 嵌入任务信息（包含基础异步任务信息） */
+  embedding?: FileAsyncTaskResponse | null;
   /** 关联的知识库列表 */
   knowledgeBases?: Array<KnowledgeBaseItem>;
 }
@@ -286,6 +290,22 @@ export interface AsyncTaskErrorResponse {
   };
   /** 错误名称 */
   name: string;
+}
+
+/**
+ * 文件相关异步任务基础信息（用于列表中的 chunking/embedding 字段）
+ */
+export interface FileAsyncTaskResponse {
+  /** 分块数量（仅 chunking 任务会返回） */
+  count?: number | null;
+  /** 异步任务错误信息 */
+  error?: AsyncTaskErrorResponse | null;
+  /** 异步任务 ID */
+  id?: string;
+  /** 异步任务状态 */
+  status?: 'pending' | 'processing' | 'success' | 'error' | null;
+  /** 异步任务类型 */
+  type?: 'chunk' | 'embedding' | 'image_generation';
 }
 
 /**

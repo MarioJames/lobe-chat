@@ -18,10 +18,12 @@ import { nanoid } from '@/utils/uuid';
 import { BaseService } from '../common/base.service';
 import { processPaginationConditions } from '../helpers/pagination';
 import {
+  AsyncTaskErrorResponse,
   BatchFileUploadRequest,
   BatchFileUploadResponse,
   BatchGetFilesRequest,
   BatchGetFilesResponse,
+  FileAsyncTaskResponse,
   FileChunkRequest,
   FileChunkResponse,
   FileDetailResponse,
@@ -1071,7 +1073,7 @@ export class FileUploadService extends BaseService {
       user?: any;
     })[],
     needsManualRelationFetch = false,
-  ) {
+  ): Promise<FileDetailResponse['file'][]> {
     if (filesResult.length === 0) return [];
 
     const fileIds = filesResult.map((file) => file.id);
@@ -1148,13 +1150,31 @@ export class FileUploadService extends BaseService {
           ? usersData.find((u) => u.id === file.userId) || null
           : file.user || null;
 
+        let chunking: FileAsyncTaskResponse | null = null;
+
+        if (chunkTask || chunkCountItem) {
+          chunking = {
+            count: chunkCountItem?.count ?? null,
+            error: (chunkTask?.error as AsyncTaskErrorResponse | null) ?? null,
+            id: chunkTask?.id,
+            status: (chunkTask?.status as FileAsyncTaskResponse['status']) ?? null,
+            type: chunkTask?.type as FileAsyncTaskResponse['type'],
+          };
+        }
+
+        const embedding: FileAsyncTaskResponse | null = embeddingTask
+          ? {
+              error: (embeddingTask.error as AsyncTaskErrorResponse | null) ?? null,
+              id: embeddingTask.id,
+              status: (embeddingTask.status as FileAsyncTaskResponse['status']) ?? null,
+              type: embeddingTask.type as FileAsyncTaskResponse['type'],
+            }
+          : null;
+
         return {
           ...base,
-          chunking: {
-            ...chunkTask,
-            ...(chunkCountItem?.count && { count: chunkCountItem.count }),
-          },
-          embedding: embeddingTask,
+          chunking,
+          embedding,
           knowledgeBases,
           user,
         };
