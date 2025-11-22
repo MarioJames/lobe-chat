@@ -12,6 +12,7 @@ import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import { DESKTOP_HEADER_ICON_SIZE } from '@/const/layoutTokens';
+import { useAgentPermissions } from '@/hooks/useRbacPermissions';
 import { useGlobalStore } from '@/store/global';
 import { systemStatusSelectors } from '@/store/global/selectors';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
@@ -33,6 +34,7 @@ const HeaderAction = memo<{ className?: string }>(({ className }) => {
   ]);
 
   const { isAgentEditable } = useServerConfigStore(featureFlagsSelectors);
+  const { canUpdate: canUpdateAgent } = useAgentPermissions();
 
   return (
     <Flexbox className={className} gap={4} horizontal>
@@ -56,7 +58,7 @@ const HeaderAction = memo<{ className?: string }>(({ className }) => {
           placement: 'bottom',
         }}
       />
-      {isAgentEditable && <SettingButton />}
+      {isAgentEditable && canUpdateAgent && <SettingButton />}
     </Flexbox>
   );
 });

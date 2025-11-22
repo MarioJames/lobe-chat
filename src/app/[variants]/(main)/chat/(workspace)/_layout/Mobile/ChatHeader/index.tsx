@@ -5,6 +5,7 @@ import { memo, useState } from 'react';
 
 import { INBOX_SESSION_ID } from '@/const/session';
 import { useQueryRoute } from '@/hooks/useQueryRoute';
+import { useAgentPermissions } from '@/hooks/useRbacPermissions';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 
 import SettingButton from '../../../features/SettingButton';
@@ -16,6 +17,7 @@ const MobileHeader = memo(() => {
   const [open, setOpen] = useState(false);
 
   const { isAgentEditable } = useServerConfigStore(featureFlagsSelectors);
+  const { canUpdate: canUpdateAgent } = useAgentPermissions();
 
   return (
     <ChatHeader
@@ -26,7 +28,7 @@ const MobileHeader = memo(() => {
       right={
         <>
           <ShareButton mobile open={open} setOpen={setOpen} />
-          {isAgentEditable && <SettingButton mobile />}
+          {isAgentEditable && canUpdateAgent && <SettingButton mobile />}
         </>
       }
       showBackButton

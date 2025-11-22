@@ -19,6 +19,7 @@ import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { isDesktop, isServerMode } from '@/const/version';
+import { useAgentPermissions } from '@/hooks/useRbacPermissions';
 import { configService } from '@/services/config';
 import { useChatGroupStore } from '@/store/chatGroup';
 import { useGlobalStore } from '@/store/global';
@@ -45,6 +46,7 @@ const Actions = memo<ActionProps>(({ group, id, openCreateGroupModal, parentType
   const { styles } = useStyles();
   const { t } = useTranslation('chat');
 
+  const { canCreate: canCreateAgent, canDelete: canDeleteAgent } = useAgentPermissions();
   const openSessionInNewWindow = useGlobalStore((s) => s.openSessionInNewWindow);
 
   const sessionCustomGroups = useSessionStore(sessionGroupSelectors.sessionGroupItems, isEqual);
@@ -84,16 +86,18 @@ const Actions = memo<ActionProps>(({ group, id, openCreateGroupModal, parentType
               }
             },
           },
-          {
-            icon: <Icon icon={LucideCopy} />,
-            key: 'duplicate',
-            label: t('duplicate', { ns: 'common' }),
-            onClick: ({ domEvent }) => {
-              domEvent.stopPropagation();
+          parentType === 'group' || canCreateAgent
+            ? {
+                icon: <Icon icon={LucideCopy} />,
+                key: 'duplicate',
+                label: t('duplicate', { ns: 'common' }),
+                onClick: ({ domEvent }) => {
+                  domEvent.stopPropagation();
 
-              duplicateSession(id);
-            },
-          },
+                  duplicateSession(id);
+                },
+              }
+            : undefined,
           ...(isDesktop
             ? [
                 {
@@ -171,36 +175,56 @@ const Actions = memo<ActionProps>(({ group, id, openCreateGroupModal, parentType
                 key: 'export',
                 label: t('export', { ns: 'common' }),
               },
-          {
-            danger: true,
-            icon: <Icon icon={Trash} />,
-            key: 'delete',
-            label: t('delete', { ns: 'common' }),
-            onClick: ({ domEvent }) => {
-              domEvent.stopPropagation();
-              modal.confirm({
-                centered: true,
-                okButtonProps: { danger: true },
-                onOk: async () => {
-                  if (parentType === 'group') {
-                    await deleteGroup(id);
-                    message.success(t('confirmRemoveGroupSuccess'));
-                  } else {
-                    await removeSession(id);
-                    message.success(t('confirmRemoveSessionSuccess'));
-                  }
+          parentType === 'group' || canDeleteAgent
+            ? {
+                danger: true,
+                icon: <Icon icon={Trash} />,
+                key: 'delete',
+                label: t('delete', { ns: 'common' }),
+                onClick: ({ domEvent }) => {
+                  domEvent.stopPropagation();
+                  modal.confirm({
+                    centered: true,
+                    okButtonProps: { danger: true },
+                    onOk: async () => {
+                      if (parentType === 'group') {
+                        await deleteGroup(id);
+                        message.success(t('confirmRemoveGroupSuccess'));
+                      } else {
+                        await removeSession(id);
+                        message.success(t('confirmRemoveSessionSuccess'));
+                      }
+                    },
+                    rootClassName: styles.modalRoot,
+                    title:
+                      sessionType === 'group'
+                        ? t('confirmRemoveChatGroupItemAlert')
+                        : t('confirmRemoveSessionItemAlert'),
+                  });
                 },
-                rootClassName: styles.modalRoot,
-                title:
-                  sessionType === 'group'
-                    ? t('confirmRemoveChatGroupItemAlert')
-                    : t('confirmRemoveSessionItemAlert'),
-              });
-            },
-          },
+              }
+            : undefined,
         ] as ItemType[]
       ).filter(Boolean),
-    [id, pin, openSessionInNewWindow],
+    [
+      id,
+      pin,
+      parentType,
+      canCreateAgent,
+      canDeleteAgent,
+      openSessionInNewWindow,
+      sessionCustomGroups,
+      group,
+      isDefault,
+      sessionType,
+      deleteGroup,
+      message,
+      modal,
+      t,
+      updateSessionGroup,
+      duplicateSession,
+      removeSession,
+    ],
   );
 
   return (

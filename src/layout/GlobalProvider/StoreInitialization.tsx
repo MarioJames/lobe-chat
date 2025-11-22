@@ -11,6 +11,7 @@ import { useAgentStore } from '@/store/agent';
 import { useAiInfraStore } from '@/store/aiInfra';
 import { useGlobalStore } from '@/store/global';
 import { systemStatusSelectors } from '@/store/global/selectors';
+import { useRbacStore } from '@/store/rbac';
 import { useServerConfigStore } from '@/store/serverConfig';
 import { customizationSelectors, serverConfigSelectors } from '@/store/serverConfig/selectors';
 import { useUserStore } from '@/store/user';
@@ -30,6 +31,7 @@ const StoreInitialization = memo(() => {
   const { serverConfig } = useServerConfigStore();
 
   const useInitSystemStatus = useGlobalStore((s) => s.useInitSystemStatus);
+  const useInitRbacPermissionCodes = useRbacStore((s) => s.useFetchCurrentUserPermissionCodes);
 
   const useInitAgentStore = useAgentStore((s) => s.useInitInboxAgentStore);
   const useInitAiProviderKeyVaults = useAiInfraStore((s) => s.useFetchAiProviderRuntimeState);
@@ -117,6 +119,7 @@ const StoreInitialization = memo(() => {
 
   useStoreUpdater('isMobile', mobile);
   useStoreUpdater('router', router);
+  useInitRbacPermissionCodes({ enabled: isLoginOnInit });
 
   return null;
 });
