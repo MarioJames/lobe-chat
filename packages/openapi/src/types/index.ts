@@ -30,6 +30,7 @@ export type ServiceResult<T = any> = Promise<T>;
 export interface TTarget {
   targetAgentId?: string;
   targetFileId?: string;
+  targetKnowledgeBaseId?: string;
   targetMessageId?: string;
   targetModelId?: string;
   targetProviderId?: string;
@@ -42,6 +43,7 @@ export interface TTarget {
 export interface TBatchTarget {
   targetAgentIds?: string[];
   targetFileIds?: string[];
+  targetKnowledgeBaseIds?: string[];
   targetMessageIds?: string[];
   targetModelIds?: string[];
   targetProviderIds?: string[];

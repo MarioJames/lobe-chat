@@ -2,12 +2,20 @@ import { AsyncTaskStatus, AsyncTaskType, FileMetadata } from '@lobechat/types';
 import { and, count, desc, eq, gte, ilike, inArray, lte, sum } from 'drizzle-orm';
 import { sha256 } from 'js-sha256';
 
+import { PERMISSION_ACTIONS } from '@/const/rbac';
 import { AsyncTaskModel } from '@/database/models/asyncTask';
 import { ChunkModel } from '@/database/models/chunk';
 import { DocumentModel } from '@/database/models/document';
 import { FileModel } from '@/database/models/file';
 import { KnowledgeBaseModel } from '@/database/models/knowledgeBase';
-import { FileItem, files, filesToSessions, knowledgeBaseFiles, users } from '@/database/schemas';
+import {
+  FileItem,
+  files,
+  filesToSessions,
+  knowledgeBaseFiles,
+  knowledgeBases,
+  users,
+} from '@/database/schemas';
 import { LobeChatDatabase } from '@/database/type';
 import { S3 } from '@/server/modules/S3';
 import { DocumentService } from '@/server/services/document';
@@ -35,7 +43,13 @@ import {
   FileUrlResponse,
   PublicFileUploadRequest,
 } from '../types/file.type';
-import { KnowledgeBaseFileListQuery } from '../types/knowledgeBase.type';
+import {
+  KnowledgeBaseFileBatchRequest,
+  KnowledgeBaseFileListQuery,
+  KnowledgeBaseFileOperationResult,
+  MoveKnowledgeBaseFilesRequest,
+  MoveKnowledgeBaseFilesResponse,
+} from '../types/knowledgeBase.type';
 
 /**
  * 文件上传服务类
@@ -93,6 +107,31 @@ export class FileUploadService extends BaseService {
       ...file,
       url: fullUrl || file.url,
     };
+  }
+
+  /**
+   * 校验知识库归属（仅允许当前用户的知识库）
+   */
+  private async assertOwnedKnowledgeBase(
+    knowledgeBaseId: string,
+    action: keyof typeof PERMISSION_ACTIONS,
+  ) {
+    const permissionResult = await this.resolveOperationPermission(action, {
+      targetKnowledgeBaseId: knowledgeBaseId,
+    });
+    if (!permissionResult.isPermitted) {
+      throw this.createAuthorizationError(permissionResult.message || '无权访问知识库文件');
+    }
+
+    const knowledgeBase = await this.db.query.knowledgeBases.findFirst({
+      where: eq(knowledgeBases.id, knowledgeBaseId),
+    });
+
+    if (!knowledgeBase || knowledgeBase.enabled === false) {
+      throw this.createNotFoundError('知识库不存在或无权访问');
+    }
+
+    return knowledgeBase;
   }
 
   /**
@@ -333,6 +372,168 @@ export class FileUploadService extends BaseService {
       return result;
     } catch (error) {
       this.handleServiceError(error, '获取知识库文件列表');
+    }
+  }
+
+  /**
+   * 批量创建知识库与文件的关联
+   */
+  async addFilesToKnowledgeBase(
+    knowledgeBaseId: string,
+    request: KnowledgeBaseFileBatchRequest,
+  ): Promise<KnowledgeBaseFileOperationResult> {
+    try {
+      await this.assertOwnedKnowledgeBase(knowledgeBaseId, 'KNOWLEDGE_BASE_UPDATE');
+
+      const uniqueFileIds = Array.from(new Set(request.fileIds));
+      if (uniqueFileIds.length === 0) {
+        throw this.createValidationError('文件ID列表不能为空');
+      }
+
+      const ownedFiles = await this.db.query.files.findMany({
+        columns: { id: true },
+        where: and(inArray(files.id, uniqueFileIds), eq(files.userId, this.userId)),
+      });
+      const ownedIds = ownedFiles.map((file) => file.id);
+
+      const failed = uniqueFileIds
+        .filter((fileId) => !ownedIds.includes(fileId))
+        .map((fileId) => ({ fileId, reason: '文件不存在或无权访问' }));
+
+      if (ownedIds.length) {
+        await this.db
+          .insert(knowledgeBaseFiles)
+          .values(
+            ownedIds.map((fileId) => ({
+              fileId,
+              knowledgeBaseId,
+              userId: this.userId,
+            })),
+          )
+          .onConflictDoNothing();
+      }
+
+      return {
+        failed,
+        successed: ownedIds,
+      };
+    } catch (error) {
+      this.handleServiceError(error, '批量添加知识库文件关联');
+    }
+  }
+
+  /**
+   * 批量移除知识库与文件的关联
+   */
+  async removeFilesFromKnowledgeBase(
+    knowledgeBaseId: string,
+    request: KnowledgeBaseFileBatchRequest,
+  ): Promise<KnowledgeBaseFileOperationResult> {
+    try {
+      const uniqueFileIds = Array.from(new Set(request.fileIds));
+      if (uniqueFileIds.length === 0) {
+        throw this.createValidationError('文件ID列表不能为空');
+      }
+
+      await this.assertOwnedKnowledgeBase(knowledgeBaseId, 'KNOWLEDGE_BASE_UPDATE');
+
+      const ownedFiles = await this.db.query.files.findMany({
+        columns: { id: true },
+        where: and(inArray(files.id, uniqueFileIds), eq(files.userId, this.userId)),
+      });
+      const ownedIds = ownedFiles.map((file) => file.id);
+
+      const failed = uniqueFileIds
+        .filter((fileId) => !ownedIds.includes(fileId))
+        .map((fileId) => ({ fileId, reason: '文件不存在或无权访问' }));
+
+      if (ownedIds.length) {
+        await this.db
+          .delete(knowledgeBaseFiles)
+          .where(
+            and(
+              eq(knowledgeBaseFiles.knowledgeBaseId, knowledgeBaseId),
+              eq(knowledgeBaseFiles.userId, this.userId),
+              inArray(knowledgeBaseFiles.fileId, ownedIds),
+            ),
+          );
+      }
+
+      return {
+        failed,
+        successed: ownedIds,
+      };
+    } catch (error) {
+      this.handleServiceError(error, '批量移除知识库文件关联');
+    }
+  }
+
+  /**
+   * 批量移动文件到另一个知识库
+   */
+  async moveFilesBetweenKnowledgeBases(
+    sourceKnowledgeBaseId: string,
+    request: MoveKnowledgeBaseFilesRequest,
+  ): Promise<MoveKnowledgeBaseFilesResponse> {
+    try {
+      if (sourceKnowledgeBaseId === request.targetKnowledgeBaseId) {
+        throw this.createValidationError('目标知识库不能与源知识库相同');
+      }
+
+      // 校验知识库归属
+      await this.assertOwnedKnowledgeBase(sourceKnowledgeBaseId, 'KNOWLEDGE_BASE_UPDATE');
+      await this.assertOwnedKnowledgeBase(request.targetKnowledgeBaseId, 'KNOWLEDGE_BASE_UPDATE');
+
+      // 校验文件归属
+      const uniqueFileIds = Array.from(new Set(request.fileIds));
+
+      const ownedFiles = await this.db.query.files.findMany({
+        columns: { id: true },
+        where: and(inArray(files.id, uniqueFileIds), eq(files.userId, this.userId)),
+      });
+
+      const ownedIds = ownedFiles.map((file) => file.id);
+
+      const failed: MoveKnowledgeBaseFilesResponse['failed'] = uniqueFileIds
+        .filter((fileId) => !ownedIds.includes(fileId))
+        .map((fileId) => ({ fileId, reason: '文件不存在或无权访问' }));
+
+      if (!ownedIds.length) {
+        return {
+          failed,
+          successed: [],
+        };
+      }
+
+      await this.db.transaction(async (trx) => {
+        await trx
+          .delete(knowledgeBaseFiles)
+          .where(
+            and(
+              eq(knowledgeBaseFiles.knowledgeBaseId, sourceKnowledgeBaseId),
+              eq(knowledgeBaseFiles.userId, this.userId),
+              inArray(knowledgeBaseFiles.fileId, ownedIds),
+            ),
+          );
+
+        await trx
+          .insert(knowledgeBaseFiles)
+          .values(
+            ownedIds.map((fileId) => ({
+              fileId,
+              knowledgeBaseId: request.targetKnowledgeBaseId,
+              userId: this.userId,
+            })),
+          )
+          .onConflictDoNothing();
+      });
+
+      return {
+        failed,
+        successed: ownedIds,
+      };
+    } catch (error) {
+      this.handleServiceError(error, '移动知识库文件');
     }
   }
 

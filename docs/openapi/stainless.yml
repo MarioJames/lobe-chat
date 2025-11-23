@@ -232,8 +232,12 @@ resources:
       api_response_knowledge_base_list: "#/components/schemas/ApiResponseKnowledgeBaseList"
       api_response_knowledge_base: "#/components/schemas/ApiResponseKnowledgeBase"
       api_response_knowledge_base_delete: "#/components/schemas/ApiResponseKnowledgeBaseDelete"
+      api_response_knowledge_base_file_operation: "#/components/schemas/ApiResponseKnowledgeBaseFileOperation"
+      api_response_move_knowledge_base_files: "#/components/schemas/ApiResponseMoveKnowledgeBaseFiles"
       knowledge_base: "#/components/schemas/KnowledgeBase"
       knowledge_base_list_item: "#/components/schemas/KnowledgeBaseListItem"
+      knowledge_base_file_operation_result: "#/components/schemas/KnowledgeBaseFileOperationResult"
+      move_knowledge_base_files_result: "#/components/schemas/MoveKnowledgeBaseFilesResult"
       create_knowledge_base_request: "#/components/schemas/CreateKnowledgeBaseRequest"
       update_knowledge_base_request: "#/components/schemas/UpdateKnowledgeBaseRequest"
       kb_api_response_file_list: "#/components/schemas/ApiResponseFileList"
@@ -249,8 +253,13 @@ resources:
         models:
           kb_api_response_file_list: "#/components/schemas/ApiResponseFileList"
           kb_file: "#/components/schemas/File"
+          kb_api_response_file_operation: "#/components/schemas/ApiResponseKnowledgeBaseFileOperation"
+          kb_api_response_move_files: "#/components/schemas/ApiResponseMoveKnowledgeBaseFiles"
         methods:
           list: get /knowledge-bases/{id}/files
+          batch_add: post /knowledge-bases/{id}/files/batch
+          batch_remove: delete /knowledge-bases/{id}/files/batch
+          move: post /knowledge-bases/{id}/files/move
 
 settings:
   # All generated integration tests that hit the prism mock http server are marked

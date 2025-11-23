@@ -38,6 +38,56 @@ export const KnowledgeBaseFileListQuerySchema = PaginationQuerySchema.extend({
 });
 
 /**
+ * 知识库文件批量操作请求
+ */
+export interface KnowledgeBaseFileBatchRequest {
+  /** 文件 ID 列表 */
+  fileIds: string[];
+}
+
+export const KnowledgeBaseFileBatchSchema = z.object({
+  fileIds: z.array(z.string().min(1, '文件ID不能为空')).min(1, '文件ID列表不能为空'),
+});
+
+/**
+ * 知识库文件移动请求
+ */
+export interface MoveKnowledgeBaseFilesRequest extends KnowledgeBaseFileBatchRequest {
+  /** 目标知识库 ID */
+  targetKnowledgeBaseId: string;
+}
+
+export const MoveKnowledgeBaseFilesSchema = KnowledgeBaseFileBatchSchema.extend({
+  targetKnowledgeBaseId: z.string().min(1, '目标知识库 ID 不能为空'),
+});
+
+/**
+ * 知识库文件批量操作结果
+ */
+export interface KnowledgeBaseFileOperationResult {
+  /** 失败的文件及原因 */
+  failed: Array<{
+    fileId: string;
+    reason: string;
+  }>;
+  /** 操作成功的文件 ID 列表 */
+  successed: string[];
+}
+
+/**
+ * 知识库文件移动结果
+ */
+export interface MoveKnowledgeBaseFilesResponse {
+  /** 失败的文件及原因 */
+  failed: Array<{
+    fileId: string;
+    reason: string;
+  }>;
+  /** 成功移动的文件 ID 列表 */
+  successed: string[];
+}
+
+/**
  * 知识库列表响应类型
  */
 export type KnowledgeBaseAccessType = 'owner' | 'userGrant' | 'roleGrant' | 'public';

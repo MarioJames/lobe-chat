@@ -5,8 +5,10 @@ import { FileUploadService } from '../services/file.service';
 import { KnowledgeBaseService } from '../services/knowledgeBase.service';
 import {
   CreateKnowledgeBaseRequest,
+  KnowledgeBaseFileBatchRequest,
   KnowledgeBaseFileListQuery,
   KnowledgeBaseListQuery,
+  MoveKnowledgeBaseFilesRequest,
   UpdateKnowledgeBaseRequest,
 } from '../types/knowledgeBase.type';
 
@@ -71,6 +73,69 @@ export class KnowledgeBaseController extends BaseController {
       const result = await fileService.getKnowledgeBaseFileList(id, query);
 
       return this.success(c, result, 'Knowledge base files retrieved successfully');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  /**
+   * 批量添加文件到知识库
+   * POST /knowledge-bases/:id/files/batch
+   */
+  async addFilesToKnowledgeBase(c: Context) {
+    try {
+      const userId = this.getUserId(c)!;
+      const { id } = this.getParams(c);
+      const body = await this.getBody<KnowledgeBaseFileBatchRequest>(c);
+
+      const db = await this.getDatabase();
+      const fileService = new FileUploadService(db, userId);
+
+      const result = await fileService.addFilesToKnowledgeBase(id, body);
+
+      return this.success(c, result, 'Files added to knowledge base');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  /**
+   * 批量从知识库移除文件
+   * DELETE /knowledge-bases/:id/files/batch
+   */
+  async removeFilesFromKnowledgeBase(c: Context) {
+    try {
+      const userId = this.getUserId(c)!;
+      const { id } = this.getParams(c);
+      const body = await this.getBody<KnowledgeBaseFileBatchRequest>(c);
+
+      const db = await this.getDatabase();
+      const fileService = new FileUploadService(db, userId);
+
+      const result = await fileService.removeFilesFromKnowledgeBase(id, body);
+
+      return this.success(c, result, 'Files removed from knowledge base');
+    } catch (error) {
+      return this.handleError(c, error);
+    }
+  }
+
+  /**
+   * 批量移动文件到其他知识库
+   * POST /knowledge-bases/:id/files/move
+   */
+  async moveFilesBetweenKnowledgeBases(c: Context) {
+    try {
+      const userId = this.getUserId(c)!;
+      const { id } = this.getParams(c);
+      const body = await this.getBody<MoveKnowledgeBaseFilesRequest>(c);
+
+      const db = await this.getDatabase();
+      const fileService = new FileUploadService(db, userId);
+
+      const result = await fileService.moveFilesBetweenKnowledgeBases(id, body);
+
+      return this.success(c, result, 'Files moved to target knowledge base');
     } catch (error) {
       return this.handleError(c, error);
     }
