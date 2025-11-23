@@ -8,9 +8,11 @@ import { requireAnyPermission } from '../middleware';
 import { requireAuth } from '../middleware/auth';
 import {
   CreateKnowledgeBaseSchema,
+  KnowledgeBaseFileBatchSchema,
   KnowledgeBaseFileListQuerySchema,
   KnowledgeBaseIdParamSchema,
   KnowledgeBaseListQuerySchema,
+  MoveKnowledgeBaseFilesSchema,
   UpdateKnowledgeBaseSchema,
 } from '../types/knowledgeBase.type';
 
@@ -159,6 +161,54 @@ app.get(
   async (c) => {
     const controller = new KnowledgeBaseController();
     return await controller.getKnowledgeBaseFiles(c);
+  },
+);
+
+/**
+ * 批量为知识库添加文件关联
+ * POST /knowledge-bases/:id/files/batch
+ */
+app.post(
+  '/:id/files/batch',
+  requireAuth,
+  requireAnyPermission(getAllScopePermissions('KNOWLEDGE_BASE_UPDATE'), '您没有权限更新知识库文件'),
+  zValidator('param', KnowledgeBaseIdParamSchema),
+  zValidator('json', KnowledgeBaseFileBatchSchema),
+  async (c) => {
+    const controller = new KnowledgeBaseController();
+    return await controller.addFilesToKnowledgeBase(c);
+  },
+);
+
+/**
+ * 批量移除知识库与文件的关联
+ * DELETE /knowledge-bases/:id/files/batch
+ */
+app.delete(
+  '/:id/files/batch',
+  requireAuth,
+  requireAnyPermission(getAllScopePermissions('KNOWLEDGE_BASE_UPDATE'), '您没有权限更新知识库文件'),
+  zValidator('param', KnowledgeBaseIdParamSchema),
+  zValidator('json', KnowledgeBaseFileBatchSchema),
+  async (c) => {
+    const controller = new KnowledgeBaseController();
+    return await controller.removeFilesFromKnowledgeBase(c);
+  },
+);
+
+/**
+ * 批量将文件从当前知识库移动到目标知识库
+ * POST /knowledge-bases/:id/files/move
+ */
+app.post(
+  '/:id/files/move',
+  requireAuth,
+  requireAnyPermission(getAllScopePermissions('KNOWLEDGE_BASE_UPDATE'), '您没有权限更新知识库文件'),
+  zValidator('param', KnowledgeBaseIdParamSchema),
+  zValidator('json', MoveKnowledgeBaseFilesSchema),
+  async (c) => {
+    const controller = new KnowledgeBaseController();
+    return await controller.moveFilesBetweenKnowledgeBases(c);
   },
 );
 
