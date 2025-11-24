@@ -27,6 +27,7 @@ import { messageRouter } from './message';
 import { moderationRouter } from './moderation';
 import { pluginRouter } from './plugin';
 import { ragEvalRouter } from './ragEval';
+import { rbacRouter } from './rbac';
 import { sessionRouter } from './session';
 import { sessionGroupRouter } from './sessionGroup';
 import { threadRouter } from './thread';
@@ -60,6 +61,7 @@ export const lambdaRouter = router({
   moderation: moderationRouter,
   plugin: pluginRouter,
   ragEval: ragEvalRouter,
+  rbac: rbacRouter,
   session: sessionRouter,
   sessionGroup: sessionGroupRouter,
   thread: threadRouter,

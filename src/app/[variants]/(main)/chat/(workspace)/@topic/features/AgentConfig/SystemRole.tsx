@@ -9,6 +9,7 @@ import { Flexbox } from 'react-layout-kit';
 
 import AgentInfo from '@/features/AgentInfo';
 import { useOpenChatSettings } from '@/hooks/useInterceptingRoutes';
+import { useAgentPermissions } from '@/hooks/useRbacPermissions';
 import { useAgentStore } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/selectors';
 import { ChatSettingsTabs } from '@/store/global/initialState';
@@ -39,6 +40,7 @@ const SystemRole = memo(({ editing, setEditing, open, setOpen, isLoading }: Syst
   const openChatSettings = useOpenChatSettings(ChatSettingsTabs.Prompt);
   const { t } = useTranslation('common');
 
+  const { canUpdate: canUpdateAgent } = useAgentPermissions();
   const [meta] = useSessionStore((s) => [sessionMetaSelectors.currentAgentMeta(s)]);
 
   const [systemRole, updateAgentConfig] = useAgentStore((s) => [
@@ -47,7 +49,7 @@ const SystemRole = memo(({ editing, setEditing, open, setOpen, isLoading }: Syst
   ]);
 
   const handleOpenWithEdit = (e: MouseEvent) => {
-    if (isLoading) return;
+    if (isLoading || !canUpdateAgent) return;
     e.stopPropagation();
     setEditing(true);
     setOpen(true);
@@ -55,7 +57,10 @@ const SystemRole = memo(({ editing, setEditing, open, setOpen, isLoading }: Syst
 
   const handleOpen = (e: MouseEvent) => {
     if (isLoading) return;
-    if (e.altKey) handleOpenWithEdit(e);
+    if (e.altKey && canUpdateAgent) {
+      handleOpenWithEdit(e);
+      return;
+    }
     setOpen(true);
   };
 
@@ -70,7 +75,7 @@ const SystemRole = memo(({ editing, setEditing, open, setOpen, isLoading }: Syst
     <Flexbox height={200} onClick={handleOpen} padding={16}>
       <EditableMessage
         classNames={{ markdown: styles.prompt }}
-        editing={editing}
+        editing={editing && canUpdateAgent}
         markdownProps={{ enableLatex: false, enableMermaid: false }}
         model={{
           extra: (
@@ -84,11 +89,15 @@ const SystemRole = memo(({ editing, setEditing, open, setOpen, isLoading }: Syst
               style={{ marginBottom: 16 }}
             />
           ),
+          footer: canUpdateAgent ? undefined : false,
         }}
         onChange={(e) => {
           updateAgentConfig({ systemRole: e });
         }}
-        onEditingChange={setEditing}
+        onEditingChange={(value) => {
+          if (!canUpdateAgent) return;
+          setEditing(value);
+        }}
         onOpenChange={setOpen}
         openModal={open}
         placeholder={`${t('settingAgent.prompt.placeholder', { ns: 'setting' })}...`}
@@ -96,7 +105,7 @@ const SystemRole = memo(({ editing, setEditing, open, setOpen, isLoading }: Syst
         text={{
           cancel: t('cancel'),
           confirm: t('ok'),
-          edit: t('edit'),
+          edit: canUpdateAgent ? t('edit') : undefined,
           title: t('settingAgent.prompt.title', { ns: 'setting' }),
         }}
         value={systemRole}

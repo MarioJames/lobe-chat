@@ -9,7 +9,7 @@ import { Center, Flexbox } from 'react-layout-kit';
 import BubblesLoading from '@/components/BubblesLoading';
 import RepoIcon from '@/components/RepoIcon';
 import { LOADING_FLAT } from '@/const/message';
-import { useKnowledgeBasePermissions } from '@/hooks/useRbacPermissions';
+import { useKnowledgeBaseAccess } from '@/hooks/useKnowledgeBaseAccess';
 import { useKnowledgeBaseStore } from '@/store/knowledgeBase';
 
 export const knowledgeItemClass = 'knowledge-base-item';
@@ -51,8 +51,7 @@ const Content = memo<KnowledgeBaseItemProps>(({ id, name, showMore }) => {
   );
 
   const { styles } = useStyles();
-  const { canDelete: canDeleteKnowledgeBase, canUpdate: canUpdateKnowledgeBase } =
-    useKnowledgeBasePermissions();
+  const { isOwner } = useKnowledgeBaseAccess(id);
 
   const toggleEditing = (visible?: boolean) => {
     useKnowledgeBaseStore.setState(
@@ -67,46 +66,33 @@ const Content = memo<KnowledgeBaseItemProps>(({ id, name, showMore }) => {
   const items = useMemo<MenuProps['items']>(() => {
     const menuItems: MenuProps['items'] = [];
 
-    if (canUpdateKnowledgeBase) {
-      menuItems.push({
-        icon: <Icon icon={PencilLine} />,
-        key: 'rename',
-        label: t('rename', { ns: 'common' }),
-        onClick: () => {
-          toggleEditing(true);
+    if (isOwner) {
+      menuItems.push(
+        {
+          icon: <Icon icon={PencilLine} />,
+          key: 'rename',
+          label: t('rename', { ns: 'common' }),
+          onClick: () => {
+            toggleEditing(true);
+          },
         },
-      });
-    }
-
-    if (canUpdateKnowledgeBase && canDeleteKnowledgeBase) {
-      menuItems.push({
-        type: 'divider',
-      });
-    }
-
-    if (canDeleteKnowledgeBase) {
-      menuItems.push({
-        danger: true,
-        icon: <Icon icon={Trash} />,
-        key: 'delete',
-        label: t('delete', { ns: 'common' }),
-        onClick: () => {
-          if (!id) return;
-
-          modal.confirm({
-            centered: true,
-            okButtonProps: { danger: true },
-            onOk: async () => {
-              await removeKnowledgeBase(id);
-            },
-            title: t('knowledgeBase.list.confirmRemoveKnowledgeBase'),
-          });
+        {
+          type: 'divider',
         },
-      });
+        {
+          danger: true,
+          icon: <Icon icon={Trash} />,
+          key: 'delete',
+          label: t('delete', { ns: 'common' }),
+          onClick: () => {
+            if (!id) return;
+          },
+        },
+      );
     }
 
     return menuItems;
-  }, [canDeleteKnowledgeBase, canUpdateKnowledgeBase, id, modal, removeKnowledgeBase, t]);
+  }, [isOwner, id, modal, removeKnowledgeBase, t]);
 
   return (
     <Flexbox
@@ -159,7 +145,7 @@ const Content = memo<KnowledgeBaseItemProps>(({ id, name, showMore }) => {
         />
       )}
 
-      {showMore && !editing && (
+      {showMore && !editing && !!items?.length && (
         <div
           onClick={(e) => {
             e.preventDefault();

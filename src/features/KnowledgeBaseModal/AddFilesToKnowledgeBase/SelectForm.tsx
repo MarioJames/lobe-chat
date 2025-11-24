@@ -7,6 +7,8 @@ import { Flexbox } from 'react-layout-kit';
 
 import RepoIcon from '@/components/RepoIcon';
 import { useKnowledgeBaseStore } from '@/store/knowledgeBase';
+import { useUserStore } from '@/store/user';
+import { userProfileSelectors } from '@/store/user/selectors';
 
 interface CreateFormProps {
   fileIds: string[];
@@ -23,7 +25,9 @@ const SelectForm = memo<CreateFormProps>(({ onClose, knowledgeBaseId, fileIds })
     s.useFetchKnowledgeBaseList,
     s.addFilesToKnowledgeBase,
   ]);
+  const currentUserId = useUserStore(userProfileSelectors.userId);
   const { data, isLoading } = useFetchKnowledgeBaseList();
+
   const onFinish = async (values: { id: string }) => {
     setLoading(true);
 
@@ -70,6 +74,7 @@ const SelectForm = memo<CreateFormProps>(({ onClose, knowledgeBaseId, fileIds })
               loading={isLoading}
               options={(data || [])
                 .filter((item) => item.id !== knowledgeBaseId)
+                .filter((item) => item.userId === currentUserId)
                 .map((item) => ({
                   label: (
                     <Flexbox gap={8} horizontal>

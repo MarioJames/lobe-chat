@@ -12,8 +12,10 @@ import { useTranslation } from 'react-i18next';
 import { Center, Flexbox } from 'react-layout-kit';
 
 import FileIcon from '@/components/FileIcon';
-import { useKnowledgeBaseAccessControl } from '@/hooks/useKnowledgeBaseAccessControl';
+import { useKnowledgeBaseAccess } from '@/hooks/useKnowledgeBaseAccess';
 import { fileManagerSelectors, useFileStore } from '@/store/file';
+import { useUserStore } from '@/store/user';
+import { userProfileSelectors } from '@/store/user/selectors';
 import { FileListItem } from '@/types/files';
 import { formatSize } from '@/utils/format';
 import { isChunkingUnsupported } from '@/utils/isChunkingUnsupported';
@@ -102,6 +104,7 @@ const FileRenderItem = memo<FileRenderItemProps>(
     onSelectedChange,
     knowledgeBaseId,
     index,
+    userId,
   }) => {
     const { t } = useTranslation('components');
     const { styles, cx } = useStyles();
@@ -111,7 +114,10 @@ const FileRenderItem = memo<FileRenderItemProps>(
       s.parseFilesToChunks,
     ]);
 
-    const { isReadOnly } = useKnowledgeBaseAccessControl(knowledgeBaseId);
+    // 判断当前用户是否是文件的所有者
+    const isFileOwner = useUserStore((s) => userProfileSelectors.userId(s) === userId);
+
+    const { isReadOnly } = useKnowledgeBaseAccess(knowledgeBaseId);
     const isSupportedForChunking = !isChunkingUnsupported(fileType);
 
     const displayTime =
@@ -143,6 +149,8 @@ const FileRenderItem = memo<FileRenderItemProps>(
               onClick={(e) => {
                 e.stopPropagation();
 
+                if (!isFileOwner) return;
+
                 onSelectedChange(id, !selected, e.shiftKey, index);
               }}
               style={{ paddingInline: 4 }}
@@ -150,6 +158,7 @@ const FileRenderItem = memo<FileRenderItemProps>(
               <Checkbox
                 checked={selected}
                 className={selected ? '' : styles.hover}
+                disabled={!isFileOwner}
                 style={{ borderRadius: '50%' }}
               />
             </Center>
@@ -164,39 +173,7 @@ const FileRenderItem = memo<FileRenderItemProps>(
               e.stopPropagation();
             }}
           >
-            {isCreatingFileParseTask || isNull(chunkingStatus) || !chunkingStatus ? (
-              <div className={isCreatingFileParseTask ? undefined : styles.hover}>
-                <Tooltip
-                  styles={{
-                    root: { pointerEvents: 'none' },
-                  }}
-                  title={t(
-                    isReadOnly
-                      ? 'FileManager.actions.chunkingUnsupported'
-                      : isSupportedForChunking
-                        ? 'FileManager.actions.chunkingTooltip'
-                        : 'FileManager.actions.chunkingUnsupported',
-                  )}
-                >
-                  <Button
-                    disabled={!isSupportedForChunking || isReadOnly}
-                    icon={FileBoxIcon}
-                    loading={isCreatingFileParseTask}
-                    onClick={() => {
-                      parseFiles([id]);
-                    }}
-                    size={'small'}
-                    type={'text'}
-                  >
-                    {t(
-                      isCreatingFileParseTask
-                        ? 'FileManager.actions.createChunkingTask'
-                        : 'FileManager.actions.chunking',
-                    )}
-                  </Button>
-                </Tooltip>
-              </div>
-            ) : (
+            {!isNull(chunkingStatus) && chunkingStatus ? (
               <div style={{ cursor: 'default' }}>
                 <ChunksBadge
                   chunkCount={chunkCount}
@@ -209,9 +186,48 @@ const FileRenderItem = memo<FileRenderItemProps>(
                   isReadOnly={isReadOnly}
                 />
               </div>
+            ) : (
+              !isReadOnly && (
+                <div className={isCreatingFileParseTask ? undefined : styles.hover}>
+                  <Tooltip
+                    styles={{
+                      root: { pointerEvents: 'none' },
+                    }}
+                    title={t(
+                      isSupportedForChunking
+                        ? 'FileManager.actions.chunkingTooltip'
+                        : 'FileManager.actions.chunkingUnsupported',
+                    )}
+                  >
+                    <Button
+                      disabled={!isSupportedForChunking}
+                      icon={FileBoxIcon}
+                      loading={isCreatingFileParseTask}
+                      onClick={() => {
+                        if (!isSupportedForChunking) return;
+                        parseFiles([id]);
+                      }}
+                      size={'small'}
+                      type={'text'}
+                    >
+                      {t(
+                        isCreatingFileParseTask
+                          ? 'FileManager.actions.createChunkingTask'
+                          : 'FileManager.actions.chunking',
+                      )}
+                    </Button>
+                  </Tooltip>
+                </div>
+              )
             )}
             <div className={styles.hover}>
-              <DropdownMenu filename={name} id={id} knowledgeBaseId={knowledgeBaseId} url={url} />
+              <DropdownMenu
+                filename={name}
+                id={id}
+                knowledgeBaseId={knowledgeBaseId}
+                url={url}
+                userId={userId}
+              />
             </div>
           </Flexbox>
         </Flexbox>

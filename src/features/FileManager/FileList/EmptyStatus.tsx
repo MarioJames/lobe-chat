@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Center, Flexbox } from 'react-layout-kit';
 
 import { useCreateNewModal } from '@/features/KnowledgeBaseModal';
+import { useKnowledgeBaseAccess } from '@/hooks/useKnowledgeBaseAccess';
 import { useKnowledgeBasePermissions } from '@/hooks/useRbacPermissions';
 import { useFileStore } from '@/store/file';
 
@@ -74,6 +75,11 @@ const EmptyStatus = ({ showKnowledgeBase, knowledgeBaseId }: EmptyStatusProps) =
 
   const { open } = useCreateNewModal();
   const { canCreate: canCreateKnowledgeBase } = useKnowledgeBasePermissions();
+  const { isReadOnly } = useKnowledgeBaseAccess(knowledgeBaseId);
+
+  const showKnowledgeBaseAction = showKnowledgeBase && canCreateKnowledgeBase;
+  const showUploadActions = !isReadOnly;
+  const showActions = showKnowledgeBaseAction || showUploadActions;
 
   return (
     <Center gap={24} height={'100%'} style={{ paddingBottom: 100 }} width={'100%'}>
@@ -81,73 +87,81 @@ const EmptyStatus = ({ showKnowledgeBase, knowledgeBaseId }: EmptyStatusProps) =
         <Text as={'h4'}>{t('FileManager.emptyStatus.title')}</Text>
         <Text type={'secondary'}>{t('FileManager.emptyStatus.or')}</Text>
       </Flexbox>
-      <Flexbox gap={12} horizontal>
-        {showKnowledgeBase && canCreateKnowledgeBase && (
-          <Flexbox
-            className={styles.card}
-            onClick={() => {
-              open();
-            }}
-            padding={16}
-          >
-            <span className={styles.actionTitle}>
-              {t('FileManager.emptyStatus.actions.knowledgeBase')}
-            </span>
-            <div className={styles.glow} style={{ background: theme.purple }} />
-            <FileTypeIcon
-              className={styles.icon}
-              color={theme.purple}
-              icon={<Icon color={'#fff'} icon={PlusIcon} />}
-              size={ICON_SIZE}
-              type={'folder'}
-            />
-          </Flexbox>
-        )}
-        <Upload
-          beforeUpload={async (file) => {
-            await pushDockFileList([file], knowledgeBaseId);
+      {showActions && (
+        <Flexbox gap={12} horizontal>
+          {showKnowledgeBaseAction && (
+            <Flexbox
+              className={styles.card}
+              onClick={() => {
+                open();
+              }}
+              padding={16}
+            >
+              <span className={styles.actionTitle}>
+                {t('FileManager.emptyStatus.actions.knowledgeBase')}
+              </span>
+              <div className={styles.glow} style={{ background: theme.purple }} />
+              <FileTypeIcon
+                className={styles.icon}
+                color={theme.purple}
+                icon={<Icon color={'#fff'} icon={PlusIcon} />}
+                size={ICON_SIZE}
+                type={'folder'}
+              />
+            </Flexbox>
+          )}
+          {showUploadActions && (
+            <>
+              <Upload
+                beforeUpload={async (file) => {
+                  await pushDockFileList([file], knowledgeBaseId);
 
-            return false;
-          }}
-          multiple={true}
-          showUploadList={false}
-        >
-          <Flexbox className={styles.card} padding={16}>
-            <span className={styles.actionTitle}>{t('FileManager.emptyStatus.actions.file')}</span>
-            <div className={styles.glow} style={{ background: theme.gold }} />
-            <FileTypeIcon
-              className={styles.icon}
-              color={theme.gold}
-              icon={<Icon color={'#fff'} icon={ArrowUpIcon} />}
-              size={ICON_SIZE}
-            />
-          </Flexbox>
-        </Upload>
-        <Upload
-          beforeUpload={async (file) => {
-            await pushDockFileList([file], knowledgeBaseId);
+                  return false;
+                }}
+                multiple={true}
+                showUploadList={false}
+              >
+                <Flexbox className={styles.card} padding={16}>
+                  <span className={styles.actionTitle}>
+                    {t('FileManager.emptyStatus.actions.file')}
+                  </span>
+                  <div className={styles.glow} style={{ background: theme.gold }} />
+                  <FileTypeIcon
+                    className={styles.icon}
+                    color={theme.gold}
+                    icon={<Icon color={'#fff'} icon={ArrowUpIcon} />}
+                    size={ICON_SIZE}
+                  />
+                </Flexbox>
+              </Upload>
+              <Upload
+                beforeUpload={async (file) => {
+                  await pushDockFileList([file], knowledgeBaseId);
 
-            return false;
-          }}
-          directory
-          multiple={true}
-          showUploadList={false}
-        >
-          <Flexbox className={styles.card} padding={16}>
-            <span className={styles.actionTitle}>
-              {t('FileManager.emptyStatus.actions.folder')}
-            </span>
-            <div className={styles.glow} style={{ background: theme.geekblue }} />
-            <FileTypeIcon
-              className={styles.icon}
-              color={theme.geekblue}
-              icon={<Icon color={'#fff'} icon={ArrowUpIcon} />}
-              size={ICON_SIZE}
-              type={'folder'}
-            />
-          </Flexbox>
-        </Upload>
-      </Flexbox>
+                  return false;
+                }}
+                directory
+                multiple={true}
+                showUploadList={false}
+              >
+                <Flexbox className={styles.card} padding={16}>
+                  <span className={styles.actionTitle}>
+                    {t('FileManager.emptyStatus.actions.folder')}
+                  </span>
+                  <div className={styles.glow} style={{ background: theme.geekblue }} />
+                  <FileTypeIcon
+                    className={styles.icon}
+                    color={theme.geekblue}
+                    icon={<Icon color={'#fff'} icon={ArrowUpIcon} />}
+                    size={ICON_SIZE}
+                    type={'folder'}
+                  />
+                </Flexbox>
+              </Upload>
+            </>
+          )}
+        </Flexbox>
+      )}
     </Center>
   );
 };
