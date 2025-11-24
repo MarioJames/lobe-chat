@@ -85,9 +85,23 @@ export const createCrudSlice: StateCreator<
       () => knowledgeBaseService.getKnowledgeBaseList(),
       {
         fallbackData: [],
-        onSuccess: () => {
-          if (!get().initKnowledgeBaseList)
+        onSuccess: (items) => {
+          if (!get().initKnowledgeBaseList) {
             set({ initKnowledgeBaseList: true }, false, 'useFetchKnowledgeBaseList/init');
+          }
+
+          set({
+            activeKnowledgeBaseItems: {
+              ...get().activeKnowledgeBaseItems,
+              ...items.reduce(
+                (acc, item) => {
+                  acc[item.id] = item;
+                  return acc;
+                },
+                {} as Record<string, KnowledgeBaseItem>,
+              ),
+            },
+          });
         },
         suspense: params.suspense,
       },

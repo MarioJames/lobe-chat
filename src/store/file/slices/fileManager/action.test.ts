@@ -822,6 +822,7 @@ describe('FileManagerActions', () => {
         size: 100,
         updatedAt: new Date(),
         url: 'http://example.com/test.txt',
+        userId: 'user-1',
       };
 
       vi.mocked(lambdaClient.file.getFileItemById.query).mockResolvedValue(mockFile);
@@ -851,6 +852,7 @@ describe('FileManagerActions', () => {
           size: 100,
           updatedAt: new Date(),
           url: 'http://example.com/test1.txt',
+          userId: 'user-1',
         },
         {
           chunkCount: null,
@@ -864,6 +866,7 @@ describe('FileManagerActions', () => {
           size: 200,
           updatedAt: new Date(),
           url: 'http://example.com/test2.txt',
+          userId: 'user-1',
         },
       ];
 
@@ -893,6 +896,7 @@ describe('FileManagerActions', () => {
           size: 100,
           updatedAt: new Date(),
           url: 'http://example.com/test.txt',
+          userId: 'user-1',
         },
       ];
 

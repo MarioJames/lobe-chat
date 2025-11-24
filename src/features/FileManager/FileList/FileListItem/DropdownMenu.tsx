@@ -13,9 +13,10 @@ import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useAddFilesToKnowledgeBaseModal } from '@/features/KnowledgeBaseModal';
-import { useKnowledgeBaseAccessControl } from '@/hooks/useKnowledgeBaseAccessControl';
 import { useFileStore } from '@/store/file';
 import { useKnowledgeBaseStore } from '@/store/knowledgeBase';
+import { useUserStore } from '@/store/user';
+import { userProfileSelectors } from '@/store/user/selectors';
 import { downloadFile } from '@/utils/client/downloadFile';
 
 interface DropdownMenuProps {
@@ -23,9 +24,10 @@ interface DropdownMenuProps {
   id: string;
   knowledgeBaseId?: string;
   url: string;
+  userId: string;
 }
 
-const DropdownMenu = memo<DropdownMenuProps>(({ id, knowledgeBaseId, url, filename }) => {
+const DropdownMenu = memo<DropdownMenuProps>(({ id, knowledgeBaseId, url, filename, userId }) => {
   const { t } = useTranslation(['components', 'common']);
   const { message, modal } = App.useApp();
 
@@ -34,7 +36,8 @@ const DropdownMenu = memo<DropdownMenuProps>(({ id, knowledgeBaseId, url, filena
     s.removeFilesFromKnowledgeBase,
   ]);
 
-  const { isReadOnly } = useKnowledgeBaseAccessControl(knowledgeBaseId);
+  const isFileOwner = useUserStore((s) => userProfileSelectors.userId(s) === userId);
+
   const inKnowledgeBase = !!knowledgeBaseId;
   const { open } = useAddFilesToKnowledgeBaseModal();
 
@@ -70,7 +73,7 @@ const DropdownMenu = memo<DropdownMenuProps>(({ id, knowledgeBaseId, url, filena
     ] as ItemType[];
 
     // 只读模式下，只保留基础操作
-    if (isReadOnly) {
+    if (!isFileOwner) {
       return commonActions;
     }
 
@@ -152,7 +155,7 @@ const DropdownMenu = memo<DropdownMenuProps>(({ id, knowledgeBaseId, url, filena
         },
       ] as ItemType[]
     ).filter(Boolean);
-  }, [inKnowledgeBase, isReadOnly]);
+  }, [inKnowledgeBase, isFileOwner]);
 
   return (
     <Dropdown menu={{ items }}>

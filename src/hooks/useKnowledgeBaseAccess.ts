@@ -9,18 +9,16 @@ import { userProfileSelectors } from '@/store/user/slices/auth/selectors';
  * @param knowledgeBaseId - The ID of the knowledge base to check
  * @returns Object containing ownership and read-only status
  */
-export const useKnowledgeBaseAccessControl = (knowledgeBaseId?: string) => {
+export const useKnowledgeBaseAccess = (knowledgeBaseId?: string) => {
   const currentUserId = useUserStore(userProfileSelectors.userId);
-  const isOwner = useKnowledgeBaseStore(
-    knowledgeBaseSelectors.isKnowledgeBaseOwner(knowledgeBaseId || '', currentUserId),
-  );
 
-  // If in a knowledge base context and not the owner, it's read-only (shared knowledge base)
-  const isReadOnly = !!knowledgeBaseId && !isOwner;
+  const [isOwner] = useKnowledgeBaseStore((s) => [
+    !knowledgeBaseId || // 文件列表根路径，不需要权限检查
+      knowledgeBaseSelectors.isKnowledgeBaseOwner(knowledgeBaseId || '', currentUserId)(s),
+  ]);
 
   return {
-    hasWriteAccess: !isReadOnly,
     isOwner,
-    isReadOnly,
+    isReadOnly: !isOwner,
   };
 };

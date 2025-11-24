@@ -8,7 +8,7 @@ import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import DragUpload from '@/components/DragUpload';
-import { useKnowledgeBaseAccessControl } from '@/hooks/useKnowledgeBaseAccessControl';
+import { useKnowledgeBaseAccess } from '@/hooks/useKnowledgeBaseAccess';
 import { useFileStore } from '@/store/file';
 
 const hotArea = css`
@@ -22,7 +22,7 @@ const hotArea = css`
 
 const UploadFileButton = ({ knowledgeBaseId }: { knowledgeBaseId?: string }) => {
   const { t } = useTranslation('file');
-  const { isReadOnly } = useKnowledgeBaseAccessControl(knowledgeBaseId);
+  const { isReadOnly } = useKnowledgeBaseAccess(knowledgeBaseId);
 
   const pushDockFileList = useFileStore((s) => s.pushDockFileList);
   const items = useMemo<MenuProps['items']>(

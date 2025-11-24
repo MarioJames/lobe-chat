@@ -22,12 +22,21 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => ({
 
 interface EmbeddingStatusProps extends FileParsingTask {
   className?: string;
+  isReadOnly?: boolean;
   onClick?: (status: AsyncTaskStatus) => void;
   onErrorClick?: (task: 'chunking' | 'embedding') => void;
 }
 
 const EmbeddingStatus = memo<EmbeddingStatusProps>(
-  ({ chunkCount, embeddingStatus, embeddingError, onClick, onErrorClick, className }) => {
+  ({
+    chunkCount,
+    embeddingStatus,
+    embeddingError,
+    onClick,
+    onErrorClick,
+    className,
+    isReadOnly,
+  }) => {
     const { t } = useTranslation(['components', 'common']);
     const { styles, cx } = useStyles();
 
@@ -56,6 +65,14 @@ const EmbeddingStatus = memo<EmbeddingStatusProps>(
       }
 
       case AsyncTaskStatus.Error: {
+        if (isReadOnly) {
+          return (
+            <Tag bordered={false} className={className} color={'error'}>
+              {t('FileParsingStatus.chunks.embeddingStatus.error')}
+            </Tag>
+          );
+        }
+
         return (
           <Tooltip
             styles={{

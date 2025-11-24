@@ -26,6 +26,7 @@ const useStyles = createStyles(({ css, token, isDarkMode }) => ({
 interface FileParsingStatusProps extends FileParsingTask {
   className?: string;
   hideEmbeddingButton?: boolean;
+  isReadOnly?: boolean;
   onClick?: (status: AsyncTaskStatus) => void;
   onEmbeddingClick?: () => void;
   onErrorClick?: (task: 'chunking' | 'embedding') => void;
@@ -35,6 +36,7 @@ interface FileParsingStatusProps extends FileParsingTask {
 const FileParsingStatus = memo<FileParsingStatusProps>(
   ({
     chunkingStatus,
+    isReadOnly,
     onEmbeddingClick,
     chunkingError,
     finishEmbedding,
@@ -152,6 +154,7 @@ const FileParsingStatus = memo<FileParsingStatusProps>(
             embeddingError={embeddingError}
             embeddingStatus={embeddingStatus}
             finishEmbedding={finishEmbedding}
+            isReadOnly={isReadOnly}
             onClick={onClick}
             onErrorClick={onErrorClick}
           />
