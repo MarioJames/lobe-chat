@@ -84,8 +84,10 @@ const EmptyStatus = ({ showKnowledgeBase, knowledgeBaseId }: EmptyStatusProps) =
   if (!showActions) {
     return (
       <Center gap={12} height={'100%'} style={{ paddingBottom: 100 }} width={'100%'}>
-        <FileTypeIcon size={ICON_SIZE} type={'folder'} />
-        <Text type={'secondary'}>{t('FileManager.emptyStatus.knowledgeBaseEmpty')}</Text>
+        <FileTypeIcon color={theme.geekblue} size={ICON_SIZE} type={'folder'} />
+        <Text className={styles.actionTitle} type={'secondary'}>
+          {t('FileManager.emptyStatus.knowledgeBaseEmpty')}
+        </Text>
       </Center>
     );
   }
