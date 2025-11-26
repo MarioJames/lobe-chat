@@ -7,12 +7,15 @@ import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
+import { useAIProviderPermissions } from '@/hooks/useRbacPermissions';
 import { aiModelSelectors, useAiInfraStore } from '@/store/aiInfra';
 
 import ModelItem from './ModelItem';
 
 const SearchResult = memo(() => {
   const { t } = useTranslation('modelProvider');
+
+  const { canUpdate } = useAIProviderPermissions();
 
   const searchKeyword = useAiInfraStore((s) => s.modelSearchKeyword);
   const batchToggleAiModels = useAiInfraStore((s) => s.batchToggleAiModels);
@@ -28,7 +31,7 @@ const SearchResult = memo(() => {
         <Text style={{ fontSize: 12, marginTop: 8 }} type={'secondary'}>
           {t('providerModels.list.searchResult', { count: filteredModels.length })}
         </Text>
-        {!isEmpty && (
+        {!isEmpty && canUpdate && (
           <Flexbox horizontal>
             <ActionIcon
               icon={ToggleRightIcon}
@@ -55,7 +58,7 @@ const SearchResult = memo(() => {
       ) : (
         <Flexbox gap={4}>
           {filteredModels.map((item) => (
-            <ModelItem {...item} key={`${item.id}-${item.enabled}`} />
+            <ModelItem disabled={!canUpdate} {...item} key={`${item.id}-${item.enabled}`} />
           ))}
         </Flexbox>
       )}

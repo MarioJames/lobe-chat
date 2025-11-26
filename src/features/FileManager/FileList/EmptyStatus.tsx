@@ -81,6 +81,17 @@ const EmptyStatus = ({ showKnowledgeBase, knowledgeBaseId }: EmptyStatusProps) =
   const showUploadActions = !isReadOnly;
   const showActions = showKnowledgeBaseAction || showUploadActions;
 
+  if (!showActions) {
+    return (
+      <Center gap={12} height={'100%'} style={{ paddingBottom: 100 }} width={'100%'}>
+        <FileTypeIcon color={theme.geekblue} size={ICON_SIZE} type={'folder'} />
+        <Text className={styles.actionTitle} type={'secondary'}>
+          {t('FileManager.emptyStatus.knowledgeBaseEmpty')}
+        </Text>
+      </Center>
+    );
+  }
+
   return (
     <Center gap={24} height={'100%'} style={{ paddingBottom: 100 }} width={'100%'}>
       <Flexbox justify={'center'} style={{ textAlign: 'center' }}>

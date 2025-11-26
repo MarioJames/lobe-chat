@@ -5,11 +5,16 @@ import { PlusIcon } from 'lucide-react';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { useAIProviderPermissions } from '@/hooks/useRbacPermissions';
+
 import CreateNewProvider from '../features/CreateNewProvider';
 
 const AddNewProvider = () => {
   const { t } = useTranslation('modelProvider');
   const [open, setOpen] = useState(false);
+  const { canCreate } = useAIProviderPermissions();
+
+  if (!canCreate) return null;
 
   return (
     <>
