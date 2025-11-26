@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useAIProviderPermissions } from '@/hooks/useRbacPermissions';
 import { useAiInfraStore } from '@/store/aiInfra';
 import { aiModelSelectors } from '@/store/aiInfra/selectors';
 
@@ -45,6 +46,7 @@ const ModelTitle = memo<ModelFetcherProps>(
     ]);
 
     const { isLoading } = useFetchAiProviderModels(provider);
+    const { canUpdate } = useAIProviderPermissions();
 
     const [fetchRemoteModelsLoading, setFetchRemoteModelsLoading] = useState(false);
     const [clearRemoteModelsLoading, setClearRemoteModelsLoading] = useState(false);
@@ -77,7 +79,7 @@ const ModelTitle = memo<ModelFetcherProps>(
               <Text style={{ fontSize: 12 }} type={'secondary'}>
                 <div style={{ display: 'flex', lineHeight: '24px' }}>
                   {t('providerModels.list.total', { count: totalModels })}
-                  {hasRemoteModels && (
+                  {hasRemoteModels && canUpdate && (
                     <ActionIcon
                       icon={CircleX}
                       loading={clearRemoteModelsLoading}
@@ -106,62 +108,66 @@ const ModelTitle = memo<ModelFetcherProps>(
                   value={searchKeyword}
                 />
               )}
-              <Space.Compact>
-                {showModelFetcher && (
-                  <Button
-                    icon={LucideRefreshCcwDot}
-                    loading={fetchRemoteModelsLoading}
-                    onClick={async () => {
-                      setFetchRemoteModelsLoading(true);
-                      try {
-                        await fetchRemoteModelList(provider);
-                      } catch (e) {
-                        console.error(e);
-                      }
-                      setFetchRemoteModelsLoading(false);
-                    }}
-                    size={'small'}
-                  >
-                    {fetchRemoteModelsLoading
-                      ? t('providerModels.list.fetcher.fetching')
-                      : t('providerModels.list.fetcher.fetch')}
-                  </Button>
-                )}
-                {showAddNewModel && (
-                  <>
+              {canUpdate && (
+                <Space.Compact>
+                  {showModelFetcher && (
                     <Button
-                      icon={PlusIcon}
-                      onClick={() => {
-                        setShowModal(true);
+                      icon={LucideRefreshCcwDot}
+                      loading={fetchRemoteModelsLoading}
+                      onClick={async () => {
+                        setFetchRemoteModelsLoading(true);
+                        try {
+                          await fetchRemoteModelList(provider);
+                        } catch (e) {
+                          console.error(e);
+                        }
+                        setFetchRemoteModelsLoading(false);
                       }}
                       size={'small'}
-                    />
-                    <CreateNewModelModal open={showModal} setOpen={setShowModal} />
-                  </>
-                )}
-                <Dropdown
-                  menu={{
-                    items: [
-                      {
-                        key: 'reset',
-                        label: t('providerModels.list.resetAll.title'),
-                        onClick: async () => {
-                          modal.confirm({
-                            content: t('providerModels.list.resetAll.conform'),
-                            onOk: async () => {
-                              await clearModelsByProvider(provider);
-                              message.success(t('providerModels.list.resetAll.success'));
+                    >
+                      {fetchRemoteModelsLoading
+                        ? t('providerModels.list.fetcher.fetching')
+                        : t('providerModels.list.fetcher.fetch')}
+                    </Button>
+                  )}
+                  {showAddNewModel && (
+                    <>
+                      <Button
+                        icon={PlusIcon}
+                        onClick={() => {
+                          setShowModal(true);
+                        }}
+                        size={'small'}
+                      />
+                      <CreateNewModelModal open={showModal} setOpen={setShowModal} />
+                    </>
+                  )}
+                  {canUpdate && (
+                    <Dropdown
+                      menu={{
+                        items: [
+                          {
+                            key: 'reset',
+                            label: t('providerModels.list.resetAll.title'),
+                            onClick: async () => {
+                              modal.confirm({
+                                content: t('providerModels.list.resetAll.conform'),
+                                onOk: async () => {
+                                  await clearModelsByProvider(provider);
+                                  message.success(t('providerModels.list.resetAll.success'));
+                                },
+                                title: t('providerModels.list.resetAll.title'),
+                              });
                             },
-                            title: t('providerModels.list.resetAll.title'),
-                          });
-                        },
-                      },
-                    ],
-                  }}
-                >
-                  <Button icon={EllipsisVertical} size={'small'} />
-                </Dropdown>
-              </Space.Compact>
+                          },
+                        ],
+                      }}
+                    >
+                      <Button icon={EllipsisVertical} size={'small'} />
+                    </Dropdown>
+                  )}
+                </Space.Compact>
+              )}
             </Flexbox>
           )}
         </Flexbox>

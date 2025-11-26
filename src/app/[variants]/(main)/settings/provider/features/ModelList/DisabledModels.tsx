@@ -12,9 +12,10 @@ import ModelItem from './ModelItem';
 
 interface DisabledModelsProps {
   activeTab: string;
+  canUpdate: boolean;
 }
 
-const DisabledModels = memo<DisabledModelsProps>(({ activeTab }) => {
+const DisabledModels = memo<DisabledModelsProps>(({ activeTab, canUpdate }) => {
   const { t } = useTranslation('modelProvider');
 
   const [showMore, setShowMore] = useState(false);
@@ -35,7 +36,7 @@ const DisabledModels = memo<DisabledModelsProps>(({ activeTab }) => {
           {t('providerModels.list.disabled')}
         </Text>
         {displayModels.map((item) => (
-          <ModelItem {...item} key={item.id} />
+          <ModelItem disabled={!canUpdate} {...item} key={item.id} />
         ))}
         {!showMore && filteredDisabledModels.length > 10 && (
           <Button

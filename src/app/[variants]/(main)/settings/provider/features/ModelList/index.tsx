@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import { useIsMobile } from '@/hooks/useIsMobile';
+import { useAIProviderPermissions } from '@/hooks/useRbacPermissions';
 import { aiModelSelectors, useAiInfraStore } from '@/store/aiInfra';
 
 import DisabledModels from './DisabledModels';
@@ -33,6 +34,8 @@ interface ContentProps {
 const Content = memo<ContentProps>(({ id }) => {
   const { t } = useTranslation('modelProvider');
   const [activeTab, setActiveTab] = useState('all');
+
+  const { canUpdate } = useAIProviderPermissions();
 
   const [isSearching, isEmpty, useFetchAiProviderModels] = useAiInfraStore((s) => [
     !!s.modelSearchKeyword,
@@ -132,8 +135,8 @@ const Content = memo<ContentProps>(({ id }) => {
         size="small"
         style={{ marginBottom: 12 }}
       />
-      <EnabledModelList activeTab={currentActiveTab} />
-      <DisabledModels activeTab={currentActiveTab} />
+      <EnabledModelList activeTab={currentActiveTab} canUpdate={canUpdate} />
+      <DisabledModels activeTab={currentActiveTab} canUpdate={canUpdate} />
     </Flexbox>
   );
 });
