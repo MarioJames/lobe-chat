@@ -39,6 +39,7 @@
         "folder": "Subir carpeta",
         "knowledgeBase": "Crear nueva base de conocimientos"
       },
+      "knowledgeBaseEmpty": "La base de conocimientos está vacía por el momento",
       "or": "o",
       "title": "Arrastra archivos o carpetas aquí"
     },

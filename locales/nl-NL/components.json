@@ -39,6 +39,7 @@
         "folder": "Map uploaden",
         "knowledgeBase": "Nieuwe kennisbank aanmaken"
       },
+      "knowledgeBaseEmpty": "De kennisbank bevat momenteel geen inhoud",
       "or": "of",
       "title": "Sleep bestanden of mappen hierheen"
     },

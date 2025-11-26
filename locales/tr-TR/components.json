@@ -39,6 +39,7 @@
         "folder": "Klasör yükle",
         "knowledgeBase": "Yeni bilgi tabanı oluştur"
       },
+      "knowledgeBaseEmpty": "Şu anda bilgi tabanında içerik bulunmamaktadır",
       "or": "veya",
       "title": "Dosyayı veya klasörü buraya sürükleyin"
     },
