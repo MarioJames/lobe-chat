@@ -39,6 +39,7 @@
         "folder": "Tải lên thư mục",
         "knowledgeBase": "Tạo kho tri thức mới"
       },
+      "knowledgeBaseEmpty": "Hiện tại chưa có nội dung trong kho kiến thức",
       "or": "hoặc",
       "title": "Kéo tệp hoặc thư mục vào đây"
     },

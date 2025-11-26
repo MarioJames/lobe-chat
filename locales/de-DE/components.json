@@ -39,6 +39,7 @@
         "folder": "Ordner hochladen",
         "knowledgeBase": "Neue Wissensdatenbank erstellen"
       },
+      "knowledgeBaseEmpty": "Die Wissensdatenbank enthält derzeit keine Inhalte",
       "or": "oder",
       "title": "Ziehen Sie Dateien oder Ordner hierher"
     },

@@ -39,6 +39,7 @@
         "folder": "Upload Folder",
         "knowledgeBase": "Create New Knowledge Base"
       },
+      "knowledgeBaseEmpty": "The knowledge base is currently empty",
       "or": "or",
       "title": "Drag files or folders here"
     },

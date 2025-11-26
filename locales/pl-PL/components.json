@@ -39,6 +39,7 @@
         "folder": "Prześlij folder",
         "knowledgeBase": "Utwórz nową bazę wiedzy"
       },
+      "knowledgeBaseEmpty": "Obecnie baza wiedzy jest pusta",
       "or": "lub",
       "title": "Przeciągnij plik lub folder tutaj"
     },

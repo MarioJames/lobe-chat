@@ -39,6 +39,7 @@
         "folder": "Télécharger un dossier",
         "knowledgeBase": "Créer une nouvelle base de connaissances"
       },
+      "knowledgeBaseEmpty": "La base de connaissances est actuellement vide",
       "or": "ou",
       "title": "Faites glisser un fichier ou un dossier ici"
     },
