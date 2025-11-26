@@ -13,9 +13,10 @@ import SortModelModal from '../SortModelModal';
 
 interface EnabledModelListProps {
   activeTab: string;
+  canUpdate: boolean;
 }
 
-const EnabledModelList = ({ activeTab }: EnabledModelListProps) => {
+const EnabledModelList = ({ canUpdate, activeTab }: EnabledModelListProps) => {
   const { t } = useTranslation('modelProvider');
 
   const enabledModels = useAiInfraStore(aiModelSelectors.enabledAiProviderModelList, isEqual);
@@ -38,7 +39,7 @@ const EnabledModelList = ({ activeTab }: EnabledModelListProps) => {
         <Text style={{ fontSize: 12, marginTop: 8 }} type={'secondary'}>
           {t('providerModels.list.enabled')}
         </Text>
-        {!isEmpty && (
+        {!isEmpty && canUpdate && (
           <Flexbox horizontal>
             <ActionIcon
               icon={ToggleLeft}
@@ -92,7 +93,15 @@ const EnabledModelList = ({ activeTab }: EnabledModelListProps) => {
         <Flexbox gap={2}>
           {filteredModels.map(({ displayName, id, ...res }) => {
             const label = displayName || id;
-            return <ModelItem displayName={label as string} id={id as string} key={id} {...res} />;
+            return (
+              <ModelItem
+                disabled={!canUpdate}
+                displayName={label as string}
+                id={id as string}
+                key={id}
+                {...res}
+              />
+            );
           })}
         </Flexbox>
       )}

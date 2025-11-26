@@ -24,6 +24,7 @@ import { FormInput, FormPassword } from '@/components/FormInput';
 import { FORM_STYLE } from '@/const/layoutTokens';
 import { AES_GCM_URL, BASE_PROVIDER_DOC_URL } from '@/const/url';
 import { isDesktop, isServerMode } from '@/const/version';
+import { useAIProviderPermissions } from '@/hooks/useRbacPermissions';
 import { aiProviderSelectors, useAiInfraStore } from '@/store/aiInfra';
 import {
   AiProviderDetailItem,
@@ -139,6 +140,7 @@ const ProviderConfig = memo<ProviderConfigProps>(
       supportResponsesApi,
     } = settings || {};
     const { t } = useTranslation('modelProvider');
+    const { canUpdate } = useAIProviderPermissions();
     const [form] = Form.useForm();
     const { cx, styles, theme } = useStyles();
 
@@ -300,7 +302,7 @@ const ProviderConfig = memo<ProviderConfigProps>(
       children: isLoading ? (
         <Skeleton.Button active className={styles.switchLoading} />
       ) : (
-        <Switch checked={isFetchOnClient} disabled={configUpdating} />
+        <Switch checked={isFetchOnClient} disabled={configUpdating || !canUpdate} />
       ),
       desc: t('providerModels.config.fetchOnClient.desc'),
       label: t('providerModels.config.fetchOnClient.title'),
@@ -364,8 +366,8 @@ const ProviderConfig = memo<ProviderConfigProps>(
         <Flexbox align={'center'} gap={8} horizontal>
           {extra}
 
-          {isCustom && <UpdateProviderInfo />}
-          <EnableSwitch id={id} />
+          {isCustom && canUpdate && <UpdateProviderInfo />}
+          <EnableSwitch disabled={!canUpdate} id={id} />
         </Flexbox>
       ),
       title: (
@@ -411,6 +413,7 @@ const ProviderConfig = memo<ProviderConfigProps>(
     return (
       <Form
         className={cx(styles.form, className)}
+        disabled={!canUpdate}
         form={form}
         items={[model]}
         onValuesChange={(_, values) => {

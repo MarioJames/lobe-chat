@@ -17,6 +17,14 @@ interface CrudPermissionResult {
   isRbacReady: boolean;
 }
 
+interface AIProviderPermissions {
+  canCreate: boolean;
+  canDelete: boolean;
+  canUpdate: boolean;
+  isRbacReady: boolean;
+  showProviderMenu: boolean;
+}
+
 const createCrudPermissionHook = (keys: CrudPermissionKeys) => (): CrudPermissionResult =>
   useRbacStore((s) => {
     return {
@@ -38,3 +46,18 @@ export const useKnowledgeBasePermissions = createCrudPermissionHook({
   delete: 'KNOWLEDGE_BASE_DELETE',
   update: 'KNOWLEDGE_BASE_UPDATE',
 });
+
+export const useAIProviderPermissions = (): AIProviderPermissions => {
+  const basePermissions = createCrudPermissionHook({
+    create: 'AI_PROVIDER_CREATE',
+    delete: 'AI_PROVIDER_DELETE',
+    update: 'AI_PROVIDER_UPDATE',
+  })();
+  const { canCreate, canDelete, canUpdate } = basePermissions;
+
+  return {
+    ...basePermissions,
+    isRbacReady: basePermissions.isRbacReady,
+    showProviderMenu: canUpdate || canCreate || canDelete,
+  };
+};
