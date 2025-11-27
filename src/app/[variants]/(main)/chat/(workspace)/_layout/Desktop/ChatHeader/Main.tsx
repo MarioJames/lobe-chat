@@ -13,6 +13,8 @@ import { useOpenChatSettings } from '@/hooks/useInterceptingRoutes';
 import { usePinnedAgentState } from '@/hooks/usePinnedAgentState';
 import { useGlobalStore } from '@/store/global';
 import { systemStatusSelectors } from '@/store/global/selectors';
+import { useServerConfigStore } from '@/store/serverConfig';
+import { customizationSelectors } from '@/store/serverConfig/selectors';
 import { useSessionStore } from '@/store/session';
 import { sessionMetaSelectors, sessionSelectors } from '@/store/session/selectors';
 import { useUserStore } from '@/store/user';
@@ -50,6 +52,9 @@ const Main = memo<{ className?: string }>(({ className }) => {
   useInitAgentConfig();
   const [isPinned] = usePinnedAgentState();
 
+  // Get default agent config from customization
+  const defaultAgentConfig = useServerConfigStore(customizationSelectors.defaultAgent);
+
   const [init, isInbox, title, avatar, backgroundColor, members, sessionType] = useSessionStore(
     (s) => {
       const session = sessionSelectors.currentSession(s);
@@ -75,7 +80,9 @@ const Main = memo<{ className?: string }>(({ className }) => {
 
   const openChatSettings = useOpenChatSettings();
 
-  const displayTitle = isInbox ? t('inbox.title') : title;
+  // Use default agent config only when in inbox, otherwise use the current session's config
+  const displayTitle = isInbox ? defaultAgentConfig?.title || t('inbox.title') : title;
+  const displayAvatar = isInbox ? defaultAgentConfig?.avatar || avatar : avatar;
   const showSessionPanel = useGlobalStore(systemStatusSelectors.showSessionPanel);
 
   if (!init)
@@ -107,7 +114,7 @@ const Main = memo<{ className?: string }>(({ className }) => {
           ]}
           onClick={() => openChatSettings()}
           size={32}
-          title={title}
+          title={displayTitle}
         />
         <Flexbox align={'center'} className={styles.container} gap={8} horizontal>
           <div className={styles.title}>{displayTitle}</div>
@@ -121,11 +128,11 @@ const Main = memo<{ className?: string }>(({ className }) => {
     <Flexbox align={'center'} className={className} gap={12} horizontal>
       {!isPinned && !showSessionPanel && <TogglePanelButton />}
       <Avatar
-        avatar={avatar}
+        avatar={displayAvatar}
         background={backgroundColor}
         onClick={() => openChatSettings()}
         size={32}
-        title={title}
+        title={displayTitle}
       />
       <Flexbox align={'center'} className={styles.container} gap={8} horizontal>
         <div className={styles.title}>{displayTitle}</div>

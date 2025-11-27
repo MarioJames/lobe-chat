@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { DEFAULT_INBOX_AVATAR } from '@/const/meta';
@@ -9,6 +9,7 @@ import { useSwitchSession } from '@/hooks/useSwitchSession';
 import { getChatStoreState, useChatStore } from '@/store/chat';
 import { chatSelectors } from '@/store/chat/selectors';
 import { useServerConfigStore } from '@/store/serverConfig';
+import { customizationSelectors } from '@/store/serverConfig/selectors';
 import { useSessionStore } from '@/store/session';
 
 import ListItem from '../ListItem';
@@ -19,11 +20,25 @@ const Inbox = memo(() => {
   const activeId = useSessionStore((s) => s.activeId);
   const switchSession = useSwitchSession();
 
+  // Get default agent config from customization
+  const defaultAgentConfig = useServerConfigStore(customizationSelectors.defaultAgent);
+
+  // Use customization config or fallback to defaults
+  const inboxAvatar = useMemo(
+    () => defaultAgentConfig?.avatar || DEFAULT_INBOX_AVATAR,
+    [defaultAgentConfig?.avatar],
+  );
+
+  const inboxTitle = useMemo(
+    () => defaultAgentConfig?.title || t('inbox.title'),
+    [defaultAgentConfig?.title, t],
+  );
+
   const openNewTopicOrSaveTopic = useChatStore((s) => s.openNewTopicOrSaveTopic);
 
   return (
     <Link
-      aria-label={t('inbox.title')}
+      aria-label={inboxTitle}
       href={SESSION_CHAT_URL(INBOX_SESSION_ID, mobile)}
       onClick={async (e) => {
         e.preventDefault();
@@ -43,7 +58,7 @@ const Inbox = memo(() => {
     >
       <ListItem
         active={activeId === INBOX_SESSION_ID}
-        avatar={DEFAULT_INBOX_AVATAR}
+        avatar={inboxAvatar}
         key={INBOX_SESSION_ID}
         styles={{
           container: {
@@ -54,7 +69,7 @@ const Inbox = memo(() => {
             maskImage: `linear-gradient(90deg, #000 90%, transparent)`,
           },
         }}
-        title={t('inbox.title')}
+        title={inboxTitle}
       />
     </Link>
   );
