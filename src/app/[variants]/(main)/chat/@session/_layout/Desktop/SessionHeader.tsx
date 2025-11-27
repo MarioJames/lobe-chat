@@ -216,7 +216,7 @@ const Header = memo(() => {
             paddingTop: 2,
           }}
         >
-          <ProductLogo className={styles.logo} size={36} type={'text'} />
+          <ProductLogo className={styles.logo} size={36} type={'combine'} />
         </Flexbox>
         <Flexbox align={'center'} gap={4} horizontal>
           <TogglePanelButton />

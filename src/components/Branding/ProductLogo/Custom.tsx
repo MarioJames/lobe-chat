@@ -52,7 +52,6 @@ const CustomImageLogo = memo<Omit<ImageProps, 'alt' | 'src'> & { size: number }>
       return BRANDING_LOGO_URL;
     }, [baseConfig?.logo, theme.appearance]);
     const brandName = baseConfig?.brandName || BRANDING_NAME;
-
     // If logoUrl is empty, render text logo instead
     if (!logoUrl) {
       return <CustomTextLogo size={size} {...rest} />;
