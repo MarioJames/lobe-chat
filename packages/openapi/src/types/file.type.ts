@@ -60,6 +60,8 @@ export interface FileListQuery extends IPaginationQuery {
   fileType?: string;
   /** 知识库ID过滤 */
   knowledgeBaseId?: string;
+  /** 是否查询全量数据（需要 ALL/WORKSPACE 权限） */
+  queryAll?: boolean;
   /** 更新时间结束 */
   updatedAtEnd?: string;
   /** 更新时间起始 */
@@ -71,6 +73,11 @@ export interface FileListQuery extends IPaginationQuery {
 export const FileListQuerySchema = PaginationQuerySchema.extend({
   fileType: z.string().optional(),
   knowledgeBaseId: z.string().optional(),
+  queryAll: z
+    .string()
+    .transform((val) => val === 'true')
+    .pipe(z.boolean())
+    .optional(),
   updatedAtEnd: z.string().datetime().optional(),
   updatedAtStart: z.string().datetime().optional(),
   userId: z.string().optional(),
@@ -269,6 +276,17 @@ export interface FileChunkResponse {
 }
 
 /**
+ * 文件关联用户信息
+ */
+export interface FileUserItem {
+  avatar?: string | null;
+  email?: string | null;
+  fullName?: string | null;
+  id: string;
+  username?: string | null;
+}
+
+/**
  * 文件列表项（包含可选的分块状态信息）
  */
 export interface FileListItem extends Partial<FileItem> {
@@ -278,6 +296,8 @@ export interface FileListItem extends Partial<FileItem> {
   embedding?: FileAsyncTaskResponse | null;
   /** 关联的知识库列表 */
   knowledgeBases?: Array<KnowledgeBaseItem>;
+  /** 关联的用户列表（相同 fileHash 的所有用户） */
+  users?: Array<FileUserItem>;
 }
 
 /**
