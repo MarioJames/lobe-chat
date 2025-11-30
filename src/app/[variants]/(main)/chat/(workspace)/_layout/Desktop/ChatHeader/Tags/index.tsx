@@ -70,7 +70,7 @@ const TitleTags = memo(() => {
       </ModelSwitchPanel>
       {isAgentEnableSearch && <SearchTags />}
       {showPlugin && plugins?.length > 0 && <PluginTag plugins={plugins} />}
-      {hasKnowledge && knowledgeData?.length && <KnowledgeTag data={knowledgeData} />}
+      {hasKnowledge && !!knowledgeData?.length && <KnowledgeTag data={knowledgeData} />}
       {enableHistoryCount && <HistoryLimitTags />}
     </Flexbox>
   );
