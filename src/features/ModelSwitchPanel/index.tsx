@@ -12,6 +12,7 @@ import { ModelItemRender, ProviderItemRender } from '@/components/ModelSelect';
 import { isDeprecatedEdition } from '@/const/version';
 import ActionDropdown from '@/features/ChatInput/ActionBar/components/ActionDropdown';
 import { useEnabledChatModels } from '@/hooks/useEnabledChatModels';
+import { useAIProviderPermissions } from '@/hooks/useRbacPermissions';
 import { useAgentStore } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/slices/chat';
 import { useAiInfraStore } from '@/store/aiInfra';
@@ -57,6 +58,8 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
     s.updateAgentConfig,
   ]);
   const { showLLM } = useServerConfigStore(featureFlagsSelectors);
+  const { showProviderMenu } = useAIProviderPermissions();
+
   const router = useRouter();
   const enabledList = useEnabledChatModels();
   const runtimeConfig = useAiInfraStore((s) => s.aiProviderRuntimeConfig);
@@ -123,21 +126,23 @@ const ModelSwitchPanel = memo<IProps>(({ children, onOpenChange, open }) => {
             provider={provider.id}
             source={provider.source}
           />
-          {showLLM && !runtimeConfig?.[provider.id]?.settings?.hiddenInProviderList && (
-            <Link
-              href={
-                isDeprecatedEdition
-                  ? '/settings?active=llm'
-                  : `/settings?active=provider&provider=${provider.id}`
-              }
-            >
-              <ActionIcon
-                icon={LucideBolt}
-                size={'small'}
-                title={t('ModelSwitchPanel.goToSettings')}
-              />
-            </Link>
-          )}
+          {showLLM && // feature flag 中开启 LLM 设置
+            showProviderMenu && // 用户拥有提供商管理权限
+            !runtimeConfig?.[provider.id]?.settings?.hiddenInProviderList && ( // 提供商列表中不隐藏该提供商
+              <Link
+                href={
+                  isDeprecatedEdition
+                    ? '/settings?active=llm'
+                    : `/settings?active=provider&provider=${provider.id}`
+                }
+              >
+                <ActionIcon
+                  icon={LucideBolt}
+                  size={'small'}
+                  title={t('ModelSwitchPanel.goToSettings')}
+                />
+              </Link>
+            )}
         </Flexbox>
       ),
       type: 'group',

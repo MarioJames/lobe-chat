@@ -3,7 +3,7 @@ import { isEmpty } from 'lodash';
 
 import { ALL_SCOPE, PERMISSION_ACTIONS } from '@/const/rbac';
 import { RbacModel } from '@/database/models/rbac';
-import { agents, aiProviders, knowledgeBases, sessions, topics } from '@/database/schemas';
+import { agents, aiProviders, files, knowledgeBases, sessions, topics } from '@/database/schemas';
 import { LobeChatDatabase } from '@/database/type';
 import { getScopePermissions } from '@/utils/rbac';
 
@@ -186,6 +186,7 @@ export abstract class BaseService implements IBaseService {
         // 查询 sessions 表
         case !!target?.targetSessionId: {
           const targetSession = await this.db.query.sessions.findFirst({
+            columns: { userId: true },
             where: eq(sessions.id, target.targetSessionId),
           });
           return targetSession?.userId;
@@ -194,6 +195,7 @@ export abstract class BaseService implements IBaseService {
         // 查询 agents 表
         case !!target?.targetAgentId: {
           const targetAgent = await this.db.query.agents.findFirst({
+            columns: { userId: true },
             where: eq(agents.id, target.targetAgentId),
           });
 
@@ -203,6 +205,7 @@ export abstract class BaseService implements IBaseService {
         // 查询 topics 表
         case !!target?.targetTopicId: {
           const targetTopic = await this.db.query.topics.findFirst({
+            columns: { userId: true },
             where: eq(topics.id, target.targetTopicId),
           });
           return targetTopic?.userId;
@@ -211,6 +214,7 @@ export abstract class BaseService implements IBaseService {
         // 查询 providers 表
         case !!target?.targetProviderId: {
           const targetProvider = await this.db.query.aiProviders.findFirst({
+            columns: { userId: true },
             where: eq(aiProviders.id, target.targetProviderId),
           });
           return targetProvider?.userId;
@@ -224,9 +228,19 @@ export abstract class BaseService implements IBaseService {
         // 查询 knowledgeBases 表
         case !!target?.targetKnowledgeBaseId: {
           const targetKnowledgeBase = await this.db.query.knowledgeBases.findFirst({
+            columns: { userId: true },
             where: eq(knowledgeBases.id, target.targetKnowledgeBaseId),
           });
           return targetKnowledgeBase?.userId;
+        }
+
+        // 查询 files 表
+        case !!target?.targetFileId: {
+          const targetFile = await this.db.query.files.findFirst({
+            columns: { userId: true },
+            where: eq(files.id, target.targetFileId),
+          });
+          return targetFile?.userId;
         }
 
         default: {
@@ -405,6 +419,13 @@ export abstract class BaseService implements IBaseService {
             where: inArray(knowledgeBases.id, targetInfoIds.targetKnowledgeBaseIds),
           });
           userIds = knowledgeBaseList.map((kb) => kb.userId);
+          break;
+        }
+        case !!targetInfoIds.targetFileIds?.length: {
+          const fileList = await this.db.query.files.findMany({
+            where: inArray(files.id, targetInfoIds.targetFileIds),
+          });
+          userIds = fileList.map((f) => f.userId);
           break;
         }
         default: {
