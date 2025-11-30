@@ -67,6 +67,9 @@ const InboxWelcome = memo(() => {
 
   // Get customization welcome config
   const welcomeConfig = useServerConfigStore(customizationSelectors.welcome);
+  // Get brand name from customization config
+  const baseConfig = useServerConfigStore(customizationSelectors.base);
+  const brandName = baseConfig?.brandName || BRANDING_NAME;
 
   const message = useMemo(() => {
     if (openingMessage) return openingMessage;
@@ -95,7 +98,7 @@ const InboxWelcome = memo(() => {
   }, [welcomeConfig?.type, welcomeConfig?.config]);
 
   // If custom type, render custom content directly
-  if (welcomeConfig?.type === 'custom' && welcomeContent) {
+  if (showInboxWelcome && welcomeConfig?.type === 'custom' && welcomeContent) {
     return (
       <Center gap={12} padding={16} width={'100%'}>
         <Flexbox className={styles.container} gap={16} style={{ maxWidth: 800 }} width={'100%'}>
@@ -127,7 +130,7 @@ const InboxWelcome = memo(() => {
                   }}
                   i18nKey="guide.defaultMessage"
                   ns="welcome"
-                  values={{ appName: BRANDING_NAME }}
+                  values={{ appName: brandName }}
                 />
               );
             }
@@ -135,17 +138,16 @@ const InboxWelcome = memo(() => {
           }}
           variant={'chat'}
         >
-          {welcomeContent ||
-            (showInboxWelcome
-              ? t(
-                  showCreateSession ? 'guide.defaultMessage' : 'guide.defaultMessageWithoutCreate',
-                  {
-                    appName: BRANDING_NAME,
-                  },
-                )
-              : message)}
+          {showInboxWelcome
+            ? welcomeContent ||
+              t(showCreateSession ? 'guide.defaultMessage' : 'guide.defaultMessageWithoutCreate', {
+                appName: BRANDING_NAME,
+              })
+            : message}
         </Markdown>
-        {questions.length > 0 && <OpeningQuestions mobile={mobile} questions={questions} />}
+        {showInboxWelcome && questions.length > 0 && (
+          <OpeningQuestions mobile={mobile} questions={questions} />
+        )}
       </Flexbox>
     </Center>
   );
