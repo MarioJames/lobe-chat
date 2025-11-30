@@ -17,29 +17,23 @@ interface CrudPermissionResult {
   isRbacReady: boolean;
 }
 
-const createCrudPermissionHook = (keys: CrudPermissionKeys) => (): CrudPermissionResult => {
-  const [isRbacReady, canCreate, canUpdate, canDelete] = useRbacStore((s) => {
-    const ready = rbacSelectors.isPermissionCodesInitialized(s);
+interface AIProviderPermissions {
+  canCreate: boolean;
+  canDelete: boolean;
+  canUpdate: boolean;
+  isRbacReady: boolean;
+  showProviderMenu: boolean;
+}
 
-    const createPermissions = getAllScopePermissions(keys.create);
-    const updatePermissions = getAllScopePermissions(keys.update);
-    const deletePermissions = getAllScopePermissions(keys.delete);
-
-    return [
-      ready,
-      ready && rbacSelectors.hasAnyPermission(createPermissions)(s),
-      ready && rbacSelectors.hasAnyPermission(updatePermissions)(s),
-      ready && rbacSelectors.hasAnyPermission(deletePermissions)(s),
-    ];
+const createCrudPermissionHook = (keys: CrudPermissionKeys) => (): CrudPermissionResult =>
+  useRbacStore((s) => {
+    return {
+      canCreate: rbacSelectors.hasAnyPermission(getAllScopePermissions(keys.create))(s),
+      canDelete: rbacSelectors.hasAnyPermission(getAllScopePermissions(keys.delete))(s),
+      canUpdate: rbacSelectors.hasAnyPermission(getAllScopePermissions(keys.update))(s),
+      isRbacReady: rbacSelectors.isPermissionCodesInitialized(s),
+    };
   });
-
-  return {
-    canCreate: !!canCreate,
-    canDelete: !!canDelete,
-    canUpdate: !!canUpdate,
-    isRbacReady,
-  };
-};
 
 export const useAgentPermissions = createCrudPermissionHook({
   create: 'AGENT_CREATE',
@@ -52,3 +46,18 @@ export const useKnowledgeBasePermissions = createCrudPermissionHook({
   delete: 'KNOWLEDGE_BASE_DELETE',
   update: 'KNOWLEDGE_BASE_UPDATE',
 });
+
+export const useAIProviderPermissions = (): AIProviderPermissions => {
+  const basePermissions = createCrudPermissionHook({
+    create: 'AI_PROVIDER_CREATE',
+    delete: 'AI_PROVIDER_DELETE',
+    update: 'AI_PROVIDER_UPDATE',
+  })();
+  const { canCreate, canDelete, canUpdate } = basePermissions;
+
+  return {
+    ...basePermissions,
+    isRbacReady: basePermissions.isRbacReady,
+    showProviderMenu: canUpdate || canCreate || canDelete,
+  };
+};

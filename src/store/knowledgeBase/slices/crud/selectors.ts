@@ -19,6 +19,7 @@ const isKnowledgeBaseOwner =
 
 export const knowledgeBaseSelectors = {
   activeKnowledgeBaseId,
+  getKnowledgeBaseById,
   getKnowledgeBaseNameById,
   isKnowledgeBaseOwner,
 };

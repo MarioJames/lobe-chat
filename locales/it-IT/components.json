@@ -39,6 +39,7 @@
         "folder": "Carica cartella",
         "knowledgeBase": "Crea nuova base di conoscenza"
       },
+      "knowledgeBaseEmpty": "Attualmente non ci sono contenuti nella base di conoscenza",
       "or": "oppure",
       "title": "Trascina qui file o cartelle"
     },

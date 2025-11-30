@@ -1,5 +1,18 @@
 import { FilesTabs, QueryFileListParams, SortType } from '@lobechat/types';
-import { and, asc, count, desc, eq, ilike, inArray, like, notExists, or, sum } from 'drizzle-orm';
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  like,
+  notExists,
+  or,
+  sql,
+  sum,
+} from 'drizzle-orm';
 import type { PgTransaction } from 'drizzle-orm/pg-core';
 
 import {
@@ -13,7 +26,10 @@ import {
   files,
   globalFiles,
   knowledgeBaseFiles,
+  knowledgeBaseGrants,
+  knowledgeBases,
 } from '../schemas';
+import { userRoles } from '../schemas/rbac';
 import { LobeChatDatabase, Transaction } from '../type';
 
 export class FileModel {
@@ -193,10 +209,12 @@ export class FileModel {
     showFilesInKnowledgeBase,
   }: QueryFileListParams = {}) => {
     // 1. query where
-    let whereClause = and(
-      q ? ilike(files.name, `%${q}%`) : undefined,
-      eq(files.userId, this.userId),
-    );
+    let whereClause = and(q ? ilike(files.name, `%${q}%`) : undefined);
+    const includeKnowledgeBaseFiles = Boolean(knowledgeBaseId) || showFilesInKnowledgeBase;
+
+    if (!includeKnowledgeBaseFiles) {
+      whereClause = and(whereClause, eq(files.userId, this.userId));
+    }
     if (category && category !== FilesTabs.All) {
       const fileTypePrefix = this.getFileTypePrefix(category as FilesTabs);
       whereClause = and(whereClause, ilike(files.fileType, `${fileTypePrefix}%`));
@@ -231,24 +249,86 @@ export class FileModel {
         size: files.size,
         updatedAt: files.updatedAt,
         url: files.url,
+        userId: files.userId,
       })
       .from(files);
 
-    // 4. add knowledge base query
-    if (knowledgeBaseId) {
-      // if knowledgeBaseId is provided, it means we are querying files in a knowledge-base
+    // 4. if show files in knowledge base, we need add knowledge base query
+    if (knowledgeBaseId || showFilesInKnowledgeBase) {
+      // 用户被授权的知识库
+      const userGrant = this.db
+        .select({ knowledgeBaseId: knowledgeBaseGrants.knowledgeBaseId })
+        .from(knowledgeBaseGrants)
+        .where(
+          and(
+            eq(knowledgeBaseGrants.granteeType, 'user'),
+            eq(knowledgeBaseGrants.granteeUserId, this.userId),
+          ),
+        )
+        .as('user_grant');
 
-      // @ts-ignore
-      query = query.innerJoin(
-        knowledgeBaseFiles,
-        and(
-          eq(files.id, knowledgeBaseFiles.fileId),
-          eq(knowledgeBaseFiles.knowledgeBaseId, knowledgeBaseId),
-        ),
+      // 用户所属角色被授权的知识库
+      const roleGrant = this.db
+        .select({ knowledgeBaseId: knowledgeBaseGrants.knowledgeBaseId })
+        .from(knowledgeBaseGrants)
+        .innerJoin(
+          userRoles,
+          and(
+            eq(knowledgeBaseGrants.granteeRoleId, userRoles.roleId),
+            eq(userRoles.userId, this.userId),
+            or(sql`${userRoles.expiresAt} IS NULL`, sql`${userRoles.expiresAt} > now()`),
+          ),
+        )
+        .where(eq(knowledgeBaseGrants.granteeType, 'role'))
+        .as('role_grant');
+
+      // 知识库可见性条件
+      const knowledgeBaseVisible = or(
+        eq(knowledgeBases.userId, this.userId),
+        eq(knowledgeBases.isPublic, true),
+        sql`${userGrant.knowledgeBaseId} IS NOT NULL`,
+        sql`${roleGrant.knowledgeBaseId} IS NOT NULL`,
       );
+
+      // 查询指定知识库文件
+      if (knowledgeBaseId) {
+        // @ts-ignore
+        query = query
+          .innerJoin(
+            knowledgeBaseFiles,
+            and(
+              eq(files.id, knowledgeBaseFiles.fileId),
+              eq(knowledgeBaseFiles.knowledgeBaseId, knowledgeBaseId),
+            ),
+          )
+          // @ts-ignore
+          .innerJoin(knowledgeBases, eq(knowledgeBaseFiles.knowledgeBaseId, knowledgeBases.id))
+          .leftJoin(userGrant, eq(knowledgeBaseFiles.knowledgeBaseId, userGrant.knowledgeBaseId))
+          .leftJoin(roleGrant, eq(knowledgeBaseFiles.knowledgeBaseId, roleGrant.knowledgeBaseId));
+
+        whereClause = and(whereClause, knowledgeBaseVisible);
+      }
+      // 展示所有对当前用户可见的文件，包括个人文件+所有对当前用户可见的知识库文件
+      else if (showFilesInKnowledgeBase) {
+        // @ts-ignore
+        query = query
+          .leftJoin(knowledgeBaseFiles, eq(files.id, knowledgeBaseFiles.fileId))
+          // @ts-ignore
+          .leftJoin(knowledgeBases, eq(knowledgeBaseFiles.knowledgeBaseId, knowledgeBases.id))
+          .leftJoin(userGrant, eq(knowledgeBaseFiles.knowledgeBaseId, userGrant.knowledgeBaseId))
+          .leftJoin(roleGrant, eq(knowledgeBaseFiles.knowledgeBaseId, roleGrant.knowledgeBaseId));
+
+        whereClause = and(
+          whereClause,
+          or(
+            eq(files.userId, this.userId),
+            and(sql`${knowledgeBaseFiles.fileId} IS NOT NULL`, knowledgeBaseVisible),
+          ),
+        );
+      }
     }
-    // 5.if we don't show files in knowledge base, we need exclude files in knowledge base
-    else if (!showFilesInKnowledgeBase) {
+    // 如果没有指定知识库ID，并且不展示知识库文件，则展示个人文件，需要排除掉被关联到知识库的文件
+    else {
       whereClause = and(
         whereClause,
         notExists(
@@ -257,7 +337,7 @@ export class FileModel {
       );
     }
 
-    // or we are just filter in the global files
+    // execute query
     return query.where(whereClause).orderBy(orderByClause);
   };
 

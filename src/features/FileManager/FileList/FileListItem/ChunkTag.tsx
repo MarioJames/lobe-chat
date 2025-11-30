@@ -26,6 +26,7 @@ const ChunksBadge = memo<ChunkTagProps>(({ id, isReadOnly, ...res }) => {
 
   return (
     <FileParsingStatusTag
+      isReadOnly={isReadOnly}
       onClick={(status) => {
         if (status === 'success') openChunkDrawer(id);
       }}

@@ -16,6 +16,7 @@ export interface FileListItem {
   size: number;
   updatedAt: Date;
   url: string;
+  userId: string;
 }
 
 export enum SortType {

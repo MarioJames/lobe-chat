@@ -3,7 +3,7 @@ import { isEmpty } from 'lodash';
 
 import { ALL_SCOPE, PERMISSION_ACTIONS } from '@/const/rbac';
 import { RbacModel } from '@/database/models/rbac';
-import { agents, aiProviders, sessions, topics } from '@/database/schemas';
+import { agents, aiProviders, knowledgeBases, sessions, topics } from '@/database/schemas';
 import { LobeChatDatabase } from '@/database/type';
 import { getScopePermissions } from '@/utils/rbac';
 
@@ -221,6 +221,14 @@ export abstract class BaseService implements IBaseService {
           return target.targetUserId;
         }
 
+        // 查询 knowledgeBases 表
+        case !!target?.targetKnowledgeBaseId: {
+          const targetKnowledgeBase = await this.db.query.knowledgeBases.findFirst({
+            where: eq(knowledgeBases.id, target.targetKnowledgeBaseId),
+          });
+          return targetKnowledgeBase?.userId;
+        }
+
         default: {
           return;
         }
@@ -390,6 +398,13 @@ export abstract class BaseService implements IBaseService {
         }
         case !!targetInfoIds.targetUserIds?.length: {
           userIds = targetInfoIds.targetUserIds;
+          break;
+        }
+        case !!targetInfoIds.targetKnowledgeBaseIds?.length: {
+          const knowledgeBaseList = await this.db.query.knowledgeBases.findMany({
+            where: inArray(knowledgeBases.id, targetInfoIds.targetKnowledgeBaseIds),
+          });
+          userIds = knowledgeBaseList.map((kb) => kb.userId);
           break;
         }
         default: {

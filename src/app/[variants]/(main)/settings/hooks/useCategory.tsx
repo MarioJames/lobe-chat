@@ -16,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 
 import type { MenuProps } from '@/components/Menu';
 import { isDeprecatedEdition, isDesktop } from '@/const/version';
+import { useAIProviderPermissions } from '@/hooks/useRbacPermissions';
 import { SettingsTabs } from '@/store/global/initialState';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 
@@ -23,6 +24,8 @@ export const useCategory = () => {
   const { t } = useTranslation('setting');
   const mobile = useServerConfigStore((s) => s.isMobile);
   const { showLLM, enableSTT, hideDocs } = useServerConfigStore(featureFlagsSelectors);
+  const { showProviderMenu, isRbacReady } = useAIProviderPermissions();
+  const allowProviderMenu = isRbacReady ? showProviderMenu : true;
 
   const cateItems: MenuProps['items'] = useMemo(
     () =>
@@ -46,6 +49,7 @@ export const useCategory = () => {
           type: 'divider',
         },
         showLLM &&
+          allowProviderMenu &&
           // TODO: Remove /llm when v2.0
           (isDeprecatedEdition
             ? {
@@ -92,7 +96,7 @@ export const useCategory = () => {
           label: t('tab.about'),
         },
       ].filter(Boolean) as MenuProps['items'],
-    [t, showLLM, enableSTT, hideDocs, mobile],
+    [t, showLLM, enableSTT, hideDocs, mobile, allowProviderMenu],
   );
 
   return cateItems;

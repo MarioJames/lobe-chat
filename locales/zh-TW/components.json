@@ -39,6 +39,7 @@
         "folder": "上傳文件夾",
         "knowledgeBase": "新建知識庫"
       },
+      "knowledgeBaseEmpty": "目前知識庫尚無內容",
       "or": "或者",
       "title": "將文件或文件夾拖到這裡"
     },

@@ -56,6 +56,7 @@ export const useStyles = createStyles(({ css, token, cx }) => {
 });
 
 interface ModelItemProps extends AiProviderModelListItem {
+  disabled?: boolean;
   enabled: boolean;
   id: string;
   isAzure?: boolean;
@@ -75,6 +76,7 @@ const ModelItem = memo<ModelItemProps>(
     contextWindowTokens,
     abilities,
     type,
+    disabled,
   }) => {
     const { styles } = useStyles();
     const { t } = useTranslation(['modelProvider', 'components', 'models', 'common']);
@@ -202,7 +204,7 @@ const ModelItem = memo<ModelItemProps>(
           </Flexbox>
         </Flexbox>
         <Flexbox align={'center'} gap={4} horizontal>
-          {modelEditable && (
+          {modelEditable && !disabled && (
             <Flexbox className={styles.config} horizontal style={{ opacity: 1 }}>
               <ActionIcon
                 icon={LucidePencil}
@@ -240,6 +242,7 @@ const ModelItem = memo<ModelItemProps>(
           )}
           <Switch
             checked={checked}
+            disabled={!modelEditable || disabled}
             loading={isModelLoading}
             onChange={async (e) => {
               setChecked(e);
@@ -267,7 +270,7 @@ const ModelItem = memo<ModelItemProps>(
               <Tag onClick={copyModelId} style={{ cursor: 'pointer', marginRight: 0 }}>
                 {id}
               </Tag>
-              {modelEditable && (
+              {modelEditable && !disabled && (
                 <Flexbox className={styles.config} horizontal>
                   <ActionIcon
                     icon={LucidePencil}
@@ -331,6 +334,7 @@ const ModelItem = memo<ModelItemProps>(
           {/*)}*/}
           <Switch
             checked={checked}
+            disabled={!modelEditable || disabled}
             loading={isModelLoading}
             onChange={async (e) => {
               setChecked(e);

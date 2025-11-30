@@ -39,6 +39,7 @@
         "folder": "Carregar pasta",
         "knowledgeBase": "Criar novo banco de conhecimento"
       },
+      "knowledgeBaseEmpty": "A base de conhecimento está vazia no momento",
       "or": "ou",
       "title": "Arraste arquivos ou pastas para cá"
     },

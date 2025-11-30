@@ -39,6 +39,7 @@
         "folder": "폴더 업로드",
         "knowledgeBase": "지식베이스 생성"
       },
+      "knowledgeBaseEmpty": "현재 지식 베이스에 내용이 없습니다",
       "or": "또는",
       "title": "파일이나 폴더를 이곳에 끌어다 놓으세요"
     },

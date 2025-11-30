@@ -36,14 +36,14 @@ const hasAllPermissions = (permissionCodes: string[]) => (s: RbacStoreState) =>
  * @param roleId 角色ID
  */
 const hasRole = (roleId: number) => (s: RbacStoreState) =>
-  s.currentUserRoles.some((role) => role.id === roleId && role.active);
+  s.currentUserRoles.some((role) => role.id === roleId && role.isActive);
 
 /**
  * 检查当前用户是否拥有指定角色名称
  * @param roleName 角色名称
  */
 const hasRoleName = (roleName: string) => (s: RbacStoreState) =>
-  s.currentUserRoles.some((role) => role.name === roleName && role.active);
+  s.currentUserRoles.some((role) => role.name === roleName && role.isActive);
 
 /**
  * 获取角色列表是否已初始化

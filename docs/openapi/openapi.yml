@@ -1050,6 +1050,146 @@ paths:
         "403": { $ref: "#/components/responses/ForbiddenError" }
         "404": { $ref: "#/components/responses/NotFoundError" }
 
+  /knowledge-bases/{id}/files/batch:
+    parameters:
+      - name: id
+        x-stainless-param-name: knowledgeBaseId
+        in: path
+        required: true
+        schema: { type: string }
+        description: Unique knowledge base identifier
+    post:
+      tags: [KnowledgeBases]
+      summary: Batch add files to a knowledge base
+      description: |
+        Create associations between a knowledge base and multiple files.
+        - Requires KNOWLEDGE_BASE_UPDATE permission
+        - Ignores duplicate associations (on conflict do nothing)
+        - Only files owned by the current user are processed
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileIds:
+                  type: array
+                  items: { type: string }
+                  minItems: 1
+                  description: Array of file IDs to associate
+              required: [fileIds]
+      responses:
+        "200":
+          {
+            description: Files added to knowledge base (duplicates skipped),
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: "#/components/schemas/ApiResponseKnowledgeBaseFileOperation",
+                      },
+                  },
+              },
+          }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
+    delete:
+      tags: [KnowledgeBases]
+      summary: Batch remove file associations from a knowledge base
+      description: |
+        Remove associations between a knowledge base and multiple files.
+        - Requires KNOWLEDGE_BASE_UPDATE permission
+        - Ignores records that are not linked to the knowledge base
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileIds:
+                  type: array
+                  items: { type: string }
+                  minItems: 1
+                  description: Array of file IDs to detach
+              required: [fileIds]
+      responses:
+        "200":
+          {
+            description: File associations removed from knowledge base,
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: "#/components/schemas/ApiResponseKnowledgeBaseFileOperation",
+                      },
+                  },
+              },
+          }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
+
+  /knowledge-bases/{id}/files/move:
+    parameters:
+      - name: id
+        x-stainless-param-name: knowledgeBaseId
+        in: path
+        required: true
+        schema: { type: string }
+        description: Source knowledge base identifier
+    post:
+      tags: [KnowledgeBases]
+      summary: Move files to another knowledge base
+      description: |
+        Move multiple files from the source knowledge base to a target knowledge base.
+        - Requires KNOWLEDGE_BASE_UPDATE permission
+        - Removes links from the source knowledge base
+        - Existing links in the target knowledge base are skipped without error
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                fileIds:
+                  type: array
+                  items: { type: string }
+                  minItems: 1
+                  description: Array of file IDs to move
+                targetKnowledgeBaseId:
+                  type: string
+                  description: Target knowledge base ID
+              required: [fileIds, targetKnowledgeBaseId]
+      responses:
+        "200":
+          {
+            description: Files moved to target knowledge base (with duplicates skipped),
+            content:
+              {
+                application/json:
+                  {
+                    schema:
+                      {
+                        $ref: "#/components/schemas/ApiResponseMoveKnowledgeBaseFiles",
+                      },
+                  },
+              },
+          }
+        "400": { $ref: "#/components/responses/BadRequestError" }
+        "401": { $ref: "#/components/responses/UnauthorizedError" }
+        "403": { $ref: "#/components/responses/ForbiddenError" }
+        "404": { $ref: "#/components/responses/NotFoundError" }
+
   /messages/count:
     get:
       tags: [Messages]
@@ -2778,6 +2918,20 @@ components:
                 success: { type: boolean }
                 message: { type: string, nullable: true }
               required: [success]
+    ApiResponseKnowledgeBaseFileOperation:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseBase"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/KnowledgeBaseFileOperationResult" }
+          required: [data]
+    ApiResponseMoveKnowledgeBaseFiles:
+      allOf:
+        - $ref: "#/components/schemas/ApiResponseBase"
+        - type: object
+          properties:
+            data: { $ref: "#/components/schemas/MoveKnowledgeBaseFilesResult" }
+          required: [data]
     KnowledgeBase:
       type: object
       properties:
@@ -2804,6 +2958,37 @@ components:
               type: string
               enum: [owner, userGrant, roleGrant, public]
               description: Access type/source of the current user for this knowledge base
+    KnowledgeBaseFileOperationResult:
+      type: object
+      properties:
+        successed:
+          type: array
+          items: { type: string }
+        failed:
+          type: array
+          items:
+            type: object
+            properties:
+              fileId: { type: string }
+              reason: { type: string }
+            required: [fileId, reason]
+      required: [successed, failed]
+    MoveKnowledgeBaseFilesResult:
+      type: object
+      properties:
+        successed:
+          type: array
+          items: { type: string }
+        failed:
+          type: array
+          items:
+            type: object
+            properties:
+              fileId: { type: string }
+              reason: { type: string }
+            required: [fileId, reason]
+      required:
+        [successed, failed]
     CreateKnowledgeBaseRequest:
       type: object
       properties:

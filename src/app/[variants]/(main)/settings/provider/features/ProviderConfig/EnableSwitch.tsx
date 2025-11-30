@@ -16,10 +16,11 @@ const useStyles = createStyles(({ css }) => ({
 
 interface SwitchProps {
   Component?: FC<{ id: string }>;
+  disabled?: boolean;
   id: string;
 }
 
-const Switch = ({ id, Component }: SwitchProps) => {
+const Switch = ({ id, Component, disabled }: SwitchProps) => {
   const { styles } = useStyles();
 
   const [toggleProviderEnabled, enabled, isLoading] = useAiInfraStore((s) => [
@@ -35,6 +36,7 @@ const Switch = ({ id, Component }: SwitchProps) => {
 
   return (
     <InstantSwitch
+      disabled={disabled}
       enabled={enabled}
       onChange={async (enabled) => {
         await toggleProviderEnabled(id as any, enabled);
