@@ -2,6 +2,7 @@
   "assistants": {
     "addAgent": "Thêm trợ lý",
     "addAgentAndConverse": "Thêm trợ lý và trò chuyện",
+    "addAgentFailed": "Thêm trợ lý thất bại",
     "addAgentSuccess": "Thêm thành công",
     "conversation": {
       "l1": "Xin chào, tôi là **{{name}}**, bạn có thể hỏi tôi bất kỳ câu hỏi nào, tôi sẽ cố gắng trả lời bạn ~",

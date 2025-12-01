@@ -2,6 +2,7 @@
   "assistants": {
     "addAgent": "Voeg assistent toe",
     "addAgentAndConverse": "Voeg assistent toe en begin een gesprek",
+    "addAgentFailed": "Assistent toevoegen mislukt",
     "addAgentSuccess": "Toevoegen geslaagd",
     "conversation": {
       "l1": "Hallo, ik ben **{{name}}**, je kunt me alles vragen en ik zal mijn best doen om je te helpen ~",

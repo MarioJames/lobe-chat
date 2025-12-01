@@ -2,6 +2,7 @@
   "assistants": {
     "addAgent": "Agregar asistente",
     "addAgentAndConverse": "Agregar asistente y conversar",
+    "addAgentFailed": "Error al agregar asistente",
     "addAgentSuccess": "Agregado con éxito",
     "conversation": {
       "l1": "Hola, soy **{{name}}**, puedes preguntarme cualquier cosa y haré lo posible por responderte ~",

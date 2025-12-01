@@ -21,6 +21,7 @@ import { sessionMetaSelectors } from '@/store/session/selectors';
 
 import AddButton from './AddButton';
 import OpeningQuestions from './OpeningQuestions';
+import RecommendedAgents from './RecommendedAgents';
 
 const useStyles = createStyles(({ css, responsive }) => ({
   container: css`
@@ -148,6 +149,12 @@ const InboxWelcome = memo(() => {
         {showInboxWelcome && questions.length > 0 && (
           <OpeningQuestions mobile={mobile} questions={questions} />
         )}
+        {showInboxWelcome &&
+          welcomeConfig?.type === 'recommended' &&
+          welcomeConfig.config.recommendedAgents &&
+          welcomeConfig.config.recommendedAgents.length > 0 && (
+            <RecommendedAgents agents={welcomeConfig.config.recommendedAgents} />
+          )}
       </Flexbox>
     </Center>
   );

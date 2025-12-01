@@ -2,6 +2,7 @@
   "assistants": {
     "addAgent": "Asistan Ekle",
     "addAgentAndConverse": "Asistan Ekle ve Sohbet Et",
+    "addAgentFailed": "Asistan eklenemedi",
     "addAgentSuccess": "Başarıyla Eklendi",
     "conversation": {
       "l1": "Merhaba, ben **{{name}}**. Bana her türlü soruyu sorabilirsin, elimden gelenin en iyisini yapacağım ~",

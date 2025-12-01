@@ -2,6 +2,7 @@
   "assistants": {
     "addAgent": "Add Assistant",
     "addAgentAndConverse": "Add Assistant and Converse",
+    "addAgentFailed": "Failed to add assistant",
     "addAgentSuccess": "Added Successfully",
     "conversation": {
       "l1": "Hello, I am **{{name}}**, you can ask me any questions, and I will do my best to answer you ~",

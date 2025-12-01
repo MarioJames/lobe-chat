@@ -2,6 +2,7 @@ export default {
   assistants: {
     addAgent: '添加助手',
     addAgentAndConverse: '添加助手并会话',
+    addAgentFailed: '添加助手失败',
     addAgentSuccess: '添加成功',
     conversation: {
       l1: '你好，我是 **{{name}}**，你可以问我任何问题，我会尽力回答你 ~',
