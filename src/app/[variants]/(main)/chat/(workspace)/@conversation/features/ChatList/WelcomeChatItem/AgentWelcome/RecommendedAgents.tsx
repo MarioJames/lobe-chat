@@ -34,8 +34,14 @@ const useStyles = createStyles(({ css, token }) => ({
     }
   `,
   container: css`
+    display: flex;
+    flex-wrap: wrap;
     gap: 12px;
+    justify-content: center;
+
+    max-width: 100%;
   `,
+
   description: css`
     margin: 0;
     font-size: 13px;
@@ -110,8 +116,8 @@ const RecommendedAgents = memo<RecommendedAgentsProps>(({ agents }) => {
   if (!agents || agents.length === 0) return null;
 
   return (
-    <Flexbox className={styles.container} gap={12} horizontal justify="space-between" wrap={'wrap'}>
-      {[...agents, ...agents, ...agents].map((agent) => {
+    <div className={styles.container}>
+      {agents.map((agent) => {
         const isAdded = isAgentAdded(agent.id);
         const isLoading = loadingIds.has(agent.id);
 
@@ -153,7 +159,7 @@ const RecommendedAgents = memo<RecommendedAgentsProps>(({ agents }) => {
           </Flexbox>
         );
       })}
-    </Flexbox>
+    </div>
   );
 });
 
