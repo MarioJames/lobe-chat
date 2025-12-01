@@ -12,6 +12,7 @@ import TitleBar, { TITLE_BAR_HEIGHT } from '@/features/ElectronTitlebar';
 import HotkeyHelperPanel from '@/features/HotkeyHelperPanel';
 import { usePlatform } from '@/hooks/usePlatform';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
+import { announcementSelectors } from '@/store/serverConfig/selectors';
 import { HotkeyScopeEnum } from '@/types/hotkey';
 
 import DesktopLayoutContainer from './DesktopLayoutContainer';
@@ -25,9 +26,11 @@ const Layout = memo<PropsWithChildren>(({ children }) => {
   const theme = useTheme();
 
   const { showCloudPromotion } = useServerConfigStore(featureFlagsSelectors);
+  const activeAnnouncement = useServerConfigStore(announcementSelectors.activeAnnouncement);
   return (
     <HotkeysProvider initiallyActiveScopes={[HotkeyScopeEnum.Global]}>
       {isDesktop && <TitleBar />}
+      {!!activeAnnouncement && <CloudBanner announcement={activeAnnouncement} />}
       {showCloudPromotion && <CloudBanner />}
       <Flexbox
         height={

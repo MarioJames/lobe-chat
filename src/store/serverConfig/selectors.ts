@@ -17,3 +17,7 @@ export const customizationSelectors = {
   defaultAgent: (s: ServerConfigStore) => s.customizationConfig?.defaultAgent,
   welcome: (s: ServerConfigStore) => s.customizationConfig?.welcome,
 };
+
+export const announcementSelectors = {
+  activeAnnouncement: (s: ServerConfigStore) => s.activeAnnouncement,
+};

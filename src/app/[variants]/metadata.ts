@@ -19,6 +19,7 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
 
   // Get customization config for favicon and brand name
   let baseConfig: {
+    brandDescription?: string;
     brandName?: string;
     favicon?: { dark?: string; light?: string };
   } | null = null;
@@ -26,27 +27,25 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
     const config = await customizationServerService.getConfig();
     baseConfig = config?.base || null;
   } catch (error) {
-    // Fallback to default values if config fetch fails
     console.warn('Failed to get customization config for metadata:', error);
   }
 
   const brandName = baseConfig?.brandName || BRANDING_NAME;
+  const description = baseConfig?.brandDescription
+    ? `${brandName} ${baseConfig.brandDescription}`
+    : t('chat.description', { appName: brandName });
 
   // Get favicon from config based on current theme
   const faviconUrl = isDark
     ? baseConfig?.favicon?.dark || baseConfig?.favicon?.light
     : baseConfig?.favicon?.light || baseConfig?.favicon?.dark;
 
-  // Build icons config
   let iconsConfig;
   if (faviconUrl) {
-    // If custom favicon is configured, use it
     iconsConfig = faviconUrl;
   } else if (isCustomBranding) {
-    // Fallback to branding logo if custom branding is enabled
     iconsConfig = BRANDING_LOGO_URL;
   } else {
-    // Default favicon
     iconsConfig = {
       apple: '/apple-touch-icon.png?v=1',
       icon: isDev ? '/favicon-dev.ico' : '/favicon.ico?v=1',
@@ -62,12 +61,12 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
       statusBarStyle: 'black-translucent',
       title: brandName,
     },
-    description: t('chat.description', { appName: brandName }),
+    description: description,
     icons: iconsConfig,
     manifest: '/manifest.json',
     metadataBase: new URL(OFFICIAL_URL),
     openGraph: {
-      description: t('chat.description', { appName: brandName }),
+      description: description,
       images: [
         {
           alt: t('chat.title', { appName: brandName }),
@@ -88,7 +87,7 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
     },
     twitter: {
       card: 'summary_large_image',
-      description: t('chat.description', { appName: brandName }),
+      description: description,
       images: [OG_URL],
       site: isCustomORG ? `@${ORG_NAME}` : '@lobehub',
       title: t('chat.title', { appName: brandName }),

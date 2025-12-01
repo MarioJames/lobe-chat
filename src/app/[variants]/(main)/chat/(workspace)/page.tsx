@@ -35,7 +35,7 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
 
   return metadataModule.generate({
     description: description || t('chat.description', { appName: brandName }),
-    title: description ? `${brandName}：${description} ` : t('chat.title', { appName: brandName }),
+    title: t('chat.title', { appName: brandName }),
     url: '/chat',
   });
 };
@@ -48,7 +48,7 @@ const Page = async (props: DynamicLayoutProps) => {
 
   const ld = ldModule.generate({
     description: description || t('chat.description', { appName: brandName }),
-    title: description ? `${brandName}：${description} ` : t('chat.title', { appName: brandName }),
+    title: t('chat.title', { appName: brandName }),
     url: '/chat',
   });
 

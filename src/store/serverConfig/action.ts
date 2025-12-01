@@ -7,11 +7,13 @@ import { customizationService } from '@/services/customization';
 import { globalService } from '@/services/global';
 import { GlobalRuntimeConfig } from '@/types/serverConfig';
 
-import type { ServerConfigStore } from './store';
+import type { ActiveAnnouncement, ServerConfigStore } from './store';
 
 const FETCH_SERVER_CONFIG_KEY = 'FETCH_SERVER_CONFIG';
 const FETCH_CUSTOMIZATION_CONFIG_KEY = 'FETCH_CUSTOMIZATION_CONFIG';
+const FETCH_ACTIVE_ANNOUNCEMENT_KEY = 'FETCH_ACTIVE_ANNOUNCEMENT';
 export interface ServerConfigAction {
+  useInitActiveAnnouncement: () => SWRResponse<ActiveAnnouncement | null>;
   useInitCustomizationConfig: () => SWRResponse<CustomizationConfig>;
   useInitServerConfig: () => SWRResponse<GlobalRuntimeConfig>;
 }
@@ -22,6 +24,19 @@ export const createServerConfigSlice: StateCreator<
   [],
   ServerConfigAction
 > = (set) => ({
+  useInitActiveAnnouncement: () => {
+    return useOnlyFetchOnceSWR<ActiveAnnouncement | null>(
+      FETCH_ACTIVE_ANNOUNCEMENT_KEY,
+      async () => {
+        return customizationService.getActiveAnnouncement();
+      },
+      {
+        onSuccess: (data) => {
+          set({ activeAnnouncement: data }, false, 'initActiveAnnouncement');
+        },
+      },
+    );
+  },
   useInitCustomizationConfig: () => {
     return useOnlyFetchOnceSWR<CustomizationConfig>(
       FETCH_CUSTOMIZATION_CONFIG_KEY,

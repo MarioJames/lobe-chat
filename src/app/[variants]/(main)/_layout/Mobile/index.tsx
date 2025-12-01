@@ -7,6 +7,7 @@ import { PropsWithChildren, memo } from 'react';
 import { withSuspense } from '@/components/withSuspense';
 import { useShowMobileWorkspace } from '@/hooks/useShowMobileWorkspace';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
+import { announcementSelectors } from '@/store/serverConfig/selectors';
 
 import NavBar from './NavBar';
 
@@ -28,9 +29,11 @@ const Layout = memo(({ children }: PropsWithChildren) => {
   const showNav = !showMobileWorkspace && MOBILE_NAV_ROUTES.has(pathname);
 
   const { showCloudPromotion } = useServerConfigStore(featureFlagsSelectors);
+  const activeAnnouncement = useServerConfigStore(announcementSelectors.activeAnnouncement);
 
   return (
     <>
+      {!!activeAnnouncement && <CloudBanner announcement={activeAnnouncement} mobile />}
       {showCloudPromotion && <CloudBanner mobile />}
       {children}
       {showNav && <NavBar />}

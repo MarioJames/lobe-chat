@@ -17,7 +17,17 @@ import { merge } from '@/utils/merge';
 
 import { ServerConfigAction, createServerConfigSlice } from './action';
 
+export interface ActiveAnnouncement {
+  content: string;
+  createdAt: Date;
+  effectiveEndAt: Date;
+  effectiveStartAt: Date;
+  id: number;
+  title: string;
+}
+
 interface ServerConfigState {
+  activeAnnouncement: ActiveAnnouncement | null;
   customizationConfig: CustomizationConfig | null;
   featureFlags: IFeatureFlagsState;
   isMobile?: boolean;
@@ -26,6 +36,7 @@ interface ServerConfigState {
 }
 
 const initialState: ServerConfigState = {
+  activeAnnouncement: null,
   customizationConfig: null,
   featureFlags: mapFeatureFlagsEnvToState(DEFAULT_FEATURE_FLAGS),
   segmentVariants: '',

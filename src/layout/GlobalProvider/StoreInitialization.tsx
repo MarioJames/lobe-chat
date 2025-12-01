@@ -47,6 +47,10 @@ const StoreInitialization = memo(() => {
   const useFetchCustomizationConfig = useServerConfigStore((s) => s.useInitCustomizationConfig);
   useFetchCustomizationConfig();
 
+  // fetch active announcement
+  const useFetchActiveAnnouncement = useServerConfigStore((s) => s.useInitActiveAnnouncement);
+  useFetchActiveAnnouncement();
+
   // Update NextAuth status
   const useUserStoreUpdater = createStoreUpdater(useUserStore);
   const oAuthSSOProviders = useServerConfigStore(serverConfigSelectors.oAuthSSOProviders);
