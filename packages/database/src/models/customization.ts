@@ -53,7 +53,12 @@ export class CustomizationModel {
         ...config.welcome,
         config: {
           ...config.welcome.config,
-          recommendedAgents,
+          recommendedAgents: recommendedAgents.map((agent) => ({
+            ...agent,
+            openingQuestions: agent.openingQuestions ?? undefined,
+            plugins: agent.plugins ?? undefined,
+            tags: agent.tags ?? undefined,
+          })),
         },
       },
     };
@@ -84,4 +89,3 @@ export class CustomizationModel {
     return result[0] ?? null;
   };
 }
-
