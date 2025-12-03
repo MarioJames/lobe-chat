@@ -5,6 +5,7 @@ import { INBOX_SESSION_ID } from '@/const/session';
 import { useAgentStore } from '@/store/agent';
 import { agentChatConfigSelectors } from '@/store/agent/selectors';
 import { messageMapKey } from '@/store/chat/utils/messageMapKey';
+import { customizationSelectors } from '@/store/serverConfig/selectors';
 import { useSessionStore } from '@/store/session';
 import { sessionMetaSelectors } from '@/store/session/selectors';
 import { useUserStore } from '@/store/user';
@@ -34,7 +35,29 @@ const getMeta = (message: UIChatMessage) => {
       }
 
       // Otherwise, use the current session's agent meta for single agent chat
-      return sessionMetaSelectors.currentAgentMeta(useSessionStore.getState());
+      const sessionMeta = sessionMetaSelectors.currentAgentMeta(useSessionStore.getState());
+
+      // Check if it's inbox session and has defaultAgent config
+      const sessionStore = useSessionStore.getState();
+      const isInbox = sessionStore.activeId === INBOX_SESSION_ID;
+
+      if (isInbox && typeof window !== 'undefined' && window.global_serverConfigStore) {
+        const serverConfigStore = window.global_serverConfigStore.getState();
+        const defaultAgent = customizationSelectors.defaultAgent(serverConfigStore);
+
+        // If defaultAgent exists, merge it with sessionMeta (defaultAgent takes priority)
+        if (defaultAgent) {
+          return {
+            ...sessionMeta,
+            avatar: defaultAgent.avatar || sessionMeta.avatar,
+            backgroundColor: sessionMeta.backgroundColor,
+            description: defaultAgent.description || sessionMeta.description,
+            title: defaultAgent.title || sessionMeta.title,
+          };
+        }
+      }
+
+      return sessionMeta;
     }
   }
 };

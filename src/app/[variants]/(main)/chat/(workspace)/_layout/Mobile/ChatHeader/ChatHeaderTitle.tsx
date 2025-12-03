@@ -9,6 +9,8 @@ import { Flexbox } from 'react-layout-kit';
 import { useChatStore } from '@/store/chat';
 import { topicSelectors } from '@/store/chat/selectors';
 import { useGlobalStore } from '@/store/global';
+import { useServerConfigStore } from '@/store/serverConfig';
+import { customizationSelectors } from '@/store/serverConfig/selectors';
 import { useSessionStore } from '@/store/session';
 import { sessionMetaSelectors, sessionSelectors } from '@/store/session/selectors';
 
@@ -25,7 +27,11 @@ const ChatHeaderTitle = memo(() => {
   ]);
   const theme = useTheme();
 
-  const displayTitle = isInbox ? t('inbox.title') : title;
+  // Get default agent config from customization
+  const defaultAgentConfig = useServerConfigStore(customizationSelectors.defaultAgent);
+
+  // Use default agent config only when in inbox, otherwise use the current session's config
+  const displayTitle = isInbox ? defaultAgentConfig?.title || t('inbox.title') : title;
 
   return (
     <ChatHeader.Title

@@ -34,14 +34,15 @@ const useStyles = createStyles(({ css, token }) => ({
     }
   `,
   container: css`
-    display: flex;
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 12px;
     justify-content: center;
-
-    max-width: 100%;
   `,
 
+  containerMultiple: css`
+    max-width: 100%;
+  `,
   description: css`
     margin: 0;
     font-size: 13px;
@@ -61,13 +62,16 @@ interface RecommendedAgentsProps {
 }
 
 const RecommendedAgents = memo<RecommendedAgentsProps>(({ agents }) => {
-  const { styles } = useStyles();
+  const { styles, cx } = useStyles();
   const { t } = useTranslation('discover');
   const { message } = App.useApp();
   const [loadingIds, setLoadingIds] = useState<Set<string>>(new Set());
 
   const createSession = useSessionStore((s) => s.createSession);
   const sessions = useSessionStore((s) => s.sessions);
+
+  // 判断是否有多个元素
+  const hasMultipleAgents = agents && agents.length > 1;
 
   // 检查助手是否已添加
   const isAgentAdded = (agentId: string) => {
@@ -116,7 +120,7 @@ const RecommendedAgents = memo<RecommendedAgentsProps>(({ agents }) => {
   if (!agents || agents.length === 0) return null;
 
   return (
-    <div className={styles.container}>
+    <div className={cx(styles.container, hasMultipleAgents && styles.containerMultiple)}>
       {agents.map((agent) => {
         const isAdded = isAgentAdded(agent.id);
         const isLoading = loadingIds.has(agent.id);
