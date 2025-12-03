@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+import { AgentItem } from './agent';
+
 // ==================== 自定义配置类型 ====================
 
 /**
@@ -25,18 +27,9 @@ export const BaseConfigSchema = z.object({
 export type BaseConfig = z.infer<typeof BaseConfigSchema>;
 
 /**
- * 推荐助手的详细信息
+ * 推荐助手 - 直接使用数据库 AgentItem 类型
  */
-export const RecommendedAgentSchema = z.object({
-  avatar: z.string().nullable(), 
-  backgroundColor: z.string().nullable(),
-  description: z.string().nullable(),
-  id: z.string(),
-  tags: z.array(z.string()).nullable(),
-  title: z.string().nullable(),
-});
-
-export type RecommendedAgent = z.infer<typeof RecommendedAgentSchema>;
+export type RecommendedAgent = AgentItem;
 
 /**
  * 欢迎界面配置 - 推荐模式
@@ -45,7 +38,7 @@ export const WelcomeRecommendedConfigSchema = z.object({
   defaultQuestions: z.array(z.string()).default([]), // 默认常见问题
   newUserQuestions: z.array(z.string()).default([]), // 新用户常见问题
   recommendedAgentIds: z.array(z.string()).default([]), // 推荐助手 ID 列表
-  recommendedAgents: z.array(RecommendedAgentSchema).optional(), // 推荐助手详情
+  recommendedAgents: z.array(z.custom<AgentItem>()).optional(), // 推荐助手详情
   welcomeContent: z.string().optional(), // 支持 Markdown
 });
 

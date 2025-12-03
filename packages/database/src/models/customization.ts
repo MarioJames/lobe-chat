@@ -43,14 +43,7 @@ export class CustomizationModel {
 
     // 批量查询推荐助手的详细信息
     const recommendedAgents = await this.db
-      .select({
-        avatar: agents.avatar,
-        backgroundColor: agents.backgroundColor,
-        description: agents.description,
-        id: agents.id,
-        tags: agents.tags,
-        title: agents.title,
-      })
+      .select()
       .from(agents)
       .where(inArray(agents.id, recommendedAgentIds));
 
