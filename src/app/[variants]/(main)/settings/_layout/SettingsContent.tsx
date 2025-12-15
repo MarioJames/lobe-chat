@@ -6,6 +6,7 @@ import React, { CSSProperties } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
 import Loading from '@/components/Loading/BrandTextLoading';
+import { useAIProviderPermissions } from '@/hooks/useRbacPermissions';
 import { SettingsTabs } from '@/store/global/initialState';
 
 const componentMap = {
@@ -51,13 +52,26 @@ interface SettingsContentProps {
 }
 
 const SettingsContent = ({ mobile, activeTab, showLLM = true }: SettingsContentProps) => {
+  const { showProviderMenu } = useAIProviderPermissions();
+
   const shouldRenderLLMTabs = (tab: string) => {
     const isLLMTab =
       tab === SettingsTabs.LLM || tab === SettingsTabs.Provider || tab === SettingsTabs.Agent;
     return showLLM || !isLLMTab;
   };
-  if (activeTab && !shouldRenderLLMTabs(activeTab)) {
-    notFound();
+
+  // Check if current tab should be accessible
+  if (activeTab) {
+    // Check feature flag (showLLM)
+    if (!shouldRenderLLMTabs(activeTab)) {
+      notFound();
+    }
+
+    // Check RBAC permission for Provider/LLM tabs
+    const isProviderTab = activeTab === SettingsTabs.Provider || activeTab === SettingsTabs.LLM;
+    if (isProviderTab && !showProviderMenu) {
+      notFound();
+    }
   }
   const renderComponent = (tab: string) => {
     const Component = componentMap[tab as keyof typeof componentMap] || componentMap.common;

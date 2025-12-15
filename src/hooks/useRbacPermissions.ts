@@ -27,11 +27,20 @@ interface AIProviderPermissions {
 
 const createCrudPermissionHook = (keys: CrudPermissionKeys) => (): CrudPermissionResult =>
   useRbacStore((s) => {
+    const isRbacReady = rbacSelectors.isPermissionCodesInitialized(s);
+
+    // Hide all permissions by default when RBAC is not ready
     return {
-      canCreate: rbacSelectors.hasAnyPermission(getAllScopePermissions(keys.create))(s),
-      canDelete: rbacSelectors.hasAnyPermission(getAllScopePermissions(keys.delete))(s),
-      canUpdate: rbacSelectors.hasAnyPermission(getAllScopePermissions(keys.update))(s),
-      isRbacReady: rbacSelectors.isPermissionCodesInitialized(s),
+      canCreate: isRbacReady
+        ? rbacSelectors.hasAnyPermission(getAllScopePermissions(keys.create))(s)
+        : false,
+      canDelete: isRbacReady
+        ? rbacSelectors.hasAnyPermission(getAllScopePermissions(keys.delete))(s)
+        : false,
+      canUpdate: isRbacReady
+        ? rbacSelectors.hasAnyPermission(getAllScopePermissions(keys.update))(s)
+        : false,
+      isRbacReady,
     };
   });
 
@@ -53,11 +62,14 @@ export const useAIProviderPermissions = (): AIProviderPermissions => {
     delete: 'AI_PROVIDER_DELETE',
     update: 'AI_PROVIDER_UPDATE',
   })();
-  const { canCreate, canDelete, canUpdate } = basePermissions;
+  const { canCreate, canDelete, canUpdate, isRbacReady } = basePermissions;
+
+  // Hide provider menu by default when RBAC is not ready
+  const showProviderMenu = isRbacReady ? canUpdate || canCreate || canDelete : false;
 
   return {
     ...basePermissions,
-    isRbacReady: basePermissions.isRbacReady,
-    showProviderMenu: canUpdate || canCreate || canDelete,
+    isRbacReady,
+    showProviderMenu,
   };
 };

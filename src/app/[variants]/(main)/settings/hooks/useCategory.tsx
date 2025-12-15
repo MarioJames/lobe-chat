@@ -24,8 +24,7 @@ export const useCategory = () => {
   const { t } = useTranslation('setting');
   const mobile = useServerConfigStore((s) => s.isMobile);
   const { showLLM, enableSTT, hideDocs } = useServerConfigStore(featureFlagsSelectors);
-  const { showProviderMenu, isRbacReady } = useAIProviderPermissions();
-  const allowProviderMenu = isRbacReady ? showProviderMenu : true;
+  const { showProviderMenu } = useAIProviderPermissions();
 
   const cateItems: MenuProps['items'] = useMemo(
     () =>
@@ -49,7 +48,7 @@ export const useCategory = () => {
           type: 'divider',
         },
         showLLM &&
-          allowProviderMenu &&
+          showProviderMenu &&
           // TODO: Remove /llm when v2.0
           (isDeprecatedEdition
             ? {
@@ -96,7 +95,7 @@ export const useCategory = () => {
           label: t('tab.about'),
         },
       ].filter(Boolean) as MenuProps['items'],
-    [t, showLLM, enableSTT, hideDocs, mobile, allowProviderMenu],
+    [t, showLLM, enableSTT, hideDocs, mobile, showProviderMenu],
   );
 
   return cateItems;
