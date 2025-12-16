@@ -128,7 +128,9 @@ export default {
   },
   ModelSwitchPanel: {
     emptyModel: '没有启用的模型，请前往设置开启',
+    emptyModelNoPermission: '没有权限开启模型管理功能', // 模型为空，且没有权限开启模型管理功能
     emptyProvider: '没有启用的服务商，请前往设置开启',
+    emptyProviderNoPermission: '没有权限开启提供商管理功能', // 服务商为空，且没有权限开启提供商管理功能
     goToSettings: '前往设置',
     provider: '服务商',
     title: '模型',

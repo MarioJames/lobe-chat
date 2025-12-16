@@ -9,6 +9,7 @@ import { Flexbox } from 'react-layout-kit';
 
 import { ModelItemRender, ProviderItemRender } from '@/components/ModelSelect';
 import { isDeprecatedEdition } from '@/const/version';
+import { useAIProviderPermissions } from '@/hooks/useRbacPermissions';
 import { useAiInfraStore } from '@/store/aiInfra';
 import { aiProviderSelectors } from '@/store/aiInfra/slices/aiProvider/selectors';
 import { useImageStore } from '@/store/image';
@@ -35,6 +36,7 @@ const ModelSelect = memo(() => {
   const { t } = useTranslation('components');
   const theme = useTheme();
   const { showLLM } = useServerConfigStore(featureFlagsSelectors);
+  const { canUpdate } = useAIProviderPermissions();
   const router = useRouter();
 
   const [currentModel, currentProvider] = useImageStore((s) => [
@@ -60,11 +62,17 @@ const ModelSelect = memo(() => {
             disabled: true,
             label: (
               <Flexbox gap={8} horizontal style={{ color: theme.colorTextTertiary }}>
-                {t('ModelSwitchPanel.emptyModel')}
-                <Icon icon={LucideArrowRight} />
+                {canUpdate
+                  ? t('ModelSwitchPanel.emptyModel')
+                  : t('ModelSwitchPanel.emptyModelNoPermission')}
+                {canUpdate && <Icon icon={LucideArrowRight} />}
               </Flexbox>
             ),
             onClick: () => {
+              if (!canUpdate) {
+                return;
+              }
+
               router.push(
                 isDeprecatedEdition
                   ? '/settings?active=llm'
@@ -86,11 +94,17 @@ const ModelSelect = memo(() => {
           disabled: true,
           label: (
             <Flexbox gap={8} horizontal style={{ color: theme.colorTextTertiary }}>
-              {t('ModelSwitchPanel.emptyProvider')}
-              <Icon icon={LucideArrowRight} />
+              {canUpdate
+                ? t('ModelSwitchPanel.emptyProvider')
+                : t('ModelSwitchPanel.emptyProviderNoPermission')}
+              {canUpdate && <Icon icon={LucideArrowRight} />}
             </Flexbox>
           ),
           onClick: () => {
+            if (!canUpdate) {
+              return;
+            }
+
             router.push(isDeprecatedEdition ? '/settings?active=llm' : '/settings?active=provider');
           },
           value: 'no-provider',
@@ -112,7 +126,7 @@ const ModelSelect = memo(() => {
             provider={provider.id}
             source={provider.source}
           />
-          {showLLM && (
+          {showLLM && canUpdate && (
             <Link
               href={
                 isDeprecatedEdition
@@ -131,7 +145,7 @@ const ModelSelect = memo(() => {
       ),
       options: getImageModels(provider),
     }));
-  }, [enabledImageModelList, showLLM, t, theme.colorTextTertiary, router]);
+  }, [enabledImageModelList, showLLM, t, theme.colorTextTertiary, router, canUpdate]);
 
   return (
     <Select
