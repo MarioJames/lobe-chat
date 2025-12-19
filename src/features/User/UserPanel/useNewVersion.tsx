@@ -10,5 +10,5 @@ export const useNewVersion = () => {
   const { enableCheckUpdates } = useServerConfigStore(featureFlagsSelectors);
   useCheckLatestVersion(enableCheckUpdates);
 
-  return hasNewVersion;
+  return enableCheckUpdates ? hasNewVersion : false;
 };
