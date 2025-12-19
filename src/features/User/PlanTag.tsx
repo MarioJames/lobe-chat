@@ -8,6 +8,7 @@ import urlJoin from 'url-join';
 import { OFFICIAL_URL } from '@/const/url';
 import { isDesktop } from '@/const/version';
 import PlanIcon from '@/features/PlanIcon';
+import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 import { Plans } from '@/types/subscription';
 
 export enum PlanType {
@@ -21,6 +22,7 @@ export interface PlanTagProps {
 const PlanTag = memo<PlanTagProps>(({ type = PlanType.Preview }) => {
   const { t } = useTranslation('common');
   const theme = useTheme();
+  const { isEnterpriseEdition } = useServerConfigStore(featureFlagsSelectors);
 
   if (type === PlanType.Preview) {
     return (
@@ -28,7 +30,7 @@ const PlanTag = memo<PlanTagProps>(({ type = PlanType.Preview }) => {
         bordered={false}
         style={{ background: theme.colorFill, borderRadius: 12, cursor: 'pointer' }}
       >
-        {t('userPanel.community')}
+        {t(isEnterpriseEdition ? 'userPanel.enterprise' : 'userPanel.community')}
       </Tag>
     );
   }

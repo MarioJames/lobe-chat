@@ -5,6 +5,7 @@ import { memo } from 'react';
 import { Flexbox, FlexboxProps } from 'react-layout-kit';
 
 import PlanTag from '@/features/User/PlanTag';
+import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 import { useUserStore } from '@/store/user';
 import { authSelectors, userProfileSelectors } from '@/store/user/selectors';
 
@@ -30,8 +31,9 @@ export interface UserInfoProps extends FlexboxProps {
 const UserInfo = memo<UserInfoProps>(({ avatarProps, onClick, ...rest }) => {
   const { styles, theme } = useStyles();
   const isSignedIn = useUserStore(authSelectors.isLogin);
+  const { isEnterpriseEdition } = useServerConfigStore(featureFlagsSelectors);
   const [nickname, username, subscriptionPlan] = useUserStore((s) => [
-    userProfileSelectors.nickName(s),
+    userProfileSelectors.nickName(s, isEnterpriseEdition),
     userProfileSelectors.username(s),
     s.subscriptionPlan,
   ]);

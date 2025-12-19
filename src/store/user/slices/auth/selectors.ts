@@ -7,13 +7,21 @@ import type { UserStore } from '@/store/user';
 
 const DEFAULT_USERNAME = BRANDING_NAME;
 
-const nickName = (s: UserStore) => {
+/**
+ * Get the nickname translation key based on enterprise edition flag
+ * This function should be called with the isEnterpriseEdition flag from feature flags
+ */
+export const getNicknameKey = (isEnterpriseEdition?: boolean) => {
+  return isEnterpriseEdition ? 'userPanel.enterpriseNickname' : 'userPanel.defaultNickname';
+};
+
+const nickName = (s: UserStore, isEnterpriseEdition?: boolean) => {
   const defaultNickName = s.user?.fullName || s.user?.username;
   if (!enableAuth) {
     if (isDesktop) {
       return defaultNickName;
     }
-    return t('userPanel.defaultNickname', { ns: 'common' });
+    return t(getNicknameKey(isEnterpriseEdition), { ns: 'common' });
   }
 
   if (s.isSignedIn) return defaultNickName;
@@ -38,7 +46,7 @@ export const userProfileSelectors = {
   displayUserName: (s: UserStore): string => username(s) || s.user?.email || '',
   email: (s: UserStore): string => s.user?.email || '',
   fullName: (s: UserStore): string => s.user?.fullName || '',
-  nickName,
+  nickName: (s: UserStore, isEnterpriseEdition?: boolean) => nickName(s, isEnterpriseEdition),
   userAvatar: (s: UserStore): string => s.user?.avatar || '',
   userId: (s: UserStore) => s.user?.id,
   userProfile: (s: UserStore): LobeUser | null | undefined => s.user,
