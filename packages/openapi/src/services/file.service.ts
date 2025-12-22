@@ -187,8 +187,8 @@ export class FileUploadService extends BaseService {
   /**
    * 获取文件列表，支持三种场景：
    * 1. 获取当前用户的文件（默认）
-   * 2. 获取指定用户的文件（需要 ALL/WORKSPACE 权限，或目标用户是自己）
-   * 3. 获取系统中所有用户的文件（需要 ALL/WORKSPACE 权限，queryAll=true）
+   * 2. 获取指定用户的文件（需要 ALL 权限，或目标用户是自己）
+   * 3. 获取系统中所有用户的文件（需要 ALL 权限，queryAll=true）
    */
   async getFileList(request: FileListQuery): Promise<FileListResponse> {
     try {
@@ -261,7 +261,11 @@ export class FileUploadService extends BaseService {
         const total = totalResult[0]?.count || 0;
 
         // 构建响应 (JOIN查询需要手动获取关联数据)
-        const responseFiles = await this.buildFileListResponse(filesResult, true, hasGlobalPermission);
+        const responseFiles = await this.buildFileListResponse(
+          filesResult,
+          true,
+          hasGlobalPermission,
+        );
 
         this.log('info', 'File list retrieved successfully (by knowledgeBase)', {
           count: responseFiles.length,
@@ -323,7 +327,11 @@ export class FileUploadService extends BaseService {
       const total = totalResult[0]?.count || 0;
 
       // 构建响应 (关系查询已包含 user 和 knowledgeBases)
-      const responseFiles = await this.buildFileListResponse(filesResult, false, hasGlobalPermission);
+      const responseFiles = await this.buildFileListResponse(
+        filesResult,
+        false,
+        hasGlobalPermission,
+      );
 
       this.log('info', 'File list retrieved successfully', {
         count: responseFiles.length,

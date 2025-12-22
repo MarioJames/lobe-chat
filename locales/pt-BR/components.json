@@ -126,7 +126,9 @@
   },
   "ModelSwitchPanel": {
     "emptyModel": "Nenhum modelo habilitado. Por favor, vá para as configurações e habilite um.",
+    "emptyModelNoPermission": "Sem permissão para ativar a funcionalidade de gerenciamento de modelos",
     "emptyProvider": "Nenhum provedor ativado, por favor vá para as configurações para ativar",
+    "emptyProviderNoPermission": "Sem permissão para ativar a funcionalidade de gerenciamento de provedores",
     "goToSettings": "Ir para as configurações",
     "provider": "Fornecedor",
     "title": "Modelo"

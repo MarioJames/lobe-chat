@@ -289,6 +289,15 @@
   "pin": "Anheften",
   "pinOff": "Anheften aufheben",
   "privacy": "Datenschutzrichtlinie",
+  "rbac": {
+    "noPermission": {
+      "backHome": "Zur Startseite",
+      "desc": "Deinem Konto wurden keine gültigen Rollen zugewiesen oder die Rollen wurden deaktiviert. Bitte wende dich an den Administrator, um Zugriff zu erhalten.",
+      "logout": "Abmelden",
+      "refresh": "Seite neu laden",
+      "title": "Zugriff verweigert"
+    }
+  },
   "regenerate": "Neu generieren",
   "releaseNotes": "Versionsdetails",
   "rename": "Umbenennen",

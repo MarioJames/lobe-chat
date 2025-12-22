@@ -136,7 +136,7 @@ export abstract class BaseService implements IBaseService {
   }
 
   /**
-   * 检查用户是否有全局权限all/workspace
+   * 检查用户是否有全局权限 ALL
    * @param permissionKey 权限键名
    * @returns 是否有权限
    */
@@ -144,7 +144,7 @@ export abstract class BaseService implements IBaseService {
     permissionKey: keyof typeof PERMISSION_ACTIONS,
   ): Promise<boolean> {
     return await this.rbacModel.hasAnyPermission(
-      getScopePermissions(permissionKey, ['ALL', 'WORKSPACE']),
+      getScopePermissions(permissionKey, ['ALL']),
       this.userId,
     );
   }
@@ -256,9 +256,9 @@ export abstract class BaseService implements IBaseService {
   /**
    * 解析权限并返回目标信息
    * 用于处理数据访问权限的通用逻辑，支持以下场景：
-   * 1. 查询/操作当前用户的数据：需要 all/workspace/owner 权限
-   * 2. 查询/操作指定用户的数据：需要 all/workspace 权限
-   * 3. 查询/操作所有数据：需要 all/workspace 权限
+   * 1. 查询/操作当前用户的数据：需要 ALL/owner 权限
+   * 2. 查询/操作指定用户的数据：需要 ALL 权限
+   * 3. 查询/操作所有数据：需要 ALL 权限
    *
    * @param permissionKey - 权限键名
    * @param targetInfoId - 目标ID，可选。传入字符串表示查询/操作特定用户的数据，传入对象键值表示查询/操作特定对象的数据
@@ -276,7 +276,7 @@ export abstract class BaseService implements IBaseService {
     isPermitted: boolean;
     message?: string;
   }> {
-    // 检查是否有对应动作的 all/workspace 权限
+    // 检查是否有对应动作的 ALL 权限
     const hasGlobalAccess = await this.hasGlobalPermission(permissionKey);
 
     // 获取目标资源所属用户 ID
@@ -291,7 +291,7 @@ export abstract class BaseService implements IBaseService {
     this.log('info', '权限检查', logContext);
 
     /**
-     * 当用户拥有 all/workspace 权限时，直接通过校验
+     * 当用户拥有 ALL 权限时，直接通过校验
      */
     if (hasGlobalAccess) {
       this.log('info', `权限通过：当前user拥有 ${permissionKey} 的最高权限`, logContext);
@@ -302,25 +302,21 @@ export abstract class BaseService implements IBaseService {
     }
 
     /**
-     * 当用户没有 all/workspace 权限时，以下场景不允许操作：
+     * 当用户没有 ALL 权限时，以下场景不允许操作：
      * 1. 查询的是全量数据
      * 2. 查询的是指定用户的数据，但目标资源不属于当前用户
      */
     if (!resourceBelongTo || resourceBelongTo !== this.userId) {
-      this.log(
-        'warn',
-        '权限拒绝：当前user没有all/workspace权限，或目标资源不属于当前用户',
-        logContext,
-      );
+      this.log('warn', '权限拒绝：当前user没有ALL权限，或目标资源不属于当前用户', logContext);
       return {
         isPermitted: false,
-        message: `no permission,current user has no all/workspace permission,and resource not belong to current user`,
+        message: `no permission,current user has no ALL permission,and resource not belong to current user`,
       };
     }
 
     /**
      * 当查询的目标资源属于当前用户时，只要有任意权限就允许操作
-     * 由于 all/workspace 权限已经在前面校验过，所以这里只需要检查 owner 权限
+     * 由于 ALL 权限已经在前面校验过，所以这里只需要检查 owner 权限
      */
     if (resourceBelongTo === this.userId) {
       // 检查是否有对应动作的 owner 权限
@@ -352,9 +348,9 @@ export abstract class BaseService implements IBaseService {
   /**
    * 解析批量操作的权限
    * 用于处理批量数据访问权限的通用逻辑
-   * 1. 批量操作必须要有 all/workspace 权限
+   * 1. 批量操作必须要有 ALL 权限
    * 2. 如果所有资源都属于当前用户，且有 owner 权限，也允许操作
-   * 3. 如果有 all/workspace 权限，允许操作所有指定的资源
+   * 3. 如果有 ALL 权限，允许操作所有指定的资源
    *
    * @param permissionKey - 权限键名
    * @param targetInfoIds - 目标资源 ID 数组
@@ -373,7 +369,7 @@ export abstract class BaseService implements IBaseService {
 
     // 如果有全局权限，直接允许批量操作
     if (hasGlobalAccess) {
-      this.log('info', `权限通过：批量操作，当前user拥有 ${permissionKey} all/workspace权限`);
+      this.log('info', `权限通过：批量操作，当前user拥有 ${permissionKey} ALL权限`);
       return { isPermitted: true };
     }
 
@@ -468,19 +464,19 @@ export abstract class BaseService implements IBaseService {
       }
 
       // 如果所有资源都属于当前用户，但用户没有 owner 权限，则不允许操作
-      this.log('warn', '权限拒绝：批量操作需要 ${permissionKey} all/workspace/owner 权限', {
+      this.log('warn', '权限拒绝：批量操作需要 ${permissionKey} ALL/owner 权限', {
         permissionKey,
         targetInfoIds,
         userIds,
       });
       return {
         isPermitted: false,
-        message: `no permission for batch operation, current user has no ${permissionKey} all/workspace/owner permission`,
+        message: `no permission for batch operation, current user has no ${permissionKey} ALL/owner permission`,
       };
     }
 
     // 操作的资源中有不属于当前用户的资源，直接拒绝
-    this.log('warn', `权限拒绝：批量操作需要 ${permissionKey} all/workspace/owner 权限`, {
+    this.log('warn', `权限拒绝：批量操作需要 ${permissionKey} ALL/owner 权限`, {
       permissionKey,
       targetInfoIds,
       userIds,
@@ -488,7 +484,7 @@ export abstract class BaseService implements IBaseService {
 
     return {
       isPermitted: false,
-      message: `no permission for batch operation, current user has no ${permissionKey} all/workspace/owner permission`,
+      message: `no permission for batch operation, current user has no ${permissionKey} ALL/owner permission`,
     };
   }
 

@@ -126,7 +126,9 @@
   },
   "ModelSwitchPanel": {
     "emptyModel": "沒有啟用的模型，請前往設定開啟",
+    "emptyModelNoPermission": "沒有權限啟用模型管理功能",
     "emptyProvider": "沒有啟用的服務商，請前往設定開啟",
+    "emptyProviderNoPermission": "沒有權限啟用供應商管理功能",
     "goToSettings": "前往設定",
     "provider": "提供商",
     "title": "模型"

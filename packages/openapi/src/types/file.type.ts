@@ -60,7 +60,7 @@ export interface FileListQuery extends IPaginationQuery {
   fileType?: string;
   /** 知识库ID过滤 */
   knowledgeBaseId?: string;
-  /** 是否查询全量数据（需要 ALL/WORKSPACE 权限） */
+  /** 是否查询全量数据（需要 ALL 权限） */
   queryAll?: boolean;
   /** 更新时间结束 */
   updatedAtEnd?: string;

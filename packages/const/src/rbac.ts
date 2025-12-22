@@ -158,18 +158,13 @@ export const PERMISSION_ACTIONS = {
 /**
  * Operation Scope Constants Definition
  */
-export const PERMISSION_SCOPE = ['ALL', 'WORKSPACE', 'OWNER'] as const;
+export const PERMISSION_SCOPE = ['ALL', 'OWNER'] as const;
 
 export type PermissionScope = (typeof PERMISSION_SCOPE)[number];
 
 /**
- * RBAC resources only allow ALL | WORKSPACE
- */
-const GLOBAL_OR_WORKSPACE_RESOURCES = new Set(['rbac']);
-
-/**
  * Calculate allowed scopes for a given permission action key.
- * Default policy: OWNER | WORKSPACE | ALL, with exceptions for system-level resources.
+ * Default policy: OWNER | ALL, with exceptions for system-level resources.
  */
 export const getAllowedScopesForAction = (
   key: keyof typeof PERMISSION_ACTIONS,
@@ -178,18 +173,18 @@ export const getAllowedScopesForAction = (
   const resource = value.split(':')[0];
   const action = value.split(':')[1];
 
-  // Semi-global resources: ALL | WORKSPACE (no OWNER)
-  if (GLOBAL_OR_WORKSPACE_RESOURCES.has(resource)) return ['ALL', 'WORKSPACE'];
+  // RBAC resources: ALL only (system-level resource)
+  if (resource === 'rbac') return ['ALL'];
 
   // user resource nuance: create/delete without OWNER; read/update allow OWNER
   if (resource === 'user') {
-    if (action === 'create' || action === 'delete') return ['ALL', 'WORKSPACE'];
+    if (action === 'create' || action === 'delete') return ['ALL'];
 
-    return ['ALL', 'WORKSPACE', 'OWNER'];
+    return ['ALL', 'OWNER'];
   }
 
-  // Default: OWNER | WORKSPACE | ALL
-  return ['ALL', 'WORKSPACE', 'OWNER'];
+  // Default: OWNER | ALL
+  return ['ALL', 'OWNER'];
 };
 
 /**

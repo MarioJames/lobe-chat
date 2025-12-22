@@ -289,6 +289,15 @@
   "pin": "Ghim",
   "pinOff": "Bỏ ghim",
   "privacy": "Chính sách bảo mật",
+  "rbac": {
+    "noPermission": {
+      "backHome": "Quay về trang chủ",
+      "desc": "Tài khoản hiện tại chưa được gán vai trò nào hoặc vai trò đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được cấp quyền truy cập.",
+      "logout": "Đăng xuất",
+      "refresh": "Làm mới trang",
+      "title": "Không có quyền truy cập"
+    }
+  },
   "regenerate": "Tạo lại",
   "releaseNotes": "Chi tiết phiên bản",
   "rename": "Đổi tên",

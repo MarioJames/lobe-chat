@@ -126,7 +126,9 @@
   },
   "ModelSwitchPanel": {
     "emptyModel": "Brak włączonych modeli, przejdź do ustawień i włącz je",
+    "emptyModelNoPermission": "Brak uprawnień do włączenia funkcji zarządzania modelami",
     "emptyProvider": "Nie ma aktywnego dostawcy usług, przejdź do ustawień, aby go włączyć",
+    "emptyProviderNoPermission": "Brak uprawnień do włączenia funkcji zarządzania dostawcami",
     "goToSettings": "Przejdź do ustawień",
     "provider": "Dostawca",
     "title": "Model"

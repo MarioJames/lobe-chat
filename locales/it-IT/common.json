@@ -289,6 +289,15 @@
   "pin": "Fissa in alto",
   "pinOff": "Annulla fissaggio",
   "privacy": "Informativa sulla privacy",
+  "rbac": {
+    "noPermission": {
+      "backHome": "Torna alla home",
+      "desc": "L'account attuale non ha ruoli assegnati o i ruoli sono stati disabilitati. Contatta l'amministratore per ottenere i permessi.",
+      "logout": "Esci",
+      "refresh": "Ricarica la pagina",
+      "title": "Accesso non autorizzato"
+    }
+  },
   "regenerate": "Rigenera",
   "releaseNotes": "Dettagli della versione",
   "rename": "Rinomina",

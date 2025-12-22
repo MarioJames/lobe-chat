@@ -126,7 +126,9 @@
   },
   "ModelSwitchPanel": {
     "emptyModel": "No enabled model. Please go to settings to enable.",
+    "emptyModelNoPermission": "You do not have permission to access model management features.",
     "emptyProvider": "No enabled providers. Please go to settings to enable one.",
+    "emptyProviderNoPermission": "You do not have permission to access provider management features.",
     "goToSettings": "Go to settings",
     "provider": "Provider",
     "title": "Model"

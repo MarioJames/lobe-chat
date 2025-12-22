@@ -126,7 +126,9 @@
   },
   "ModelSwitchPanel": {
     "emptyModel": "No enabled model, please go to settings to enable.",
+    "emptyModelNoPermission": "Geen toestemming om de modelbeheerfunctie in te schakelen",
     "emptyProvider": "Geen ingeschakelde provider, ga naar instellingen om deze in te schakelen",
+    "emptyProviderNoPermission": "Geen toestemming om de providerbeheerfunctie in te schakelen",
     "goToSettings": "Ga naar instellingen",
     "provider": "Provider",
     "title": "Model"

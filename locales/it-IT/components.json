@@ -126,7 +126,9 @@
   },
   "ModelSwitchPanel": {
     "emptyModel": "Nessun modello attivo. Vai alle impostazioni per attivarne uno.",
+    "emptyModelNoPermission": "Non hai i permessi per attivare la gestione dei modelli",
     "emptyProvider": "Nessun fornitore attivo, vai alle impostazioni per attivarlo",
+    "emptyProviderNoPermission": "Non hai i permessi per attivare la gestione dei provider",
     "goToSettings": "Vai alle impostazioni",
     "provider": "Provider",
     "title": "Modello"

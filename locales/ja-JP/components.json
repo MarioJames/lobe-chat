@@ -126,7 +126,9 @@
   },
   "ModelSwitchPanel": {
     "emptyModel": "有効なモデルがありません。設定に移動して有効にしてください。",
+    "emptyModelNoPermission": "モデル管理機能を有効にする権限がありません",
     "emptyProvider": "有効なサービスプロバイダーがありません。設定に移動して有効にしてください。",
+    "emptyProviderNoPermission": "プロバイダー管理機能を有効にする権限がありません",
     "goToSettings": "設定に移動",
     "provider": "プロバイダー",
     "title": "モデル"

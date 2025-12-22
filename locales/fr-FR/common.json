@@ -289,6 +289,15 @@
   "pin": "Épingler",
   "pinOff": "Désactiver l'épinglage",
   "privacy": "Politique de confidentialité",
+  "rbac": {
+    "noPermission": {
+      "backHome": "Retour à l'accueil",
+      "desc": "Ce compte n'a aucun rôle attribué ou le rôle a été désactivé. Veuillez contacter l'administrateur pour obtenir les autorisations nécessaires.",
+      "logout": "Se déconnecter",
+      "refresh": "Rafraîchir la page",
+      "title": "Accès non autorisé"
+    }
+  },
   "regenerate": "Régénérer",
   "releaseNotes": "Détails de la version",
   "rename": "Renommer",

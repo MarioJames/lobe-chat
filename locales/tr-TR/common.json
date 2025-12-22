@@ -289,6 +289,15 @@
   "pin": "Pin",
   "pinOff": "Unpin",
   "privacy": "Gizlilik Politikası",
+  "rbac": {
+    "noPermission": {
+      "backHome": "Ana Sayfaya Dön",
+      "desc": "Mevcut hesabınıza atanmış bir rol yok ya da rol devre dışı bırakılmış. Lütfen yetki almak için yöneticinizle iletişime geçin.",
+      "logout": "Oturumu Kapat",
+      "refresh": "Sayfayı Yenile",
+      "title": "Erişim Yetkiniz Yok"
+    }
+  },
   "regenerate": "Tekrarla",
   "releaseNotes": "Sürüm Detayları",
   "rename": "Yeniden İsimlendir",

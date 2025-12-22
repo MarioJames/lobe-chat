@@ -289,6 +289,15 @@
   "pin": "Vastzetten",
   "pinOff": "Vastzetten uitschakelen",
   "privacy": "Privacybeleid",
+  "rbac": {
+    "noPermission": {
+      "backHome": "Terug naar de startpagina",
+      "desc": "Dit account heeft geen toegewezen rollen of de rollen zijn uitgeschakeld. Neem contact op met de beheerder om toegang te verkrijgen.",
+      "logout": "Uitloggen",
+      "refresh": "Pagina vernieuwen",
+      "title": "Geen toegangsrechten"
+    }
+  },
   "regenerate": "Opnieuw genereren",
   "releaseNotes": "Versie details",
   "rename": "Naam wijzigen",

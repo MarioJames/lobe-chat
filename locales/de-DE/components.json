@@ -126,7 +126,9 @@
   },
   "ModelSwitchPanel": {
     "emptyModel": "Kein aktiviertes Modell. Bitte gehen Sie zu den Einstellungen, um es zu aktivieren.",
+    "emptyModelNoPermission": "Keine Berechtigung zum Aktivieren der Modellverwaltungsfunktion",
     "emptyProvider": "Es sind keine aktiven Anbieter vorhanden, bitte gehen Sie zu den Einstellungen, um sie zu aktivieren",
+    "emptyProviderNoPermission": "Keine Berechtigung zum Aktivieren der Anbieterverwaltungsfunktion",
     "goToSettings": "Zu den Einstellungen gehen",
     "provider": "Anbieter",
     "title": "Modell"

@@ -126,7 +126,9 @@
   },
   "ModelSwitchPanel": {
     "emptyModel": "Etkinleştirilmiş model bulunmamaktadır, lütfen ayarlara giderek açın",
+    "emptyModelNoPermission": "Model yönetimi özelliğini açma izniniz yok",
     "emptyProvider": "Etkinleştirilmiş bir sağlayıcı yok, lütfen ayarlara gidin",
+    "emptyProviderNoPermission": "Sağlayıcı yönetimi özelliğini açma izniniz yok",
     "goToSettings": "Ayrıntılara git",
     "provider": "Sağlayıcı",
     "title": "Model"

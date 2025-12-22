@@ -289,6 +289,15 @@
   "pin": "Fixar",
   "pinOff": "Desafixar",
   "privacy": "Política de Privacidade",
+  "rbac": {
+    "noPermission": {
+      "backHome": "Voltar para a página inicial",
+      "desc": "A conta atual não possui nenhum papel atribuído ou o papel foi desativado. Por favor, entre em contato com o administrador para obter acesso.",
+      "logout": "Sair",
+      "refresh": "Atualizar página",
+      "title": "Acesso não autorizado"
+    }
+  },
   "regenerate": "Regenerar",
   "releaseNotes": "Notas da versão",
   "rename": "Renomear",

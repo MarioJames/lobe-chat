@@ -289,6 +289,15 @@
   "pin": "Przypnij",
   "pinOff": "Odepnij",
   "privacy": "Polityka prywatności",
+  "rbac": {
+    "noPermission": {
+      "backHome": "Powrót do strony głównej",
+      "desc": "Twoje konto nie ma przypisanych żadnych dostępnych ról lub role zostały dezaktywowane. Skontaktuj się z administratorem, aby uzyskać dostęp.",
+      "logout": "Wyloguj się",
+      "refresh": "Odśwież stronę",
+      "title": "Brak dostępu"
+    }
+  },
   "regenerate": "Regeneruj",
   "releaseNotes": "Szczegóły wersji",
   "rename": "Zmień nazwę",

@@ -3,6 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { memo, useEffect } from 'react';
 
+import { enableAuth } from '@/const/auth';
+import { rbacSelectors, useRbacStore } from '@/store/rbac';
 import { useUserStore } from '@/store/user';
 import { authSelectors } from '@/store/user/selectors';
 
@@ -19,6 +21,11 @@ const Redirect = memo<RedirectProps>(({ setLoadingStage }) => {
     authSelectors.isLoaded(s),
     s.isUserStateInit,
     s.isOnboard,
+  ]);
+
+  const [isRolesInitialized, roles] = useRbacStore((s) => [
+    rbacSelectors.isRolesInitialized(s),
+    rbacSelectors.currentUserRoles(s),
   ]);
 
   const navToChat = () => {
@@ -45,6 +52,19 @@ const Redirect = memo<RedirectProps>(({ setLoadingStage }) => {
       return;
     }
 
+    // wait for roles info to be ready and valid
+    if (enableAuth) {
+      if (!isRolesInitialized) {
+        setLoadingStage(AppLoadingStage.InitUser);
+        return;
+      }
+
+      if (roles.length === 0) {
+        router.replace('/no-permission');
+        return;
+      }
+    }
+
     // user need to onboard
     if (!isOnboard) {
       router.replace('/onboard');
@@ -53,7 +73,7 @@ const Redirect = memo<RedirectProps>(({ setLoadingStage }) => {
 
     // finally go to chat
     navToChat();
-  }, [isUserStateInit, isLoaded, isOnboard, isLogin]);
+  }, [isUserStateInit, isLoaded, isOnboard, isLogin, isRolesInitialized, roles.length]);
 
   return null;
 });

@@ -32,6 +32,7 @@ const StoreInitialization = memo(() => {
 
   const useInitSystemStatus = useGlobalStore((s) => s.useInitSystemStatus);
   const useInitRbacPermissionCodes = useRbacStore((s) => s.useFetchCurrentUserPermissionCodes);
+  const useInitRbacRoles = useRbacStore((s) => s.useFetchCurrentUserRoles);
 
   const useInitAgentStore = useAgentStore((s) => s.useInitInboxAgentStore);
   const useInitAiProviderKeyVaults = useAiInfraStore((s) => s.useFetchAiProviderRuntimeState);
@@ -124,6 +125,7 @@ const StoreInitialization = memo(() => {
   useStoreUpdater('isMobile', mobile);
   useStoreUpdater('router', router);
   useInitRbacPermissionCodes({ enabled: isLoginOnInit });
+  useInitRbacRoles({ enabled: isLoginOnInit });
 
   return null;
 });

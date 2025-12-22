@@ -23,7 +23,7 @@ PermissionsRoutes.get(
   '/',
   requireAuth,
   requireAnyPermission(
-    getScopePermissions('RBAC_PERMISSION_READ', ['ALL', 'WORKSPACE']),
+    getScopePermissions('RBAC_PERMISSION_READ', ['ALL']),
     '您没有权限查看权限列表',
   ),
   zValidator('query', PermissionsListQuerySchema),
@@ -42,7 +42,7 @@ PermissionsRoutes.get(
   '/:id',
   requireAuth,
   requireAnyPermission(
-    getScopePermissions('RBAC_PERMISSION_READ', ['ALL', 'WORKSPACE']),
+    getScopePermissions('RBAC_PERMISSION_READ', ['ALL']),
     '您没有权限查看权限详情',
   ),
   zValidator('param', PermissionIdParamSchema),
@@ -61,7 +61,7 @@ PermissionsRoutes.post(
   '/',
   requireAuth,
   requireAnyPermission(
-    getScopePermissions('RBAC_PERMISSION_CREATE', ['ALL', 'WORKSPACE']),
+    getScopePermissions('RBAC_PERMISSION_CREATE', ['ALL']),
     '您没有权限创建权限',
   ),
   zValidator('json', CreatePermissionRequestSchema),
@@ -80,7 +80,7 @@ PermissionsRoutes.patch(
   '/:id',
   requireAuth,
   requireAnyPermission(
-    getScopePermissions('RBAC_PERMISSION_UPDATE', ['ALL', 'WORKSPACE']),
+    getScopePermissions('RBAC_PERMISSION_UPDATE', ['ALL']),
     '您没有权限更新权限',
   ),
   zValidator('param', PermissionIdParamSchema),
@@ -100,7 +100,7 @@ PermissionsRoutes.delete(
   '/:id',
   requireAuth,
   requireAnyPermission(
-    getScopePermissions('RBAC_PERMISSION_DELETE', ['ALL', 'WORKSPACE']),
+    getScopePermissions('RBAC_PERMISSION_DELETE', ['ALL']),
     '您没有权限删除权限',
   ),
   zValidator('param', PermissionIdParamSchema),

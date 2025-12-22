@@ -289,6 +289,15 @@
   "pin": "Fijar",
   "pinOff": "Quitar fijación",
   "privacy": "Política de privacidad",
+  "rbac": {
+    "noPermission": {
+      "backHome": "Volver a la página principal",
+      "desc": "La cuenta actual no tiene ningún rol asignado o el rol ha sido deshabilitado. Por favor, contacta con el administrador para obtener acceso.",
+      "logout": "Cerrar sesión",
+      "refresh": "Actualizar página",
+      "title": "Acceso no autorizado"
+    }
+  },
   "regenerate": "Regenerar",
   "releaseNotes": "Detalles de la versión",
   "rename": "Renombrar",

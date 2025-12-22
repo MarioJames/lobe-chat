@@ -289,6 +289,15 @@
   "pin": "Pin",
   "pinOff": "Unpin",
   "privacy": "Privacy Policy",
+  "rbac": {
+    "noPermission": {
+      "backHome": "Back to Home",
+      "desc": "This account has no available roles (or all roles are disabled). Please contact an administrator to grant access.",
+      "logout": "Sign out",
+      "refresh": "Refresh Page",
+      "title": "Access denied"
+    }
+  },
   "regenerate": "Regenerate",
   "releaseNotes": "Version Details",
   "rename": "Rename",

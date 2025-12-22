@@ -292,6 +292,15 @@ export default {
   pin: '置顶',
   pinOff: '取消置顶',
   privacy: '隐私政策',
+  rbac: {
+    noPermission: {
+      backHome: '返回首页',
+      desc: '当前账号未分配任何可用角色，或角色已被禁用，请联系管理员为你开通权限。',
+      logout: '退出登录',
+      refresh: '刷新页面',
+      title: '无权限访问',
+    },
+  },
   regenerate: '重新生成',
   releaseNotes: '版本详情',
   rename: '重命名',

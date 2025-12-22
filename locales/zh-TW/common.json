@@ -289,6 +289,15 @@
   "pin": "置頂",
   "pinOff": "取消置頂",
   "privacy": "隱私政策",
+  "rbac": {
+    "noPermission": {
+      "backHome": "返回首頁",
+      "desc": "當前帳號未分配任何可用角色，或角色已被停用，請聯繫管理員為你開通權限。",
+      "logout": "登出",
+      "refresh": "重新整理頁面",
+      "title": "無權限訪問"
+    }
+  },
   "regenerate": "重新生成",
   "releaseNotes": "版本詳細",
   "rename": "重新命名",

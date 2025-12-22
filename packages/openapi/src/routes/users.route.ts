@@ -34,10 +34,7 @@ UserRoutes.get('/me', requireAuth, async (c) => {
 UserRoutes.get(
   '/',
   requireAuth,
-  requireAnyPermission(
-    getScopePermissions('USER_READ', ['ALL', 'WORKSPACE']),
-    '您没有权限查看用户列表',
-  ),
+  requireAnyPermission(getScopePermissions('USER_READ', ['ALL']), '您没有权限查看用户列表'),
   zValidator('query', UserSearchRequestSchema),
   async (c) => {
     const userController = new UserController();
@@ -53,10 +50,7 @@ UserRoutes.get(
 UserRoutes.post(
   '/',
   requireAuth,
-  requireAnyPermission(
-    getScopePermissions('USER_CREATE', ['ALL', 'WORKSPACE']),
-    '您没有权限创建用户',
-  ),
+  requireAnyPermission(getScopePermissions('USER_CREATE', ['ALL']), '您没有权限创建用户'),
   zValidator('json', CreateUserRequestSchema),
   async (c) => {
     const userController = new UserController();
