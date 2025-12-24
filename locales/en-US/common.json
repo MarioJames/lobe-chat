@@ -378,6 +378,8 @@
     "discord": "Community Support",
     "docs": "Documentation",
     "email": "Email Support",
+    "enterprise": "Enterprise Edition",
+    "enterpriseNickname": "Enterprise User",
     "feedback": "Feedback and Suggestions",
     "help": "Help Center",
     "moveGuide": "The settings button has been moved here",

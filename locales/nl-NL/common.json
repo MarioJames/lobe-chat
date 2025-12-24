@@ -378,6 +378,8 @@
     "discord": "communityondersteuning",
     "docs": "gebruiksaanwijzing",
     "email": "e-mailondersteuning",
+    "enterprise": "Enterprise-versie",
+    "enterpriseNickname": "Enterprise-gebruiker",
     "feedback": "feedback en suggesties",
     "help": "helpcentrum",
     "moveGuide": "instellingen verplaatst naar hier",
