@@ -16,17 +16,27 @@ const PageTitle = memo<{ title: string }>(({ title }) => {
 
   // 动态设置浏览器标签 icon (favicon)
   useEffect(() => {
-    // 根据当前主题选择 favicon
+    // 根据当前主题从企业logo中选择 favicon
     const faviconUrl =
       theme.appearance === 'dark'
-        ? baseConfig?.favicon?.dark || baseConfig?.favicon?.light
-        : baseConfig?.favicon?.light || baseConfig?.favicon?.dark;
-
-    // 如果配置中不存在 favicon，保持原有的 favicon 不变
-    if (!faviconUrl) return;
+        ? baseConfig?.logo?.dark || baseConfig?.logo?.light
+        : baseConfig?.logo?.light || baseConfig?.logo?.dark;
 
     // 查找现有的 favicon link 标签
-    let linkElement = document.querySelector("link[rel*='icon']") as HTMLLinkElement;
+    const linkElements = document.querySelectorAll("link[rel*='icon']");
+
+    if (!faviconUrl) {
+      // 如果配置中不存在 favicon，移除所有 favicon link 标签
+      linkElements.forEach((link) => link.remove());
+      return;
+    }
+
+    // 查找或创建 favicon link 标签
+    let linkElement = Array.from(linkElements).find(
+      (link) =>
+        (link as HTMLLinkElement).rel === 'icon' ||
+        (link as HTMLLinkElement).rel === 'shortcut icon',
+    ) as HTMLLinkElement;
 
     // 如果不存在，创建一个新的 link 标签
     if (!linkElement) {
@@ -37,7 +47,7 @@ const PageTitle = memo<{ title: string }>(({ title }) => {
 
     // 更新 favicon URL
     linkElement.href = faviconUrl;
-  }, [baseConfig?.favicon, theme.appearance]);
+  }, [baseConfig?.logo, theme.appearance]);
 
   return null;
 });

@@ -1,13 +1,11 @@
-import { BRANDING_LOGO_URL, BRANDING_NAME, ORG_NAME } from '@/const/branding';
+import { BRANDING_NAME, ORG_NAME } from '@/const/branding';
 import { DEFAULT_LANG } from '@/const/locale';
 import { OFFICIAL_URL, OG_URL } from '@/const/url';
-import { isCustomBranding, isCustomORG } from '@/const/version';
+import { isCustomORG } from '@/const/version';
 import { translation } from '@/server/translation';
 import { customizationServerService } from '@/services/customization/server';
 import { DynamicLayoutProps } from '@/types/next';
 import { RouteVariants } from '@/utils/server/routeVariants';
-
-const isDev = process.env.NODE_ENV === 'development';
 
 export const generateMetadata = async (props: DynamicLayoutProps) => {
   const locale = await RouteVariants.getLocale(props);
@@ -21,7 +19,7 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
   let baseConfig: {
     brandDescription?: string;
     brandName?: string;
-    favicon?: { dark?: string; light?: string };
+    logo?: { dark?: string; light?: string };
   } | null = null;
   try {
     const config = await customizationServerService.getConfig();
@@ -35,23 +33,10 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
     ? `${brandName} ${baseConfig.brandDescription}`
     : t('chat.description', { appName: brandName });
 
-  // Get favicon from config based on current theme
+  // Get favicon from enterprise logo in config based on current theme
   const faviconUrl = isDark
-    ? baseConfig?.favicon?.dark || baseConfig?.favicon?.light
-    : baseConfig?.favicon?.light || baseConfig?.favicon?.dark;
-
-  let iconsConfig;
-  if (faviconUrl) {
-    iconsConfig = faviconUrl;
-  } else if (isCustomBranding) {
-    iconsConfig = BRANDING_LOGO_URL;
-  } else {
-    iconsConfig = {
-      apple: '/apple-touch-icon.png?v=1',
-      icon: isDev ? '/favicon-dev.ico' : '/favicon.ico?v=1',
-      shortcut: isDev ? '/favicon-32x32-dev.ico' : '/favicon-32x32.ico?v=1',
-    };
-  }
+    ? baseConfig?.logo?.dark || baseConfig?.logo?.light
+    : baseConfig?.logo?.light || baseConfig?.logo?.dark;
 
   return {
     alternates: {
@@ -62,7 +47,7 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
       title: brandName,
     },
     description: description,
-    icons: iconsConfig,
+    ...(faviconUrl && { icons: faviconUrl }),
     manifest: '/manifest.json',
     metadataBase: new URL(OFFICIAL_URL),
     openGraph: {

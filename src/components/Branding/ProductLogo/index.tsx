@@ -1,6 +1,6 @@
 'use client';
 
-import { LobeHub, LobeHubProps } from '@lobehub/ui/brand';
+import type { LobeHubProps } from '@lobehub/ui/brand';
 import { memo } from 'react';
 
 import { isCustomBranding } from '@/const/version';
@@ -17,10 +17,11 @@ interface ProductLogoProps extends LobeHubProps {
 export const ProductLogo = memo<ProductLogoProps>((props) => {
   const baseConfig = useServerConfigStore(customizationSelectors.base);
   const hasCustomLogo = baseConfig?.logo?.light || baseConfig?.logo?.dark;
+  const hasBrandName = baseConfig?.brandName;
 
-  if (isCustomBranding || hasCustomLogo) {
+  if (isCustomBranding || hasCustomLogo || hasBrandName) {
     return <CustomLogo {...props} />;
   }
 
-  return <LobeHub {...props} />;
+  return null;
 });

@@ -5,7 +5,6 @@ import Image, { ImageProps } from 'next/image';
 import { ReactNode, forwardRef, memo, useMemo } from 'react';
 import { Flexbox, FlexboxProps } from 'react-layout-kit';
 
-import { BRANDING_LOGO_URL, BRANDING_NAME } from '@/const/branding';
 import { useServerConfigStore } from '@/store/serverConfig';
 import { customizationSelectors } from '@/store/serverConfig/selectors';
 
@@ -20,7 +19,11 @@ const useStyles = createStyles(({ css }) => {
 
 const CustomTextLogo = memo<FlexboxProps & { size: number }>(({ size, style, ...rest }) => {
   const baseConfig = useServerConfigStore(customizationSelectors.base);
-  const brandName = baseConfig?.brandName || BRANDING_NAME;
+  const brandName = baseConfig?.brandName;
+
+  if (!brandName) {
+    return null;
+  }
 
   return (
     <Flexbox
@@ -46,12 +49,11 @@ const CustomImageLogo = memo<Omit<ImageProps, 'alt' | 'src'> & { size: number }>
       if (baseConfig?.logo) {
         // Use theme-aware logo (light/dark)
         const url = theme.appearance === 'dark' ? baseConfig.logo.dark : baseConfig.logo.light;
-        // If custom logo URL is empty, fallback to default
-        return url || BRANDING_LOGO_URL;
+        return url || null;
       }
-      return BRANDING_LOGO_URL;
+      return null;
     }, [baseConfig?.logo, theme.appearance]);
-    const brandName = baseConfig?.brandName || BRANDING_NAME;
+    const brandName = baseConfig?.brandName || '';
     // If logoUrl is empty, render text logo instead
     if (!logoUrl) {
       return <CustomTextLogo size={size} {...rest} />;
@@ -89,8 +91,17 @@ const Divider: IconType = forwardRef(({ size = '1em', style, ...rest }, ref) => 
 ));
 
 const CustomLogo = memo<LobeChatProps>(({ extra, size = 32, className, style, type, ...rest }) => {
+  const baseConfig = useServerConfigStore(customizationSelectors.base);
   const theme = useTheme();
   const { styles } = useStyles();
+
+  const hasLogo = baseConfig?.logo?.light || baseConfig?.logo?.dark;
+  const hasBrandName = baseConfig?.brandName;
+
+  if (!hasLogo && !hasBrandName) {
+    return null;
+  }
+
   let logoComponent: ReactNode;
 
   switch (type) {
