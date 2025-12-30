@@ -2,7 +2,6 @@ import { Suspense } from 'react';
 
 import StructuredData from '@/components/StructuredData';
 import { serverFeatureFlags } from '@/config/featureFlags';
-import { BRANDING_NAME } from '@/const/branding';
 import { isDesktop } from '@/const/version';
 import { ldModule } from '@/server/ld';
 import { metadataModule } from '@/server/metadata';
@@ -15,23 +14,49 @@ import PageTitle from '../features/PageTitle';
 import Changelog from './features/ChangelogModal';
 import TelemetryNotification from './features/TelemetryNotification';
 
-const getBrandInfo = async (): Promise<{ brandName: string; description: string }> => {
+const getBrandInfo = async (): Promise<{
+  brandName: string | null;
+  description: string;
+} | null> => {
   try {
     const config = await customizationServerService.getConfig();
+    const baseConfig = config?.base;
+
+    // 如果baseConfig为null，返回null，不显示默认的logo和lobehub文案
+    if (!baseConfig) {
+      return null;
+    }
+
     return {
-      brandName: config?.base?.brandName || BRANDING_NAME,
-      description: config?.base?.brandDescription || '',
+      brandName: baseConfig.brandName || null,
+      description: baseConfig.brandDescription || '',
     };
   } catch (error) {
     console.warn('Failed to get customization config:', error);
-    return { brandName: BRANDING_NAME, description: '' };
+    return null;
   }
 };
 
 export const generateMetadata = async (props: DynamicLayoutProps) => {
   const locale = await RouteVariants.getLocale(props);
   const { t } = await translation('metadata', locale);
-  const { brandName, description } = await getBrandInfo();
+  const brandInfo = await getBrandInfo();
+
+  // 如果brandInfo为null，不显示默认的logo和lobehub文案
+  if (!brandInfo) {
+    return {
+      title: '',
+    };
+  }
+
+  const { brandName, description } = brandInfo;
+
+  // 如果brandName为null，使用空字符串作为title
+  if (!brandName) {
+    return {
+      title: '',
+    };
+  }
 
   return metadataModule.generate({
     description: description || t('chat.description', { appName: brandName }),
@@ -44,17 +69,22 @@ const Page = async (props: DynamicLayoutProps) => {
   const { hideDocs, showChangelog } = serverFeatureFlags();
   const { isMobile, locale } = await RouteVariants.getVariantsFromProps(props);
   const { t } = await translation('metadata', locale);
-  const { brandName, description } = await getBrandInfo();
+  const brandInfo = await getBrandInfo();
 
-  const ld = ldModule.generate({
-    description: description || t('chat.description', { appName: brandName }),
-    title: t('chat.title', { appName: brandName }),
-    url: '/chat',
-  });
+  // 如果brandInfo为null，不生成结构化数据
+  const ld =
+    brandInfo && brandInfo.brandName
+      ? ldModule.generate({
+          description:
+            brandInfo.description || t('chat.description', { appName: brandInfo.brandName }),
+          title: t('chat.title', { appName: brandInfo.brandName }),
+          url: '/chat',
+        })
+      : null;
 
   return (
     <>
-      <StructuredData ld={ld} />
+      {ld && <StructuredData ld={ld} />}
       <PageTitle />
       <TelemetryNotification mobile={isMobile} />
       {!isDesktop && showChangelog && !hideDocs && !isMobile && (

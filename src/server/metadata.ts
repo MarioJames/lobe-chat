@@ -34,7 +34,9 @@ export class Meta {
     const formatedTitle = formatTitleLength(title, 21);
     // eslint-disable-next-line no-param-reassign
     const formatedDescription = formatDescLength(description, tags);
-    const siteTitle = title.includes(BRANDING_NAME) ? title : title + ` · ${BRANDING_NAME}`;
+    // 如果title为空字符串，不添加默认的BRANDING_NAME
+    const siteTitle =
+      !title || title.includes(BRANDING_NAME) ? title : title + ` · ${BRANDING_NAME}`;
     return {
       alternates: {
         canonical:

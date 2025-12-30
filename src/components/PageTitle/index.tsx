@@ -12,6 +12,8 @@ const PageTitle = memo<{ title: string }>(({ title }) => {
   useEffect(() => {
     // 如果baseConfig为null或undefined，不显示默认的logo和lobehub文案
     if (!baseConfig) {
+      // 设置空的 title，避免显示默认的 title
+      document.title = '';
       return;
     }
 
@@ -21,11 +23,16 @@ const PageTitle = memo<{ title: string }>(({ title }) => {
 
   // 动态设置浏览器标签 icon (favicon)
   useEffect(() => {
+    const removeFavicons = () => {
+      // 移除所有 favicon link 标签（包括 Next.js 自动添加的）
+      const linkElements = document.querySelectorAll("link[rel*='icon']");
+      linkElements.forEach((link) => link.remove());
+    };
+
     // 如果baseConfig为null或undefined，不设置favicon
     if (!baseConfig) {
       // 移除所有 favicon link 标签
-      const linkElements = document.querySelectorAll("link[rel*='icon']");
-      linkElements.forEach((link) => link.remove());
+      removeFavicons();
       return;
     }
 
@@ -35,31 +42,20 @@ const PageTitle = memo<{ title: string }>(({ title }) => {
         ? baseConfig?.logo?.dark || baseConfig?.logo?.light
         : baseConfig?.logo?.light || baseConfig?.logo?.dark;
 
-    // 查找现有的 favicon link 标签
-    const linkElements = document.querySelectorAll("link[rel*='icon']");
-
     if (!faviconUrl) {
       // 如果配置中不存在 favicon，移除所有 favicon link 标签
-      linkElements.forEach((link) => link.remove());
+      removeFavicons();
       return;
     }
 
-    // 查找或创建 favicon link 标签
-    let linkElement = Array.from(linkElements).find(
-      (link) =>
-        (link as HTMLLinkElement).rel === 'icon' ||
-        (link as HTMLLinkElement).rel === 'shortcut icon',
-    ) as HTMLLinkElement;
+    // 先移除所有现有的 favicon link 标签
+    removeFavicons();
 
-    // 如果不存在，创建一个新的 link 标签
-    if (!linkElement) {
-      linkElement = document.createElement('link');
-      linkElement.rel = 'icon';
-      document.head.append(linkElement);
-    }
-
-    // 更新 favicon URL
+    // 创建新的 favicon link 标签
+    const linkElement = document.createElement('link');
+    linkElement.rel = 'icon';
     linkElement.href = faviconUrl;
+    document.head.append(linkElement);
   }, [baseConfig, theme.appearance]);
 
   return null;

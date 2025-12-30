@@ -34,8 +34,10 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
       alternates: {
         canonical: OFFICIAL_URL,
       },
+      icons: [],
       manifest: '/manifest.json',
       metadataBase: new URL(OFFICIAL_URL),
+      title: '',
     };
   }
 
