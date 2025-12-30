@@ -28,8 +28,19 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
     console.warn('Failed to get customization config for metadata:', error);
   }
 
-  const brandName = baseConfig?.brandName || BRANDING_NAME;
-  const description = baseConfig?.brandDescription
+  // 如果baseConfig为null，不显示默认的logo和lobehub文案
+  if (!baseConfig) {
+    return {
+      alternates: {
+        canonical: OFFICIAL_URL,
+      },
+      manifest: '/manifest.json',
+      metadataBase: new URL(OFFICIAL_URL),
+    };
+  }
+
+  const brandName = baseConfig.brandName || BRANDING_NAME;
+  const description = baseConfig.brandDescription
     ? `${brandName} ${baseConfig.brandDescription}`
     : t('chat.description', { appName: brandName });
 

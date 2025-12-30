@@ -7,15 +7,28 @@ import { customizationSelectors } from '@/store/serverConfig/selectors';
 
 const PageTitle = memo<{ title: string }>(({ title }) => {
   const baseConfig = useServerConfigStore(customizationSelectors.base);
-  const brandName = baseConfig?.brandName || BRANDING_NAME;
   const theme = useTheme();
 
   useEffect(() => {
+    // 如果baseConfig为null或undefined，不显示默认的logo和lobehub文案
+    if (!baseConfig) {
+      return;
+    }
+
+    const brandName = baseConfig.brandName || BRANDING_NAME;
     document.title = title ? `${title} · ${brandName}` : brandName;
-  }, [title, brandName]);
+  }, [title, baseConfig]);
 
   // 动态设置浏览器标签 icon (favicon)
   useEffect(() => {
+    // 如果baseConfig为null或undefined，不设置favicon
+    if (!baseConfig) {
+      // 移除所有 favicon link 标签
+      const linkElements = document.querySelectorAll("link[rel*='icon']");
+      linkElements.forEach((link) => link.remove());
+      return;
+    }
+
     // 根据当前主题从企业logo中选择 favicon
     const faviconUrl =
       theme.appearance === 'dark'
@@ -47,7 +60,7 @@ const PageTitle = memo<{ title: string }>(({ title }) => {
 
     // 更新 favicon URL
     linkElement.href = faviconUrl;
-  }, [baseConfig?.logo, theme.appearance]);
+  }, [baseConfig, theme.appearance]);
 
   return null;
 });
