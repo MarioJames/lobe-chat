@@ -30,11 +30,19 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
 
   // 如果baseConfig为null，不显示默认的logo和lobehub文案
   if (!baseConfig) {
+    // 使用一个透明的 SVG 图片的 data URI 作为 favicon，阻止 Next.js 自动添加默认 favicon
+    // SVG 格式的透明图片更可靠，不会显示任何内容
+    const emptyFavicon =
+      'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMSIgaGVpZ2h0PSIxIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPjxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbGw9Im5vbmUiLz48L3N2Zz4=';
     return {
       alternates: {
         canonical: OFFICIAL_URL,
       },
-      icons: [],
+      icons: {
+        apple: emptyFavicon,
+        icon: emptyFavicon,
+        shortcut: emptyFavicon,
+      },
       manifest: '/manifest.json',
       metadataBase: new URL(OFFICIAL_URL),
       title: '',

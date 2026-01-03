@@ -29,27 +29,18 @@ const PageTitle = memo<{ title: string }>(({ title }) => {
       linkElements.forEach((link) => link.remove());
     };
 
-    // 如果baseConfig为null或undefined，不设置favicon
-    if (!baseConfig) {
-      // 移除所有 favicon link 标签
-      removeFavicons();
-      return;
-    }
-
     // 根据当前主题从企业logo中选择 favicon
     const faviconUrl =
       theme.appearance === 'dark'
         ? baseConfig?.logo?.dark || baseConfig?.logo?.light
         : baseConfig?.logo?.light || baseConfig?.logo?.dark;
 
-    if (!faviconUrl) {
-      // 如果配置中不存在 favicon，移除所有 favicon link 标签
-      removeFavicons();
-      return;
-    }
-
     // 先移除所有现有的 favicon link 标签
     removeFavicons();
+
+    if (!baseConfig) return;
+
+    if (!faviconUrl) return;
 
     // 创建新的 favicon link 标签
     const linkElement = document.createElement('link');
