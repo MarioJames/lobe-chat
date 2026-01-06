@@ -60,9 +60,12 @@ export const agents = pgTable(
 
     virtual: boolean('virtual').default(false),
     enabled: boolean('enabled').default(false),
+    deleted: boolean('deleted').default(false),
 
     openingMessage: text('opening_message'),
     openingQuestions: text('opening_questions').array().default([]),
+
+    sourceAgentId: text('source_agent_id'),
 
     ...timestamps,
   },
@@ -71,6 +74,12 @@ export const agents = pgTable(
     titleIndex: index('agents_title_idx').on(t.title),
     descriptionIndex: index('agents_description_idx').on(t.description),
     enabledIndex: index('agents_enabled_idx').on(t.enabled),
+    deletedIndex: index('agents_deleted_idx').on(t.deleted),
+    sourceAgentIdIndex: index('agents_source_agent_id_idx').on(t.sourceAgentId),
+    // 唯一约束：同一个源 agent 对于同一个用户只能有一个副本
+    sourceUserUnique: uniqueIndex('agents_source_user_unique').on(t.sourceAgentId, t.userId),
+    // 外键约束：sourceAgentId 引用 agents.id（自引用）
+    sourceAgentIdFk: sql`CONSTRAINT agents_source_agent_id_fk FOREIGN KEY (source_agent_id) REFERENCES agents(id) ON DELETE CASCADE`,
   }),
 );
 
@@ -78,6 +87,9 @@ export const insertAgentSchema = createInsertSchema(agents);
 
 export type NewAgent = typeof agents.$inferInsert;
 export type AgentItem = typeof agents.$inferSelect;
+
+export type NewAgentGrant = typeof agentsGrants.$inferInsert;
+export type AgentGrantItem = typeof agentsGrants.$inferSelect;
 
 export const agentsKnowledgeBases = pgTable(
   'agents_knowledge_bases',
@@ -121,6 +133,7 @@ export const agentsFiles = pgTable(
   }),
 );
 
+// Agent grants table
 export const agentsGrants = pgTable(
   'agents_grants',
   {
@@ -149,5 +162,7 @@ export const agentsGrants = pgTable(
       t.agentId,
       t.granteeRoleId,
     ),
+    // 为角色查询添加索引
+    granteeRoleIdIndex: index('agents_grants_grantee_role_id_idx').on(t.granteeRoleId),
   }),
 );
