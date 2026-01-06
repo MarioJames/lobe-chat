@@ -234,6 +234,7 @@ export class SessionModel {
         .values({
           ...config,
           createdAt: new Date(),
+          enabled: true,
           id: idGenerator('agents'),
           updatedAt: new Date(),
           userId: this.userId,
