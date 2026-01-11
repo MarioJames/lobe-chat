@@ -9,14 +9,18 @@ import {
 } from '../schemas';
 import { userRoles } from '../schemas/rbac';
 import { LobeChatDatabase } from '../type';
+import { RbacModel } from './rbac';
+import { getScopePermissions } from '@/utils/rbac';
 
 export class KnowledgeBaseModel {
   private userId: string;
   private db: LobeChatDatabase;
+  private rbacModel: RbacModel;
 
   constructor(db: LobeChatDatabase, userId: string) {
     this.userId = userId;
     this.db = db;
+    this.rbacModel = new RbacModel(db, userId);
   }
 
   // create
@@ -248,7 +252,7 @@ export class KnowledgeBaseModel {
     };
   };
 
-  findById = async (id: string) => {
+  findById = async (id: string, options?: { skipRbacCheck?: boolean }) => {
     const kb = await this.db.query.knowledgeBases.findFirst({
       where: eq(knowledgeBases.id, id),
     });
@@ -259,6 +263,17 @@ export class KnowledgeBaseModel {
 
     if (kb.isPublic || kb.userId === this.userId) {
       return kb;
+    }
+
+    if (!options?.skipRbacCheck) {
+      const hasGlobalPermission = await this.rbacModel.hasAnyPermission(
+        getScopePermissions('KNOWLEDGE_BASE_READ', ['ALL']),
+        this.userId,
+      );
+
+      if (hasGlobalPermission) {
+        return kb;
+      }
     }
 
     if (kb.type === 'shared') {

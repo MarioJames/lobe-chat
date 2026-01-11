@@ -192,16 +192,23 @@ export class FileUploadService extends BaseService {
    */
   async getFileList(request: FileListQuery): Promise<FileListResponse> {
     try {
+      // 检查是否有全局权限
+      const hasGlobalPermission = await this.hasGlobalPermission('FILE_READ');
+
       // 根据请求参数决定权限校验的资源范围
       // 1. queryAll=true 时，使用 ALL_SCOPE 查询全量数据
       // 2. 指定 userId 时，查询指定用户的数据
-      // 3. 否则查询当前用户的数据
+      // 3. 如果查询知识库文件且有全局权限，使用 ALL_SCOPE 以获取所有文件
+      // 4. 否则查询当前用户的数据
       let resourceInfo: { targetUserId: string } | typeof ALL_SCOPE | undefined;
 
       if (request.queryAll) {
         resourceInfo = ALL_SCOPE;
       } else if (request.userId) {
         resourceInfo = { targetUserId: request.userId };
+      } else if (request.knowledgeBaseId && hasGlobalPermission) {
+        // 查询知识库文件时，如果有全局权限，可查询所有文件
+        resourceInfo = ALL_SCOPE;
       }
 
       const permissionResult = await this.resolveOperationPermission('FILE_READ', resourceInfo);
@@ -209,9 +216,6 @@ export class FileUploadService extends BaseService {
       if (!permissionResult.isPermitted) {
         throw this.createAuthorizationError(permissionResult.message || '无权访问文件列表');
       }
-
-      // 检查是否有全局权限
-      const hasGlobalPermission = await this.hasGlobalPermission('FILE_READ');
 
       this.log('info', 'Getting file list', {
         ...request,
