@@ -1,8 +1,4 @@
-import { Suspense } from 'react';
-
 import StructuredData from '@/components/StructuredData';
-import { serverFeatureFlags } from '@/config/featureFlags';
-import { isDesktop } from '@/const/version';
 import { ldModule } from '@/server/ld';
 import { metadataModule } from '@/server/metadata';
 import { translation } from '@/server/translation';
@@ -11,7 +7,6 @@ import { DynamicLayoutProps } from '@/types/next';
 import { RouteVariants } from '@/utils/server/routeVariants';
 
 import PageTitle from '../features/PageTitle';
-import Changelog from './features/ChangelogModal';
 import TelemetryNotification from './features/TelemetryNotification';
 
 const getBrandInfo = async (): Promise<{
@@ -66,7 +61,6 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
 };
 
 const Page = async (props: DynamicLayoutProps) => {
-  const { hideDocs, showChangelog } = serverFeatureFlags();
   const { isMobile, locale } = await RouteVariants.getVariantsFromProps(props);
   const { t } = await translation('metadata', locale);
   const brandInfo = await getBrandInfo();
@@ -87,11 +81,6 @@ const Page = async (props: DynamicLayoutProps) => {
       {ld && <StructuredData ld={ld} />}
       <PageTitle />
       <TelemetryNotification mobile={isMobile} />
-      {!isDesktop && showChangelog && !hideDocs && !isMobile && (
-        <Suspense>
-          <Changelog />
-        </Suspense>
-      )}
     </>
   );
 };

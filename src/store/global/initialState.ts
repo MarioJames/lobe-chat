@@ -78,7 +78,6 @@ export interface SystemStatus {
    * 记住用户最后选择的图像生成提供商
    */
   lastSelectedImageProvider?: string;
-  latestChangelogId?: string;
   mobileShowPortal?: boolean;
   mobileShowTopic?: boolean;
   noWideScreen?: boolean;

@@ -288,11 +288,9 @@ export class Sitemap {
   }
 
   async getPage(): Promise<MetadataRoute.Sitemap> {
-    const hideDocs = serverFeatureFlags().hideDocs;
     return [
       ...this._genSitemap('/', { noLocales: true }),
       ...this._genSitemap('/chat', { noLocales: true }),
-      ...(!hideDocs ? this._genSitemap('/changelog', { noLocales: true }) : []),
       /* ↓ cloud slot ↓ */
 
       /* ↑ cloud slot ↑ */

@@ -301,6 +301,13 @@
       "when": 1762694236106,
       "tag": "0042_init_agents_grants",
       "breakpoints": true
+    },
+    {
+      "idx": 43,
+      "version": "7",
+      "when": 1772382289918,
+      "tag": "0043_modify_agents_knowlege",
+      "breakpoints": true
     }
   ],
   "version": "6"

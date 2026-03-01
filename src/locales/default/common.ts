@@ -36,7 +36,6 @@ export default {
     '「子话题」功能在当前模式下不可用，如需该功能，请切换到 Postgres/Pglite DB 模式或使用 LobeHub Cloud',
   branchingRequiresSavedTopic: '当前话题未保存，保存后才可以使用子话题能力',
   cancel: '取消',
-  changelog: '更新日志',
   clientDB: {
     autoInit: {
       title: '初始化 PGlite 数据库',

@@ -36,7 +36,6 @@ export const config = {
     '/labs',
     '/chat',
     '/chat(.*)',
-    '/changelog(.*)',
     '/settings(.*)',
     '/image',
     '/files',

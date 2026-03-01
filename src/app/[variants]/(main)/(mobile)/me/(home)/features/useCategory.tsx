@@ -5,7 +5,6 @@ import {
   Database,
   Download,
   Feather,
-  FileClockIcon,
   Settings2,
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -107,12 +106,6 @@ export const useCategory = () => {
       key: 'feedback',
       label: t('feedback'),
       onClick: () => window.open(FEEDBACK, '__blank'),
-    },
-    {
-      icon: FileClockIcon,
-      key: 'changelog',
-      label: t('changelog'),
-      onClick: () => router.push('/changelog'),
     },
   ].filter(Boolean) as CellProps[];
 

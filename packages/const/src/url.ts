@@ -15,7 +15,6 @@ export const OG_URL = '/og/cover.png?v=1';
 
 export const GITHUB = 'https://github.com/lobehub/lobe-chat';
 export const GITHUB_ISSUES = urlJoin(GITHUB, 'issues/new/choose');
-export const CHANGELOG = 'https://lobehub.com/changelog';
 export const DOCKER_IMAGE = 'https://hub.docker.com/r/lobehub/lobe-chat';
 
 export const DOCUMENTS = urlJoin(OFFICIAL_SITE, '/docs');
@@ -66,4 +65,3 @@ export const mailTo = (email: string) => `mailto:${email}`;
 export const AES_GCM_URL = 'https://datatracker.ietf.org/doc/html/draft-ietf-avt-srtp-aes-gcm-01';
 export const BASE_PROVIDER_DOC_URL = 'https://lobehub.com/docs/usage/providers';
 export const SITEMAP_BASE_URL = isDev ? '/sitemap.xml/' : 'sitemap';
-export const CHANGELOG_URL = urlJoin(OFFICIAL_SITE, 'changelog/versions');

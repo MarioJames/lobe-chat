@@ -28,7 +28,6 @@ export const FeatureFlagsSchema = z.object({
   token_counter: FeatureFlagValue.optional(),
 
   welcome_suggest: FeatureFlagValue.optional(),
-  changelog: FeatureFlagValue.optional(),
 
   clerk_sign_up: FeatureFlagValue.optional(),
 
@@ -100,7 +99,6 @@ export const DEFAULT_FEATURE_FLAGS: IFeatureFlags = {
 
   market: true,
   speech_to_text: true,
-  changelog: true,
 
   group_chat: false,
 
@@ -130,7 +128,6 @@ export const mapFeatureFlagsEnvToState = (config: IFeatureFlags, userId?: string
     enablePlugins: evaluateFeatureFlag(config.plugins, userId),
     showDalle: evaluateFeatureFlag(config.dalle, userId),
     showAiImage: evaluateFeatureFlag(config.ai_image, userId),
-    showChangelog: evaluateFeatureFlag(config.changelog, userId),
 
     enableCheckUpdates: evaluateFeatureFlag(config.check_updates, userId),
     showWelcomeSuggest: evaluateFeatureFlag(config.welcome_suggest, userId),
