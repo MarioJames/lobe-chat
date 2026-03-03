@@ -754,11 +754,10 @@
       "\nCREATE INDEX \"agents_deleted_idx\" ON \"agents\" USING btree (\"deleted\");",
       "\nCREATE INDEX \"agents_source_agent_id_idx\" ON \"agents\" USING btree (\"source_agent_id\");",
       "\nCREATE UNIQUE INDEX \"agents_source_user_unique\" ON \"agents\" USING btree (\"source_agent_id\",\"user_id\");",
-      "\nCREATE INDEX \"agents_grants_grantee_role_id_idx\" ON \"agents_grants\" USING btree (\"grantee_role_id\");",
-      "\nCREATE INDEX \"knowledge_bases_user_type_enabled_idx\" ON \"knowledge_bases\" USING btree (\"user_id\",\"type\",\"enabled\");\n"
+      "\nCREATE INDEX \"agents_grants_grantee_role_id_idx\" ON \"agents_grants\" USING btree (\"grantee_role_id\");\n"
     ],
     "bps": true,
     "folderMillis": 1772382289918,
-    "hash": "526ec7e7c7091c3177eebe0e1ae5f67bddd52fc12870b40a7d710996618d1cf3"
+    "hash": "090f48ade1963c0118c0dae703f4d6295cb24b3563c4dbdd69256763112ebeff"
   }
 ]

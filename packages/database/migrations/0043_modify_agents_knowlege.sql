@@ -4,5 +4,4 @@ ALTER TABLE "agents" ADD COLUMN "source_agent_id" text;--> statement-breakpoint
 CREATE INDEX "agents_deleted_idx" ON "agents" USING btree ("deleted");--> statement-breakpoint
 CREATE INDEX "agents_source_agent_id_idx" ON "agents" USING btree ("source_agent_id");--> statement-breakpoint
 CREATE UNIQUE INDEX "agents_source_user_unique" ON "agents" USING btree ("source_agent_id","user_id");--> statement-breakpoint
-CREATE INDEX "agents_grants_grantee_role_id_idx" ON "agents_grants" USING btree ("grantee_role_id");--> statement-breakpoint
-CREATE INDEX "knowledge_bases_user_type_enabled_idx" ON "knowledge_bases" USING btree ("user_id","type","enabled");
+CREATE INDEX "agents_grants_grantee_role_id_idx" ON "agents_grants" USING btree ("grantee_role_id");
