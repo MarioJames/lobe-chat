@@ -1,6 +1,3 @@
-DROP INDEX "knowledge_bases_user_id_unique";--> statement-breakpoint
-DROP INDEX "knowledge_bases_type_unique";--> statement-breakpoint
-DROP INDEX "knowledge_bases_enabled_unique";--> statement-breakpoint
 ALTER TABLE "knowledge_bases" ALTER COLUMN "user_id" SET NOT NULL;--> statement-breakpoint
 ALTER TABLE "agents" ADD COLUMN "deleted" boolean DEFAULT false;--> statement-breakpoint
 ALTER TABLE "agents" ADD COLUMN "source_agent_id" text;--> statement-breakpoint
