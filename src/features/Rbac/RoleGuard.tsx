@@ -2,7 +2,7 @@
 
 import { Button } from '@lobehub/ui';
 import { Card, Result } from 'antd';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { PropsWithChildren, memo, useEffect, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Center } from 'react-layout-kit';
@@ -18,7 +18,25 @@ export interface RoleGuardProps extends PropsWithChildren {
   redirectTo?: string;
 }
 
+const normalizePathSegments = (path: string) => path.replace(/\/+$/, '').split('/').filter(Boolean);
+
+const isSameRoute = (pathname: string | null, redirectTo: string) => {
+  if (!pathname) return false;
+
+  const pathnameSegments = normalizePathSegments(pathname);
+  const redirectSegments = normalizePathSegments(redirectTo);
+
+  if (redirectSegments.length === 0) return pathnameSegments.length === 0;
+  if (pathnameSegments.length < redirectSegments.length) return false;
+
+  return redirectSegments.every((segment, index) => {
+    const pathnameIndex = pathnameSegments.length - redirectSegments.length + index;
+    return pathnameSegments[pathnameIndex] === segment;
+  });
+};
+
 const RoleGuard = memo<RoleGuardProps>(({ children, redirectTo = '/no-permission' }) => {
+  const pathname = usePathname();
   const router = useRouter();
   const { t } = useTranslation('common');
   const { t: tError } = useTranslation('error');
@@ -46,33 +64,37 @@ const RoleGuard = memo<RoleGuardProps>(({ children, redirectTo = '/no-permission
   );
 
   const hasActiveRole = roles.some((r) => r.isActive);
+  const isOnRedirectPage = useMemo(() => isSameRoute(pathname, redirectTo), [pathname, redirectTo]);
+  const shouldWaitForInitialAuth = !isLoaded && !isUserStateInit && !isRolesInitialized;
 
   const shouldCheckRoles = enableAuth && isServerMode;
 
   useEffect(() => {
     if (!shouldCheckRoles) return;
-    if (!isLoaded) return;
+    if (shouldWaitForInitialAuth) return;
     if (!isLoginWithAuth) return;
     if (!isUserStateInit) return;
     if (!isRolesInitialized) return;
     if (hasActiveRole) return;
+    if (isOnRedirectPage) return;
 
     router.replace(redirectTo);
   }, [
+    isOnRedirectPage,
     hasActiveRole,
-    isLoaded,
     isLoginWithAuth,
     isRolesInitialized,
     isUserStateInit,
     redirectTo,
     router,
+    shouldWaitForInitialAuth,
     shouldCheckRoles,
   ]);
 
   if (!shouldCheckRoles) return children;
 
   // auth state not ready yet
-  if (!isLoaded) {
+  if (shouldWaitForInitialAuth) {
     return (
       <div style={{ height: '100vh', width: '100%' }}>
         <FullscreenLoading activeStage={0} stages={stages} />
@@ -148,6 +170,8 @@ const RoleGuard = memo<RoleGuardProps>(({ children, redirectTo = '/no-permission
 
   // no available roles, redirecting...
   if (!hasActiveRole) {
+    if (isOnRedirectPage) return children;
+
     return (
       <div style={{ height: '100vh', width: '100%' }}>
         <FullscreenLoading activeStage={2} stages={stages} />

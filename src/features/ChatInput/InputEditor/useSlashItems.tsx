@@ -15,7 +15,7 @@ import {
   SigmaIcon,
   Table2Icon,
 } from 'lucide-react';
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 
 type SlashItems = Extract<SlashOptions['items'], unknown[]>;

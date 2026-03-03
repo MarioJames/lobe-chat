@@ -1,5 +1,4 @@
 import { Hotkey, Icon } from '@lobehub/ui';
-import { DiscordIcon } from '@lobehub/ui/icons';
 import { Badge } from 'antd';
 import { ItemType } from 'antd/es/menu/interface';
 import {
@@ -21,7 +20,7 @@ import { Flexbox } from 'react-layout-kit';
 
 import type { MenuProps } from '@/components/Menu';
 import { enableAuth } from '@/const/auth';
-import { BRANDING_EMAIL, LOBE_CHAT_CLOUD, SOCIAL_URL } from '@/const/branding';
+import { BRANDING_EMAIL, LOBE_CHAT_CLOUD } from '@/const/branding';
 import { DEFAULT_DESKTOP_HOTKEY_CONFIG } from '@/const/desktop';
 import { DOCUMENTS_REFER_URL, GITHUB_ISSUES, OFFICIAL_URL, UTM_SOURCE, mailTo } from '@/const/url';
 import { isDesktop } from '@/const/version';
@@ -112,15 +111,15 @@ export const useMenu = () => {
   const data = !isLogin
     ? []
     : ([
-      {
-        icon: <Icon icon={HardDriveDownload} />,
-        key: 'import',
-        label: <DataImporter>{t('importData')}</DataImporter>,
-      },
-      {
-        type: 'divider',
-      },
-    ].filter(Boolean) as ItemType[]);
+        {
+          icon: <Icon icon={HardDriveDownload} />,
+          key: 'import',
+          label: <DataImporter>{t('importData')}</DataImporter>,
+        },
+        {
+          type: 'divider',
+        },
+      ].filter(Boolean) as ItemType[]);
 
   const helps: MenuProps['items'] = [
     showCloudPromotion && {
@@ -149,15 +148,6 @@ export const useMenu = () => {
           label: (
             <Link href={GITHUB_ISSUES} target={'_blank'}>
               {t('userPanel.feedback')}
-            </Link>
-          ),
-        },
-        {
-          icon: <Icon icon={DiscordIcon} />,
-          key: 'discord',
-          label: (
-            <Link href={SOCIAL_URL.discord} target={'_blank'}>
-              {t('userPanel.discord')}
             </Link>
           ),
         },
@@ -196,12 +186,12 @@ export const useMenu = () => {
 
   const logoutItems: MenuProps['items'] = isLoginWithAuth
     ? [
-      {
-        icon: <Icon icon={LogOut} />,
-        key: 'logout',
-        label: <span>{t('signout', { ns: 'auth' })}</span>,
-      },
-    ]
+        {
+          icon: <Icon icon={LogOut} />,
+          key: 'logout',
+          label: <span>{t('signout', { ns: 'auth' })}</span>,
+        },
+      ]
     : [];
 
   return { logoutItems, mainItems };

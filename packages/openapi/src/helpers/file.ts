@@ -5,6 +5,13 @@ import urlJoin from 'url-join';
 
 import { fileEnv } from '@/envs/file';
 
+function bufferToBlobPart(buffer: Buffer): Uint8Array<ArrayBuffer> {
+  const arrayBuffer = new ArrayBuffer(buffer.length);
+  const bytes = new Uint8Array(arrayBuffer);
+  bytes.set(buffer);
+  return bytes;
+}
+
 /**
  * 给文件添加URL前缀
  * @param file 文件对象
@@ -109,13 +116,13 @@ export async function parseFormData(c: Context): Promise<FormData> {
         const filename = (f as any).originalFilename || (f as any).newFilename || 'file';
         const mime = (f as any).mimetype || 'application/octet-stream';
         if (buf && typeof File !== 'undefined') {
-          const file = new File([buf], filename, { type: mime });
+          const file = new File([bufferToBlobPart(buf)], filename, { type: mime });
           fd.append(name, file);
         } else if ((f as any).filepath) {
           // @ts-ignore
           const fs = require('node:fs');
-          const bin = fs.readFileSync((f as any).filepath);
-          const file = new File([bin], filename, { type: mime });
+          const bin: Buffer = fs.readFileSync((f as any).filepath);
+          const file = new File([bufferToBlobPart(bin)], filename, { type: mime });
           fd.append(name, file);
         }
       }

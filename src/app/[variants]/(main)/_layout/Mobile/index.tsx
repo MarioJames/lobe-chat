@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { PropsWithChildren, memo } from 'react';
 
 import { withSuspense } from '@/components/withSuspense';
+import RoleGuard from '@/features/Rbac/RoleGuard';
 import { useShowMobileWorkspace } from '@/hooks/useShowMobileWorkspace';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 import { announcementSelectors } from '@/store/serverConfig/selectors';
@@ -32,12 +33,12 @@ const Layout = memo(({ children }: PropsWithChildren) => {
   const activeAnnouncement = useServerConfigStore(announcementSelectors.activeAnnouncement);
 
   return (
-    <>
+    <RoleGuard>
       {!!activeAnnouncement && <CloudBanner announcement={activeAnnouncement} mobile />}
       {showCloudPromotion && <CloudBanner mobile />}
       {children}
       {showNav && <NavBar />}
-    </>
+    </RoleGuard>
   );
 });
 

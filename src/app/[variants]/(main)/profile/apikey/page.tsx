@@ -1,12 +1,8 @@
-import { notFound } from 'next/navigation';
-
-import { serverFeatureFlags } from '@/config/featureFlags';
 import { metadataModule } from '@/server/metadata';
 import { translation } from '@/server/translation';
 import { DynamicLayoutProps } from '@/types/next';
 import { RouteVariants } from '@/utils/server/routeVariants';
 
-import Page from '../../settings/system-agent';
 import Client from './Client';
 
 export const generateMetadata = async (props: DynamicLayoutProps) => {
@@ -19,14 +15,8 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
   });
 };
 
-const page = () => {
-  const { showApiKeyManage } = serverFeatureFlags();
-
-  if (!showApiKeyManage) return notFound();
-
+const page = async () => {
   return <Client />;
 };
-
-Page.displayName = 'ApiKey';
 
 export default page;
