@@ -99,7 +99,7 @@ export class TopicController extends BaseController {
 
       const db = await this.getDatabase();
       const topicService = new TopicService(db, userId);
-      await topicService.deleteTopic(topicId);
+      await topicService.deleteTopic(topicId as string);
 
       return this.success(c, null, '删除话题成功');
     } catch (error) {

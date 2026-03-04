@@ -53,16 +53,9 @@ const Redirect = memo<RedirectProps>(({ setLoadingStage }) => {
     }
 
     // wait for roles info to be ready and valid
-    if (enableAuth) {
-      if (!isRolesInitialized) {
-        setLoadingStage(AppLoadingStage.InitUser);
-        return;
-      }
-
-      if (roles.length === 0) {
-        router.replace('/no-permission');
-        return;
-      }
+    if (enableAuth && !isRolesInitialized) {
+      setLoadingStage(AppLoadingStage.InitUser);
+      return;
     }
 
     // user need to onboard

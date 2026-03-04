@@ -8,6 +8,12 @@ import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Center, Flexbox } from 'react-layout-kit';
 
+import { enableAuth } from '@/const/auth';
+import { isServerMode } from '@/const/version';
+import { rbacSelectors, useRbacStore } from '@/store/rbac';
+import { useUserStore } from '@/store/user';
+import { authSelectors } from '@/store/user/selectors';
+
 const useStyles = createStyles(({ css, token }) => ({
   button: css`
     margin-block-start: ${token.marginLG}px;
@@ -46,6 +52,12 @@ const useStyles = createStyles(({ css, token }) => ({
 
     background-color: ${token.colorFillTertiary};
   `,
+  overlay: css`
+    position: fixed;
+    z-index: 9999;
+    inset: 0;
+    background: ${token.colorBgBase};
+  `,
   title: css`
     margin-block-end: ${token.marginSM}px;
 
@@ -60,12 +72,34 @@ const handleRefresh = () => {
   window.location.href = '/';
 };
 
-const NoPermission = memo(() => {
+const RoleGuard = memo(() => {
   const { styles } = useStyles();
   const { t } = useTranslation('common');
 
+  const [isLoaded, isLoginWithAuth] = useUserStore((s) => [
+    Boolean(authSelectors.isLoaded(s)),
+    Boolean(authSelectors.isLoginWithAuth(s)),
+  ]);
+
+  const [roles, isRolesInitialized] = useRbacStore((s) => [
+    rbacSelectors.currentUserRoles(s),
+    rbacSelectors.isRolesInitialized(s),
+  ]);
+  const useFetchCurrentUserRoles = useRbacStore((s) => s.useFetchCurrentUserRoles);
+
+  useFetchCurrentUserRoles({
+    enabled: enableAuth && isServerMode && isLoaded && isLoginWithAuth,
+  });
+
+  const shouldCheckRoles = enableAuth && isServerMode;
+  const hasActiveRole = roles.some((r) => r.isActive);
+  const shouldShowNoPermission =
+    shouldCheckRoles && !hasActiveRole && isRolesInitialized && isLoginWithAuth;
+
+  if (!shouldShowNoPermission) return null;
+
   return (
-    <Center height="100vh">
+    <Center className={styles.overlay}>
       <Card className={styles.card}>
         <Flexbox align="center" className={styles.container}>
           <div className={styles.iconWrapper}>
@@ -82,6 +116,6 @@ const NoPermission = memo(() => {
   );
 });
 
-NoPermission.displayName = 'NoPermission';
+RoleGuard.displayName = 'RoleGuard';
 
-export default NoPermission;
+export default RoleGuard;

@@ -5,6 +5,9 @@ import { BRANDING_NAME } from '@/const/branding';
 import { useServerConfigStore } from '@/store/serverConfig';
 import { customizationSelectors } from '@/store/serverConfig/selectors';
 
+const CUSTOM_FAVICON_ATTR = 'data-lobe-custom-favicon';
+const CUSTOM_FAVICON_SELECTOR = `link[${CUSTOM_FAVICON_ATTR}="true"]`;
+
 const PageTitle = memo<{ title: string }>(({ title }) => {
   const baseConfig = useServerConfigStore(customizationSelectors.base);
   const theme = useTheme();
@@ -23,10 +26,26 @@ const PageTitle = memo<{ title: string }>(({ title }) => {
 
   // 动态设置浏览器标签 icon (favicon)
   useEffect(() => {
-    const removeFavicons = () => {
-      // 移除所有 favicon link 标签（包括 Next.js 自动添加的）
-      const linkElements = document.querySelectorAll("link[rel*='icon']");
-      linkElements.forEach((link) => link.remove());
+    const removeCustomFavicon = () => {
+      const customFavicon = document.head.querySelector(
+        CUSTOM_FAVICON_SELECTOR,
+      ) as HTMLLinkElement | null;
+      customFavicon?.remove();
+    };
+
+    const upsertCustomFavicon = (href: string) => {
+      let customFavicon = document.head.querySelector(
+        CUSTOM_FAVICON_SELECTOR,
+      ) as HTMLLinkElement | null;
+
+      if (!customFavicon) {
+        customFavicon = document.createElement('link');
+        customFavicon.rel = 'icon';
+        customFavicon.setAttribute(CUSTOM_FAVICON_ATTR, 'true');
+        document.head.append(customFavicon);
+      }
+
+      customFavicon.href = href;
     };
 
     // 根据当前主题从企业logo中选择 favicon
@@ -35,18 +54,17 @@ const PageTitle = memo<{ title: string }>(({ title }) => {
         ? baseConfig?.logo?.dark || baseConfig?.logo?.light
         : baseConfig?.logo?.light || baseConfig?.logo?.dark;
 
-    // 先移除所有现有的 favicon link 标签
-    removeFavicons();
+    if (!baseConfig) {
+      removeCustomFavicon();
+      return;
+    }
 
-    if (!baseConfig) return;
+    if (!faviconUrl) {
+      removeCustomFavicon();
+      return;
+    }
 
-    if (!faviconUrl) return;
-
-    // 创建新的 favicon link 标签
-    const linkElement = document.createElement('link');
-    linkElement.rel = 'icon';
-    linkElement.href = faviconUrl;
-    document.head.append(linkElement);
+    upsertCustomFavicon(faviconUrl);
   }, [baseConfig, theme.appearance]);
 
   return null;

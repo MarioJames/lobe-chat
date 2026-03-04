@@ -10,7 +10,6 @@ import { isDesktop } from '@/const/version';
 import { BANNER_HEIGHT } from '@/features/AlertBanner/CloudBanner';
 import TitleBar, { TITLE_BAR_HEIGHT } from '@/features/ElectronTitlebar';
 import HotkeyHelperPanel from '@/features/HotkeyHelperPanel';
-import RoleGuard from '@/features/Rbac/RoleGuard';
 import { usePlatform } from '@/hooks/usePlatform';
 import { featureFlagsSelectors, useServerConfigStore } from '@/store/serverConfig';
 import { announcementSelectors } from '@/store/serverConfig/selectors';
@@ -29,43 +28,42 @@ const Layout = memo<PropsWithChildren>(({ children }) => {
   const { showCloudPromotion } = useServerConfigStore(featureFlagsSelectors);
   const activeAnnouncement = useServerConfigStore(announcementSelectors.activeAnnouncement);
   return (
-    <RoleGuard>
-      <HotkeysProvider initiallyActiveScopes={[HotkeyScopeEnum.Global]}>
-        {isDesktop && <TitleBar />}
-        {!!activeAnnouncement && <CloudBanner announcement={activeAnnouncement} />}
-        {showCloudPromotion && <CloudBanner />}
-        <Flexbox
-          height={
-            isDesktop
-              ? `calc(100% - ${TITLE_BAR_HEIGHT}px)`
-              : showCloudPromotion
-                ? `calc(100% - ${BANNER_HEIGHT}px)`
-                : '100%'
-          }
-          horizontal
-          style={{
-            borderTop: isPWA ? `1px solid ${theme.colorBorder}` : undefined,
-            position: 'relative',
-          }}
-          width={'100%'}
-        >
-          {isDesktop ? (
-            <DesktopLayoutContainer>{children}</DesktopLayoutContainer>
-          ) : (
-            <>
-              <Suspense>
-                <SideBar />
-              </Suspense>
-              {children}
-            </>
-          )}
-        </Flexbox>
-        <HotkeyHelperPanel />
-        <Suspense>
-          <RegisterHotkeys />
-        </Suspense>
-      </HotkeysProvider>
-    </RoleGuard>
+    <HotkeysProvider initiallyActiveScopes={[HotkeyScopeEnum.Global]}>
+      {isDesktop && <TitleBar />}
+      {!!activeAnnouncement && <CloudBanner announcement={activeAnnouncement} />}
+      {showCloudPromotion && <CloudBanner />}
+      <Flexbox
+        height={
+          isDesktop
+            ? `calc(100% - ${TITLE_BAR_HEIGHT}px)`
+            : showCloudPromotion
+              ? `calc(100% - ${BANNER_HEIGHT}px)`
+              : '100%'
+        }
+        horizontal
+        style={{
+          borderTop: isPWA ? `1px solid ${theme.colorBorder}` : undefined,
+          position: 'relative',
+        }}
+        width={'100%'}
+      >
+        {isDesktop ? (
+          <DesktopLayoutContainer>{children}</DesktopLayoutContainer>
+        ) : (
+          <>
+            <Suspense>
+              <SideBar />
+            </Suspense>
+            {children}
+          </>
+        )}
+      </Flexbox>
+      <HotkeyHelperPanel />
+      <Suspense>
+        <RegisterHotkeys />
+      </Suspense>
+      {/* <RoleGuard /> */}
+    </HotkeysProvider>
   );
 });
 
