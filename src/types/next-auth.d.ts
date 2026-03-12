@@ -11,6 +11,7 @@ declare module 'next-auth' {
   }
   interface User {
     providerAccountId?: string;
+    username?: string;
   }
   /**
    * More types can be extends here

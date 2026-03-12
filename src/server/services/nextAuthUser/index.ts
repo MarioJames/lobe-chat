@@ -101,7 +101,7 @@ export class NextAuthUserService {
   };
 
   createUser: NonNullable<Adapter['createUser']> = async (user) => {
-    const { id, name, email, emailVerified, image, providerAccountId } = user;
+    const { id, name, email, emailVerified, image, providerAccountId, username } = user;
     // return the user if it already exists
     let existingUser =
       email && typeof email === 'string' && email.trim()
@@ -129,6 +129,7 @@ export class NextAuthUserService {
         id: uid,
         image,
         name,
+        username,
       }),
     );
 

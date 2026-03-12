@@ -6,11 +6,13 @@ interface FeishuProfile {
   avatar_middle: string;
   avatar_thumb: string;
   avatar_url: string;
+  email?: string;
   en_name: string;
   name: string;
   open_id: string;
   tenant_key: string;
   union_id: string;
+  user_id?: string;
 }
 
 interface FeishuProfileResponse {
@@ -59,11 +61,15 @@ function Feishu(): OAuthConfig<FeishuProfileResponse> {
     profile(profileResponse) {
       const profile = profileResponse.data;
 
+      console.log('profile', profile);
+
       return {
+        email: profile.email ?? null,
         id: profile.union_id,
         image: profile.avatar_url,
         name: profile.name,
         providerAccountId: profile.union_id,
+        username: profile.en_name || profile.user_id || profile.name,
       };
     },
     style: {
