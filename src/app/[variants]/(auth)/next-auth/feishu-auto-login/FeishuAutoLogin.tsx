@@ -13,8 +13,7 @@ interface FeishuAutoLoginProps {
   appId: string;
 }
 
-const FEISHU_JSSDK_URL =
-  'https://lf1-cdn-tos.bytegoofy.com/goofy/lark/op/h5-js-sdk-1.5.30/h5-js-sdk-1.5.30.js';
+const FEISHU_JSSDK_URL = 'https://lf1-cdn-tos.bytegoofy.com/goofy/lark/op/h5-js-sdk-1.5.23.js';
 
 const useStyles = createStyles(({ css, token }) => ({
   container: css`
@@ -100,16 +99,27 @@ export default memo<FeishuAutoLoginProps>(({ appId }) => {
         return;
       }
 
+      const callRequestAuthCode = () => {
+        window.tt!.requestAuthCode({
+          appId,
+          fail: (fallbackErr) => reject(new Error(fallbackErr.errString)),
+          success: (res) => resolve(res.code),
+        });
+      };
+
+      // Fallback 1: JSSDK version too low, requestAccess not available
+      if (!window.tt.requestAccess) {
+        callRequestAuthCode();
+        return;
+      }
+
+      // Primary: use requestAccess (recommended by Feishu docs)
       window.tt.requestAccess({
         appID: appId,
         fail: (err) => {
-          // errno 103: client version too low, fallback to requestAuthCode
-          if (err.errno === 103 && window.tt?.requestAuthCode) {
-            window.tt.requestAuthCode({
-              appId,
-              fail: (fallbackErr) => reject(new Error(fallbackErr.errString)),
-              success: (res) => resolve(res.code),
-            });
+          // Fallback 2: client version too low (errno 103)
+          if (err.errno === 103) {
+            callRequestAuthCode();
           } else {
             reject(new Error(err.errString || `Feishu auth failed (errno: ${err.errno})`));
           }
