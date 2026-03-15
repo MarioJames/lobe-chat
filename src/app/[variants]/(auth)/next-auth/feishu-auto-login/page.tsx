@@ -4,8 +4,10 @@ import Loading from '@/components/Loading/BrandTextLoading';
 
 import FeishuAutoLogin from './FeishuAutoLogin';
 
+const appId = process.env.AUTH_FEISHU_APP_ID ?? '';
+
 export default () => (
   <Suspense fallback={<Loading />}>
-    <FeishuAutoLogin />
+    <FeishuAutoLogin appId={appId} />
   </Suspense>
 );

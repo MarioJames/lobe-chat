@@ -9,6 +9,10 @@ import { useSearchParams } from 'next/navigation';
 import { memo, useCallback, useEffect, useRef, useState } from 'react';
 import { Flexbox } from 'react-layout-kit';
 
+interface FeishuAutoLoginProps {
+  appId: string;
+}
+
 const FEISHU_JSSDK_URL =
   'https://lf1-cdn-tos.bytegoofy.com/goofy/lark/op/h5-js-sdk-1.5.30/h5-js-sdk-1.5.30.js';
 
@@ -80,11 +84,10 @@ const loadScript = (src: string): Promise<void> =>
     document.head.append(script);
   });
 
-export default memo(() => {
+export default memo<FeishuAutoLoginProps>(({ appId }) => {
   const { styles } = useStyles();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') ?? '/';
-  const appId = searchParams.get('appId') ?? '';
 
   const [status, setStatus] = useState<Status>('detecting');
   const [errorMsg, setErrorMsg] = useState('');
@@ -127,7 +130,7 @@ export default memo(() => {
 
       if (!appId) {
         setStatus('error');
-        setErrorMsg('缺少 appId 参数，请在 URL 中添加 ?appId=YOUR_FEISHU_APP_ID');
+        setErrorMsg('飞书应用未配置，请设置 AUTH_FEISHU_APP_ID 环境变量');
         return;
       }
 
