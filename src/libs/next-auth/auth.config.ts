@@ -1,3 +1,4 @@
+import type { Provider } from '@auth/core/providers';
 import type { NextAuthConfig } from 'next-auth';
 
 import { getServerDBConfig } from '@/config/db';
@@ -5,6 +6,7 @@ import { getAuthConfig } from '@/envs/auth';
 
 import { LobeNextAuthDbAdapter } from './adapter';
 import { ssoProviders } from './sso-providers';
+import FeishuAutoLogin from './sso-providers/feishu-auto-login';
 
 const {
   NEXT_AUTH_DEBUG,
@@ -17,15 +19,22 @@ const {
 const { NEXT_PUBLIC_ENABLED_SERVER_SERVICE } = getServerDBConfig();
 
 export const initSSOProviders = () => {
-  return NEXT_PUBLIC_ENABLE_NEXT_AUTH
-    ? NEXT_AUTH_SSO_PROVIDERS.split(/[,，]/).map((provider) => {
-        const validProvider = ssoProviders.find((item) => item.id === provider.trim());
+  if (!NEXT_PUBLIC_ENABLE_NEXT_AUTH) return [];
 
-        if (validProvider) return validProvider.provider;
+  const providers: Provider[] = NEXT_AUTH_SSO_PROVIDERS.split(/[,，]/).map((provider) => {
+    const validProvider = ssoProviders.find((item) => item.id === provider.trim());
 
-        throw new Error(`[NextAuth] provider ${provider} is not supported`);
-      })
-    : [];
+    if (validProvider) return validProvider.provider;
+
+    throw new Error(`[NextAuth] provider ${provider} is not supported`);
+  });
+
+  // Auto-register Feishu auto-login provider when Feishu credentials are configured
+  if (process.env.AUTH_FEISHU_APP_ID && process.env.AUTH_FEISHU_APP_SECRET) {
+    providers.push(FeishuAutoLogin.provider);
+  }
+
+  return providers;
 };
 
 // Notice this is only an object, not a full Auth.js instance
