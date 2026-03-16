@@ -4,9 +4,11 @@ import type {
   LobeAgentTTSConfig,
 } from '@lobechat/types';
 import { AgentChatConfigSchema } from '@lobechat/types';
+import { sql } from 'drizzle-orm';
 import {
   boolean,
   index,
+  integer,
   jsonb,
   pgTable,
   primaryKey,
@@ -20,6 +22,7 @@ import { z } from 'zod';
 import { idGenerator, randomSlug } from '../utils/idGenerator';
 import { timestamps } from './_helpers';
 import { files, knowledgeBases } from './file';
+import { roles } from './rbac';
 import { sessionGroups } from './session';
 import { users } from './user';
 
@@ -92,6 +95,9 @@ export const insertAgentSchema = createInsertSchema(agents, {
 export type NewAgent = typeof agents.$inferInsert;
 export type AgentItem = typeof agents.$inferSelect;
 
+export type NewAgentGrant = typeof agentsGrants.$inferInsert;
+export type AgentGrantItem = typeof agentsGrants.$inferSelect;
+
 export const agentsKnowledgeBases = pgTable(
   'agents_knowledge_bases',
   {
@@ -138,4 +144,39 @@ export const agentsFiles = pgTable(
     index('agents_files_file_id_idx').on(t.fileId),
     index('agents_files_user_id_idx').on(t.userId),
   ],
+);
+
+// Agent grants table for authorization control
+export const agentsGrants = pgTable(
+  'agents_grants',
+  {
+    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+
+    agentId: text('agent_id')
+      .references(() => agents.id, { onDelete: 'cascade' })
+      .notNull(),
+
+    granteeType: varchar('grantee_type', { enum: ['user', 'role'], length: 20 }).notNull(),
+    granteeUserId: text('grantee_user_id').references(() => users.id, { onDelete: 'cascade' }),
+    granteeRoleId: text('grantee_role_id').references(() => roles.id, { onDelete: 'cascade' }),
+
+    ...timestamps,
+  },
+  (t) => ({
+    // Ensure only one type of grantee per record (either user or role)
+    chkGranteeEitherOr: sql`CHECK ((${t.granteeType} = 'user' AND ${t.granteeUserId} IS NOT NULL AND ${t.granteeRoleId} IS NULL) OR (${t.granteeType} = 'role' AND ${t.granteeRoleId} IS NOT NULL AND ${t.granteeUserId} IS NULL))`,
+
+    // Unique indexes to prevent duplicate grants
+    granteeUserUnique: uniqueIndex('agents_grants_grantee_user_unique').on(
+      t.agentId,
+      t.granteeUserId,
+    ),
+    granteeRoleUnique: uniqueIndex('agents_grants_grantee_role_unique').on(
+      t.agentId,
+      t.granteeRoleId,
+    ),
+    // Index for role-based queries
+    granteeRoleIdIndex: index('agents_grants_grantee_role_id_idx').on(t.granteeRoleId),
+    agentIdIndex: index('agents_grants_agent_id_idx').on(t.agentId),
+  }),
 );

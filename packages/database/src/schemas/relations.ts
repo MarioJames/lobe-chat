@@ -2,7 +2,7 @@ import { relations } from 'drizzle-orm';
 import { index, pgTable, primaryKey, text, uuid, varchar } from 'drizzle-orm/pg-core';
 
 import { createdAt } from './_helpers';
-import { agents, agentsFiles, agentsKnowledgeBases } from './agent';
+import { agents, agentsFiles, agentsGrants, agentsKnowledgeBases } from './agent';
 import {
   agentEvalBenchmarks,
   agentEvalDatasets,
@@ -16,6 +16,7 @@ import { documents, files, knowledgeBases } from './file';
 import { generationBatches, generations, generationTopics } from './generation';
 import { messageGroups, messages, messagesFiles, messageTranslates } from './message';
 import { chunks, documentChunks, unstructuredChunks } from './rag';
+import { roles } from './rbac';
 import { sessionGroups, sessions } from './session';
 import { threads, topicDocuments, topics } from './topic';
 import { users } from './user';
@@ -134,6 +135,7 @@ export const agentsRelations = relations(agents, ({ many }) => ({
   knowledgeBases: many(agentsKnowledgeBases),
   files: many(agentsFiles),
   chatGroups: many(chatGroupsAgents),
+  grants: many(agentsGrants),
 }));
 
 export const agentsToSessionsRelations = relations(agentsToSessions, ({ one }) => ({
@@ -177,6 +179,21 @@ export const agentsFilesRelations = relations(agentsFiles, ({ one }) => ({
   agent: one(agents, {
     fields: [agentsFiles.agentId],
     references: [agents.id],
+  }),
+}));
+
+export const agentsGrantsRelations = relations(agentsGrants, ({ one }) => ({
+  agent: one(agents, {
+    fields: [agentsGrants.agentId],
+    references: [agents.id],
+  }),
+  granteeUser: one(users, {
+    fields: [agentsGrants.granteeUserId],
+    references: [users.id],
+  }),
+  granteeRole: one(roles, {
+    fields: [agentsGrants.granteeRoleId],
+    references: [roles.id],
   }),
 }));
 
