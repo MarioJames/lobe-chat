@@ -1,16 +1,16 @@
-import { BRANDING_LOGO_URL, BRANDING_NAME } from '@lobechat/business-const';
-import { type IconType } from '@lobehub/icons';
-import { type FlexboxProps } from '@lobehub/ui';
-import { Flexbox } from '@lobehub/ui';
-import { type LobeChatProps } from '@lobehub/ui/brand';
-import { createStaticStyles, cssVar } from 'antd-style';
-import { type ReactNode } from 'react';
-import { memo } from 'react';
+'use client';
 
-import { type ImageProps } from '@/libs/next/Image';
-import Image from '@/libs/next/Image';
+import type { IconType } from '@lobehub/icons';
+import type { LobeChatProps } from '@lobehub/ui/brand';
+import { createStyles, useTheme } from 'antd-style';
+import Image, { type ImageProps } from 'next/image';
+import { memo, type ReactNode, useMemo } from 'react';
+import { Flexbox, type FlexboxProps } from 'react-layout-kit';
 
-const styles = createStaticStyles(({ css }) => {
+import { useServerConfigStore } from '@/store/serverConfig';
+import { customizationSelectors } from '@/store/serverConfig/selectors';
+
+const useStyles = createStyles(({ css }) => {
   return {
     extraTitle: css`
       font-weight: 300;
@@ -20,6 +20,13 @@ const styles = createStaticStyles(({ css }) => {
 });
 
 const CustomTextLogo = memo<FlexboxProps & { size: number }>(({ size, style, ...rest }) => {
+  const baseConfig = useServerConfigStore(customizationSelectors.base);
+  const brandName = baseConfig?.brandName;
+
+  if (!brandName) {
+    return null;
+  }
+
   return (
     <Flexbox
       height={size}
@@ -31,18 +38,34 @@ const CustomTextLogo = memo<FlexboxProps & { size: number }>(({ size, style, ...
       }}
       {...rest}
     >
-      {BRANDING_NAME}
+      {brandName}
     </Flexbox>
   );
 });
 
 const CustomImageLogo = memo<Omit<ImageProps, 'alt' | 'src'> & { size: number }>(
   ({ size, ...rest }) => {
+    const baseConfig = useServerConfigStore(customizationSelectors.base);
+    const theme = useTheme();
+    const logoUrl = useMemo(() => {
+      if (baseConfig?.logo) {
+        // Use theme-aware logo (light/dark)
+        const url = theme.appearance === 'dark' ? baseConfig.logo.dark : baseConfig.logo.light;
+        return url || null;
+      }
+      return null;
+    }, [baseConfig?.logo, theme.appearance]);
+    const brandName = baseConfig?.brandName || '';
+    // If logoUrl is empty, render text logo instead
+    if (!logoUrl) {
+      return <CustomTextLogo size={size} {...rest} />;
+    }
+
     return (
       <Image
-        alt={BRANDING_NAME}
+        alt={brandName}
         height={size}
-        src={BRANDING_LOGO_URL}
+        src={logoUrl}
         unoptimized={true}
         width={size}
         {...rest}
@@ -51,7 +74,7 @@ const CustomImageLogo = memo<Omit<ImageProps, 'alt' | 'src'> & { size: number }>
   },
 );
 
-const Divider: IconType = (({ ref, size = '1em', style, ...rest }) => (
+const Divider: IconType = ({ ref, size = '1em', style, ...rest }) => (
   <svg
     fill="none"
     height={size}
@@ -67,9 +90,20 @@ const Divider: IconType = (({ ref, size = '1em', style, ...rest }) => (
   >
     <path d="M16.88 3.549L7.12 20.451" />
   </svg>
-)) as IconType;
+);
 
 const CustomLogo = memo<LobeChatProps>(({ extra, size = 32, className, style, type, ...rest }) => {
+  const baseConfig = useServerConfigStore(customizationSelectors.base);
+  const theme = useTheme();
+  const { styles } = useStyles();
+
+  const hasLogo = baseConfig?.logo?.light || baseConfig?.logo?.dark;
+  const hasBrandName = baseConfig?.brandName;
+
+  if (!hasLogo && !hasBrandName) {
+    return null;
+  }
+
   let logoComponent: ReactNode;
 
   switch (type) {
@@ -118,7 +152,7 @@ const CustomLogo = memo<LobeChatProps>(({ extra, size = 32, className, style, ty
   return (
     <Flexbox horizontal align={'center'} className={className} flex={'none'} {...rest}>
       {logoComponent}
-      <Divider size={extraSize} style={{ color: cssVar.colorFill }} />
+      <Divider size={extraSize} style={{ color: theme.colorFill }} />
       <div className={styles.extraTitle} style={{ fontSize: extraSize }}>
         {extra}
       </div>

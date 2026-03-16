@@ -1,4 +1,4 @@
-import { isNotNull } from 'drizzle-orm';
+import { isNotNull, sql } from 'drizzle-orm';
 import type { AnyPgColumn } from 'drizzle-orm/pg-core';
 import {
   boolean,
@@ -20,6 +20,7 @@ import type { FileSource } from '@/types/files';
 import { idGenerator, randomSlug } from '../utils/idGenerator';
 import { accessedAt, createdAt, timestamps } from './_helpers';
 import { asyncTasks } from './asyncTask';
+import { roles } from './rbac';
 import { users } from './user';
 
 export const globalFiles = pgTable(
@@ -189,11 +190,12 @@ export const knowledgeBases = pgTable(
     avatar: text('avatar'),
 
     // different types of knowledge bases need to be distinguished
-    type: text('type'),
+    type: varchar('type', { enum: ['personal', 'shared'], length: 20 }).default('personal'),
     userId: text('user_id')
       .references(() => users.id, { onDelete: 'cascade' })
       .notNull(),
     clientId: text('client_id'),
+    enabled: boolean('enabled').default(true).notNull(),
 
     isPublic: boolean('is_public').default(false),
 
@@ -201,10 +203,18 @@ export const knowledgeBases = pgTable(
 
     ...timestamps,
   },
-  (t) => [
-    uniqueIndex('knowledge_bases_client_id_user_id_unique').on(t.clientId, t.userId),
-    index('knowledge_bases_user_id_idx').on(t.userId),
-  ],
+  (t) => ({
+    clientIdUnique: uniqueIndex('knowledge_bases_client_id_user_id_unique').on(
+      t.clientId,
+      t.userId,
+    ),
+    // Compound index for accelerating queries by user ID, type, and enabled status
+    userTypeEnabledIdx: index('knowledge_bases_user_type_enabled_idx').on(
+      t.userId,
+      t.type,
+      t.enabled,
+    ),
+  }),
 );
 
 export const insertKnowledgeBasesSchema = createInsertSchema(knowledgeBases);
@@ -229,10 +239,49 @@ export const knowledgeBaseFiles = pgTable(
 
     createdAt: createdAt(),
   },
-  (t) => [
-    primaryKey({ columns: [t.knowledgeBaseId, t.fileId] }),
-    index('knowledge_base_files_kb_id_idx').on(t.knowledgeBaseId),
-    index('knowledge_base_files_user_id_idx').on(t.userId),
-    index('knowledge_base_files_file_id_idx').on(t.fileId),
-  ],
+  (t) => ({
+    pk: primaryKey({
+      columns: [t.knowledgeBaseId, t.fileId],
+    }),
+  }),
 );
+
+// Knowledge base grants table
+export const knowledgeBaseGrants = pgTable(
+  'knowledge_base_grants',
+  {
+    id: integer('id').primaryKey().generatedByDefaultAsIdentity(),
+
+    knowledgeBaseId: text('knowledge_base_id')
+      .references(() => knowledgeBases.id, { onDelete: 'cascade' })
+      .notNull(),
+
+    granteeType: varchar('grantee_type', { enum: ['user', 'role'], length: 20 }).notNull(),
+    granteeUserId: text('grantee_user_id').references(() => users.id, { onDelete: 'cascade' }),
+    granteeRoleId: integer('grantee_role_id').references(() => roles.id, { onDelete: 'cascade' }),
+
+    permission: varchar('permission', { enum: ['read', 'write', 'manage'], length: 20 })
+      .default('read')
+      .notNull(),
+
+    accessedAt: accessedAt(),
+    ...timestamps,
+  },
+  (t) => ({
+    // Ensure each record can only have one authorization method
+    chkGranteeEitherOr: sql`CHECK ((${t.granteeType} = 'user' AND ${t.granteeUserId} IS NOT NULL AND ${t.granteeRoleId} IS NULL) OR (${t.granteeType} = 'role' AND ${t.granteeRoleId} IS NOT NULL AND ${t.granteeUserId} IS NULL))`,
+
+    // Unique index to prevent duplicate grants
+    granteeUserUnique: uniqueIndex('knowledge_base_grants_grantee_user_unique').on(
+      t.knowledgeBaseId,
+      t.granteeUserId,
+    ),
+    granteeRoleUnique: uniqueIndex('knowledge_base_grants_grantee_role_unique').on(
+      t.knowledgeBaseId,
+      t.granteeRoleId,
+    ),
+  }),
+);
+
+export type NewKnowledgeBaseGrant = typeof knowledgeBaseGrants.$inferInsert;
+export type KnowledgeBaseGrantItem = typeof knowledgeBaseGrants.$inferSelect;

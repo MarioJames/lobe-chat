@@ -2,6 +2,7 @@ import type { PartialDeep } from 'type-fest';
 
 import type { IFeatureFlagsState } from '@/config/featureFlags';
 
+import type { BaseConfig, WelcomeConfig } from './customization';
 import type { ChatModelCard } from './llm';
 import type {
   GlobalLLMProviderKey,
@@ -48,6 +49,18 @@ export type ServerLanguageModel = Partial<Record<GlobalLLMProviderKey, ServerMod
 
 export interface GlobalServerConfig {
   aiProvider: ServerLanguageModel;
+  customization?: {
+    announcement?: {
+      content?: string;
+      effectiveEndAt?: Date;
+      effectiveStartAt?: Date;
+      id?: number;
+      title?: string;
+    } | null;
+    base?: BaseConfig | null;
+    defaultAgent?: PartialDeep<UserDefaultAgent> | null;
+    welcome?: WelcomeConfig | null;
+  };
   defaultAgent?: PartialDeep<UserDefaultAgent>;
   disableEmailPassword?: boolean;
   enableBusinessFeatures?: boolean;

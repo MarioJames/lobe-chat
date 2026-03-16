@@ -17,3 +17,10 @@ export const serverConfigSelectors = {
   isMobile: (s: ServerConfigStore) => s.isMobile || false,
   oAuthSSOProviders: (s: ServerConfigStore) => s.serverConfig.oAuthSSOProviders,
 };
+
+export const customizationSelectors = {
+  base: (s: ServerConfigStore) => s.serverConfig.customization?.base,
+  welcome: (s: ServerConfigStore) => s.serverConfig.customization?.welcome,
+  defaultAgent: (s: ServerConfigStore) => s.serverConfig.customization?.defaultAgent,
+  announcement: (s: ServerConfigStore) => s.serverConfig.customization?.announcement,
+};

@@ -2,6 +2,8 @@ import { ENABLE_BUSINESS_FEATURES } from '@lobechat/business-const';
 
 import { klavisEnv } from '@/config/klavis';
 import { isDesktop } from '@/const/version';
+import { getServerDB } from '@/database/core/db-adaptor';
+import { CustomizationModel } from '@/database/models/customization';
 import { appEnv, getAppConfig } from '@/envs/app';
 import { authEnv } from '@/envs/auth';
 import { fileEnv } from '@/envs/file';
@@ -28,6 +30,49 @@ const getBetterAuthSSOProviders = () => {
 
 export const getServerGlobalConfig = async () => {
   const { DEFAULT_AGENT_CONFIG } = getAppConfig();
+
+  // Get customization config from database
+  let customizationConfig: GlobalServerConfig['customization'] = undefined;
+  try {
+    const serverDB = await getServerDB();
+    const model = new CustomizationModel(serverDB);
+    const config = await model.getConfig();
+    if (config) {
+      customizationConfig = {
+        base: config.base ?? null,
+        defaultAgent: config.defaultAgent
+          ? {
+              config: {
+                avatar: config.defaultAgent.avatar,
+                description: config.defaultAgent.description,
+                model: config.defaultAgent.modelId,
+                params: config.defaultAgent.params as any,
+                plugins: config.defaultAgent.plugins,
+                systemRole: config.defaultAgent.systemRole,
+                title: config.defaultAgent.title,
+              },
+            }
+          : null,
+        welcome: config.welcome ?? null,
+      };
+    }
+
+    // Get active announcement
+    const announcement = await model.getActiveAnnouncement();
+    if (announcement) {
+      customizationConfig = customizationConfig || {};
+      customizationConfig.announcement = {
+        content: announcement.content,
+        effectiveEndAt: announcement.effectiveEndAt,
+        effectiveStartAt: announcement.effectiveStartAt,
+        id: announcement.id,
+        title: announcement.title,
+      };
+    }
+  } catch (error) {
+    // Ignore errors when fetching customization config
+    console.error('[GlobalConfig] Failed to fetch customization config:', error);
+  }
 
   const config: GlobalServerConfig = {
     aiProvider: await genServerAiProvidersConfig({
@@ -71,6 +116,7 @@ export const getServerGlobalConfig = async () => {
         withDeploymentName: true,
       },
     }),
+    customization: customizationConfig ?? undefined,
     defaultAgent: {
       config: parseAgentConfig(DEFAULT_AGENT_CONFIG),
     },
