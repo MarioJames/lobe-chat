@@ -436,6 +436,12 @@ export default {
   'regenerate': 'Regenerate',
   'releaseNotes': 'Version Details',
   'rename': 'Rename',
+  'rbac.noPermission.backHome': 'Back to Home',
+  'rbac.noPermission.desc':
+    'Your account has not been assigned any available roles, or the roles have been disabled. Please contact the administrator to grant permissions.',
+  'rbac.noPermission.logout': 'Sign Out',
+  'rbac.noPermission.refresh': 'Refresh Page',
+  'rbac.noPermission.title': 'No Access Permission',
   'reset': 'Reset',
   'retry': 'Retry',
   'run': 'Run',
