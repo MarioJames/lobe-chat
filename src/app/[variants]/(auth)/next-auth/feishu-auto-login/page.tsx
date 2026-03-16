@@ -4,10 +4,14 @@ import Loading from '@/components/Loading/BrandTextLoading';
 
 import FeishuAutoLogin from './FeishuAutoLogin';
 
-const appId = process.env.AUTH_FEISHU_APP_ID ?? '';
+export const dynamic = 'force-dynamic';
 
-export default () => (
-  <Suspense fallback={<Loading />}>
-    <FeishuAutoLogin appId={appId} />
-  </Suspense>
-);
+export default () => {
+  const appId = process.env.AUTH_FEISHU_APP_ID ?? '';
+
+  return (
+    <Suspense fallback={<Loading />}>
+      <FeishuAutoLogin appId={appId} />
+    </Suspense>
+  );
+};
