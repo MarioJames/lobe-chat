@@ -301,14 +301,13 @@ describe('AiProviderModel', () => {
       expect(provider?.keyVaults).toEqual({ decryptedKey: 'value' });
     });
 
-    it('should handle non-existent provider for builtin provider', async () => {
+    it('should return undefined for non-existent builtin provider', async () => {
       const builtinId = ModelProvider.OpenAI;
       const provider = await aiProviderModel.getAiProviderById(builtinId, (text) =>
         JSON.parse(text as string),
       );
 
-      expect(provider).toBeDefined();
-      expect(provider?.source).toBe('builtin');
+      expect(provider).toBeUndefined();
     });
 
     it('should return undefined for non-existent custom provider', async () => {

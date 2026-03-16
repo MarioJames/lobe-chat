@@ -1,7 +1,6 @@
 import { AiProviderModelListItem, EnabledAiModel } from 'model-bank';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { DEFAULT_MODEL_PROVIDER_LIST } from '@/config/modelProviders';
 import { clientDB, initializeDB } from '@/database/client/db';
 import {
   AiProviderDetailItem,
@@ -29,10 +28,10 @@ beforeEach(async () => {
 
 describe('AiInfraRepos', () => {
   describe('getAiProviderList', () => {
-    it('should merge builtin and user providers correctly', async () => {
+    it('should return user providers only', async () => {
       const mockUserProviders = [
-        { id: 'openai', enabled: true, name: 'Custom OpenAI' },
-        { id: 'custom', enabled: true, name: 'Custom Provider' },
+        { id: 'openai', enabled: true, name: 'Custom OpenAI', sort: 1 },
+        { id: 'custom', enabled: true, name: 'Custom Provider', sort: 2 },
       ] as AiProviderListItem[];
 
       vi.spyOn(repo.aiProviderModel, 'getAiProviderList').mockResolvedValueOnce(mockUserProviders);
@@ -40,27 +39,30 @@ describe('AiInfraRepos', () => {
       const result = await repo.getAiProviderList();
 
       expect(result).toBeDefined();
-      expect(result.length).toBeGreaterThan(0);
-      // Verify the merge logic
-      const openaiProvider = result.find((p) => p.id === 'openai');
-      expect(openaiProvider).toMatchObject({ enabled: true, name: 'Custom OpenAI' });
+      expect(result).toHaveLength(2);
+      expect(result[0]).toMatchObject({ enabled: true, name: 'Custom OpenAI' });
     });
 
-    it('should sort providers according to DEFAULT_MODEL_PROVIDER_LIST order', async () => {
+    it('should sort providers by sort field', async () => {
+      const mockUserProviders = [
+        { id: 'custom', enabled: true, name: 'Custom Provider', sort: 2 },
+        { id: 'openai', enabled: true, name: 'Custom OpenAI', sort: 1 },
+      ] as AiProviderListItem[];
+
+      vi.spyOn(repo.aiProviderModel, 'getAiProviderList').mockResolvedValueOnce(mockUserProviders);
+
+      const result = await repo.getAiProviderList();
+
+      expect(result[0].id).toBe('openai');
+      expect(result[1].id).toBe('custom');
+    });
+
+    it('should return empty array when no user providers', async () => {
       vi.spyOn(repo.aiProviderModel, 'getAiProviderList').mockResolvedValue([]);
 
       const result = await repo.getAiProviderList();
 
-      expect(result).toEqual(
-        expect.arrayContaining(
-          DEFAULT_MODEL_PROVIDER_LIST.map((item) =>
-            expect.objectContaining({
-              id: item.id,
-              source: 'builtin',
-            }),
-          ),
-        ),
-      );
+      expect(result).toEqual([]);
     });
   });
 
@@ -90,7 +92,7 @@ describe('AiInfraRepos', () => {
           logo: 'logo1',
           name: 'OpenAI',
           sort: 1,
-          source: 'builtin' as const,
+          source: 'custom' as const,
         },
         {
           enabled: false,
@@ -98,7 +100,7 @@ describe('AiInfraRepos', () => {
           logo: 'logo2',
           name: 'Anthropic',
           sort: 2,
-          source: 'builtin' as const,
+          source: 'custom' as const,
         },
       ];
 
@@ -111,7 +113,7 @@ describe('AiInfraRepos', () => {
           id: 'openai',
           logo: 'logo1',
           name: 'OpenAI',
-          source: 'builtin',
+          source: 'custom',
         },
       ]);
     });

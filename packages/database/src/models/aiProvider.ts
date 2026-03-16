@@ -202,15 +202,6 @@ export class AiProviderModel {
     const [result] = await query;
 
     if (!result) {
-      // if the provider is builtin but not init, we will insert it to the db
-      if (this.isBuiltInProvider(id)) {
-        await this.db.insert(aiProviders).values({ id, source: 'builtin', userId: this.userId });
-
-        const resultAgain = await query;
-
-        return { ...resultAgain[0] } as unknown as AiProviderDetailItem;
-      }
-
       return;
     }
 

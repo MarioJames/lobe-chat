@@ -7,7 +7,6 @@ import {
 } from 'model-bank';
 import pMap from 'p-map';
 
-import { DEFAULT_MODEL_PROVIDER_LIST } from '@/config/modelProviders';
 import {
   AiProviderDetailItem,
   AiProviderListItem,
@@ -141,31 +140,12 @@ export class AiInfraRepos {
 
   /**
    * Calculate the final providerList based on the known providerConfig
+   * only return user's custom providers, excluding builtin providers
    */
   getAiProviderList = async () => {
     const userProviders = await this.aiProviderModel.getAiProviderList();
 
-    // 1. 先创建一个基于 DEFAULT_MODEL_PROVIDER_LIST id 顺序的映射
-    const orderMap = new Map(DEFAULT_MODEL_PROVIDER_LIST.map((item, index) => [item.id, index]));
-
-    const builtinProviders = DEFAULT_MODEL_PROVIDER_LIST.map((item) => ({
-      description: item.description,
-      enabled:
-        userProviders.some((provider) => provider.id === item.id && provider.enabled) ||
-        this.providerConfigs[item.id]?.enabled,
-      id: item.id,
-      name: item.name,
-      source: 'builtin',
-    })) as AiProviderListItem[];
-
-    const mergedProviders = mergeArrayById(builtinProviders, userProviders);
-
-    // 3. 根据 orderMap 排序
-    return mergedProviders.sort((a, b) => {
-      const orderA = orderMap.get(a.id) ?? Number.MAX_SAFE_INTEGER;
-      const orderB = orderMap.get(b.id) ?? Number.MAX_SAFE_INTEGER;
-      return orderA - orderB;
-    });
+    return userProviders.sort((a, b) => (a.sort ?? 0) - (b.sort ?? 0));
   };
 
   /**
