@@ -1,11 +1,10 @@
-import { isEmpty, omit } from 'lodash-es';
+import { omit } from 'lodash-es';
 import {
   AIChatModelCard,
   AiModelSourceEnum,
   AiProviderModelListItem,
   EnabledAiModel,
 } from 'model-bank';
-import pMap from 'p-map';
 
 import {
   AiProviderDetailItem,
@@ -174,58 +173,17 @@ export class AiInfraRepos {
       this.getAiProviderList(),
       this.aiModelModel.getAllModels(),
     ]);
-    const enabledProviders = providers.filter((item) => (filterEnabled ? item.enabled : true));
-
-    const builtinModelList = await pMap(
-      enabledProviders,
-      async (provider) => {
-        const aiModels = await this.fetchBuiltinModels(provider.id);
-        return (aiModels || [])
-          .map<EnabledAiModel & { enabled?: boolean | null }>((item) => {
-            const user = allModels.find((m) => m.id === item.id && m.providerId === provider.id);
-
-            // 用户未修改本地模型
-            if (!user)
-              return {
-                ...item,
-                abilities: item.abilities || {},
-                providerId: provider.id,
-              };
-
-            const mergedModel = {
-              ...item,
-              abilities: !isEmpty(user.abilities) ? user.abilities : item.abilities || {},
-              config: !isEmpty(user.config) ? user.config : item.config,
-              contextWindowTokens:
-                typeof user.contextWindowTokens === 'number'
-                  ? user.contextWindowTokens
-                  : item.contextWindowTokens,
-              displayName: user?.displayName || item.displayName,
-              enabled: typeof user.enabled === 'boolean' ? user.enabled : item.enabled,
-              id: item.id,
-              providerId: provider.id,
-              settings: item.settings,
-              sort: user.sort || undefined,
-              type: user.type || item.type,
-            };
-            return injectSearchSettings(provider.id, mergedModel); // 用户修改本地模型，检查搜索设置
-          })
-          .filter((item) => (filterEnabled ? item.enabled : true));
-      },
-      { concurrency: 10 },
+    const enabledProviderIds = new Set(
+      providers.filter((item) => (filterEnabled ? item.enabled : true)).map((item) => item.id),
     );
 
-    const enabledProviderIds = new Set(enabledProviders.map((item) => item.id));
-    // 用户数据库模型，检查搜索设置
-    const appendedUserModels = allModels
-      .filter((item) =>
-        filterEnabled ? enabledProviderIds.has(item.providerId) && item.enabled : true,
-      )
+    // 只返回用户数据库中属于已启用 provider 的模型
+    const enabledModels = allModels
+      .filter((item) => enabledProviderIds.has(item.providerId))
+      .filter((item) => (filterEnabled ? item.enabled : true))
       .map((item) => injectSearchSettings(item.providerId, item));
 
-    return [...builtinModelList.flat(), ...appendedUserModels].sort(
-      (a, b) => (a?.sort || -1) - (b?.sort || -1),
-    ) as EnabledAiModel[];
+    return enabledModels.sort((a, b) => (a?.sort || -1) - (b?.sort || -1)) as EnabledAiModel[];
   };
 
   getAiProviderRuntimeState = async (

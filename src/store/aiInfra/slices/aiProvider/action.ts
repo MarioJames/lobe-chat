@@ -244,8 +244,9 @@ export const createAiProviderSlice: StateCreator<
     return useClientDataSWR<AiProviderRuntimeStateWithBuiltinModels | undefined>(
       shouldFetch ? [AiProviderSwrKey.fetchAiProviderRuntimeState, isLogin] : null,
       async ([, isLogin]) => {
-        const [{ LOBE_DEFAULT_MODEL_LIST: builtinAiModelList }, { DEFAULT_MODEL_PROVIDER_LIST }] =
-          await Promise.all([import('model-bank'), import('@/config/modelProviders')]);
+        const [{ LOBE_DEFAULT_MODEL_LIST: builtinAiModelList }] = await Promise.all([
+          import('model-bank'),
+        ]);
 
         if (isLogin) {
           const data = await aiProviderService.getAiProviderRuntimeState();
@@ -264,39 +265,15 @@ export const createAiProviderSlice: StateCreator<
           };
         }
 
-        const enabledAiProviders: EnabledProvider[] = DEFAULT_MODEL_PROVIDER_LIST.filter(
-          (provider) => provider.enabled,
-        ).map((item) => ({ id: item.id, name: item.name, source: AiProviderSourceEnum.Builtin }));
-
-        const enabledChatAiProviders = enabledAiProviders.filter((provider) => {
-          return builtinAiModelList.some(
-            (model) => model.providerId === provider.id && model.type === 'chat',
-          );
-        });
-
-        const enabledImageAiProviders = enabledAiProviders
-          .filter((provider) => {
-            return builtinAiModelList.some(
-              (model) => model.providerId === provider.id && model.type === 'image',
-            );
-          })
-          .map((item) => ({ id: item.id, name: item.name, source: AiProviderSourceEnum.Builtin }));
-
-        // Build model lists for non-login state as well
-        const enabledAiModels = builtinAiModelList.filter((m) => m.enabled);
-        const [enabledChatModelList, enabledImageModelList] = await Promise.all([
-          buildProviderModelLists(enabledChatAiProviders, enabledAiModels, 'chat'),
-          buildProviderModelLists(enabledImageAiProviders, enabledAiModels, 'image'),
-        ]);
-
+        // 未登录时，不获取 builtin 渠道模型，返回空列表
         return {
           builtinAiModelList,
-          enabledAiModels,
-          enabledAiProviders,
-          enabledChatAiProviders,
-          enabledChatModelList,
-          enabledImageAiProviders,
-          enabledImageModelList,
+          enabledAiModels: [],
+          enabledAiProviders: [],
+          enabledChatAiProviders: [],
+          enabledChatModelList: [],
+          enabledImageAiProviders: [],
+          enabledImageModelList: [],
           runtimeConfig: {},
         };
       },
