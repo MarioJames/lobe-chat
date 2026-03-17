@@ -150,10 +150,14 @@ const CustomLogo = memo<LobeChatProps>(({ extra, size = 32, className, style, ty
   return (
     <Flexbox align={'center'} className={className} flex={'none'} horizontal {...rest}>
       {logoComponent}
-      <Divider size={extraSize} style={{ color: theme.colorFill }} />
-      <div className={styles.extraTitle} style={{ fontSize: extraSize }}>
-        {extra}
-      </div>
+      {extra && (
+        <>
+          <Divider size={extraSize} style={{ color: theme.colorFill }} />
+          <div className={styles.extraTitle} style={{ fontSize: extraSize }}>
+            {extra}
+          </div>
+        </>
+      )}
     </Flexbox>
   );
 });

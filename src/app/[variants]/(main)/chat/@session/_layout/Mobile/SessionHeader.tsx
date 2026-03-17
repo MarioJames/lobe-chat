@@ -22,7 +22,12 @@ const Header = memo(() => {
   return (
     <ChatHeader
       left={
-        <Flexbox align={'center'} gap={8} horizontal style={{ marginLeft: 8 }}>
+        <Flexbox
+          align={'center'}
+          gap={8}
+          horizontal
+          style={{ marginLeft: 8, whiteSpace: 'nowrap' }}
+        >
           <UserAvatar onClick={() => router.push('/me')} size={32} />
           <ProductLogo type={'text'} />
         </Flexbox>
