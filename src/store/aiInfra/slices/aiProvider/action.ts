@@ -244,10 +244,6 @@ export const createAiProviderSlice: StateCreator<
     return useClientDataSWR<AiProviderRuntimeStateWithBuiltinModels | undefined>(
       shouldFetch ? [AiProviderSwrKey.fetchAiProviderRuntimeState, isLogin] : null,
       async ([, isLogin]) => {
-        const [{ LOBE_DEFAULT_MODEL_LIST: builtinAiModelList }] = await Promise.all([
-          import('model-bank'),
-        ]);
-
         if (isLogin) {
           const data = await aiProviderService.getAiProviderRuntimeState();
 
@@ -259,7 +255,7 @@ export const createAiProviderSlice: StateCreator<
 
           return {
             ...data,
-            builtinAiModelList,
+            builtinAiModelList: [],
             enabledChatModelList,
             enabledImageModelList,
           };
@@ -267,7 +263,7 @@ export const createAiProviderSlice: StateCreator<
 
         // 未登录时，不获取 builtin 渠道模型，返回空列表
         return {
-          builtinAiModelList,
+          builtinAiModelList: [],
           enabledAiModels: [],
           enabledAiProviders: [],
           enabledChatAiProviders: [],
